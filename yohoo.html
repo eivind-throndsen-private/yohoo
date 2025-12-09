@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yohoo! Personal Start Page</title>
+    <style>
+        :root {
+            /* Light Cream Theme */
+            --bg-color: #FFEFCF;
+            --section-bg: #FFF8E7;
+            --border-color: #E6D5B0;
+            --header-color: #6B4E3D;
+            --link-color: #0066CC;
+            --link-hover: #0052A3;
+            --text-muted: #8B7355;
+            --delete-icon: #D32F2F;
+            --text-main: #2C2416;
+            
+            /* Spacing */
+            --gap: 0.75rem;
+            --radius: 4px;
+            
+            /* Font Scaling */
+            --font-scale: 1.6;
+            
+            /* Hover Effects */
+            --hover-bg: rgba(107, 78, 61, 0.08);
+            --hover-accent: var(--link-color);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        /* Layout Structure */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            color: var(--header-color);
+            font-size: calc(1rem * var(--font-scale));
+            font-weight: 700;
+        }
+
+        .clock {
+            font-family: monospace;
+            font-size: calc(0.625rem * var(--font-scale));
+            color: var(--header-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 300px;
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.375rem 0.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            background-color: var(--section-bg);
+            color: var(--text-main);
+            font-size: calc(0.5rem * var(--font-scale));
+        }
+
+        input[type="text"]:focus {
+            outline: 2px solid var(--header-color);
+            border-color: transparent;
+        }
+
+        .shortcut-hint {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.4rem;
+            pointer-events: none;
+            border: 1px solid var(--border-color);
+            padding: 1px 3px;
+            border-radius: 2px;
+        }
+
+        button {
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius);
+            border: none;
+            background-color: var(--header-color);
+            color: var(--bg-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-size: calc(0.5rem * var(--font-scale));
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Font Size Slider */
+        .font-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .font-slider-label {
+            font-size: calc(0.45rem * var(--font-scale));
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--header-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--link-color);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--header-color);
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: var(--link-color);
+        }
+
+        /* Grid System - Three Column Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--gap);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Sections */
+        .section {
+            background-color: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .section.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--header-color);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: grab;
+        }
+
+        .section-title {
+            color: var(--header-color);
+            font-weight: 600;
+            font-size: calc(0.55rem * var(--font-scale));
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Links */
+        .link-list {
+            list-style: none;
+            min-height: 25px; /* Drop target area */
+            flex-grow: 1;
+        }
+
+        .link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem;
+            padding-left: 0.25rem;
+            margin-bottom: 0.125rem;
+            border-radius: 2px;
+            cursor: grab;
+            border-left: 3px solid transparent;
+        }
+
+        .link-item:hover {
+            background-color: var(--hover-bg);
+            border-left-color: var(--hover-accent);
+            padding-left: 0.375rem;
+        }
+
+        .link-item.dragging {
+            opacity: 0.5;
+            background-color: var(--bg-color);
+        }
+
+        .link-content {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            text-decoration: none;
+            color: var(--link-color);
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .link-content:hover {
+            color: var(--link-hover);
+        }
+
+        .favicon {
+            width: 8px;
+            height: 8px;
+            flex-shrink: 0;
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 1px;
+        }
+
+        .link-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: calc(0.5rem * var(--font-scale));
+        }
+
+        .delete-btn, .edit-btn {
+            background: none;
+            color: var(--text-muted);
+            padding: 2px;
+            opacity: 0;
+            pointer-events: none;
+            font-size: calc(0.5rem * var(--font-scale));
+        }
+
+        .link-item:hover .delete-btn,
+        .link-item:hover .edit-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .delete-btn:hover {
+            color: var(--delete-icon);
+        }
+
+        .edit-btn:hover {
+            color: var(--link-color);
+        }
+
+        .link-edit-input {
+            width: 100%;
+            padding: 0.25rem;
+            border: 1px solid var(--link-color);
+            border-radius: 2px;
+            background-color: var(--section-bg);
+            color: var(--text-main);
+            font-size: calc(0.5rem * var(--font-scale));
+            outline: 2px solid var(--link-color);
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        /* Drag Over Visuals */
+        .drag-over {
+            background-color: rgba(196, 163, 255, 0.1);
+            border: 2px dashed var(--header-color);
+        }
+
+        /* Trash */
+        .trash-container {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+
+        .trash-header {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            color: var(--delete-icon);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.5rem;
+        }
+
+        .trash-content {
+            display: none; /* Hidden by default */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .trash-content.open {
+            display: grid;
+        }
+
+        .trash-item {
+            background-color: rgba(0,0,0,0.05);
+            padding: 0.25rem;
+            border-radius: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .restore-btn {
+            background: none;
+            color: var(--link-color);
+            font-size: 0.45rem;
+            padding: 0.125rem 0.25rem;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.45rem;
+            text-align: center;
+        }
+
+        /* Debug Console */
+        .debug-console {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 400px;
+            max-height: 300px;
+            background-color: #000;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 0.7rem;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-y: auto;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .debug-console.visible {
+            display: block;
+        }
+
+        .debug-console .debug-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .debug-console .debug-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #000;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 0.7rem;
+            border-radius: 4px;
+            z-index: 10000;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .shortcut-hint {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-top">
+            <h1>Yohoo!</h1>
+            <div id="clock" class="clock">00:00:00</div>
+        </div>
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search links..." autocomplete="off">
+                <span class="shortcut-hint">/</span>
+            </div>
+            <div class="font-slider-container">
+                <span class="font-slider-label">A-</span>
+                <input type="range" id="fontSlider" min="0.7" max="2.0" step="0.1" value="1.6" title="Adjust font size">
+                <span class="font-slider-label">A+</span>
+            </div>
+            <button id="refreshTitlesBtn" title="Refresh Google Workspace and Miro document titles">🔄 Refresh Titles</button>
+            <button id="addSectionBtn">+ Add Section</button>
+        </div>
+        <div style="margin-top: 0.25rem; font-size: 0.45rem; color: var(--text-muted);">
+            Drag sections to reorder | Drag links to organize | Drop URLs from browser bar
+        </div>
+    </header>
+
+    <div id="mainGrid" class="grid">
+        </div>
+
+    <div class="trash-container">
+        <div class="trash-header" id="trashToggle">
+            🗑️ Trash (<span id="trashCount">0</span>) ▼
+        </div>
+        <div id="trashContent" class="trash-content">
+            </div>
+    </div>
+
+    <footer>
+        © 2025 Yohoo - Personal Start Page
+    </footer>
+</div>
+
+<!-- Debug Console -->
+<button class="debug-toggle" id="debugToggle">🐛 Debug</button>
+<div class="debug-console" id="debugConsole">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 2px solid #0f0; padding-bottom: 5px;">
+        <strong>DEBUG CONSOLE</strong>
+        <button onclick="document.getElementById('debugConsole').innerHTML = '<div style=\'text-align:center;\'>Cleared</div>'" style="background:#f00;color:#fff;border:none;padding:2px 8px;cursor:pointer;border-radius:2px;">Clear</button>
+    </div>
+    <div id="debugLog"></div>
+</div>
+
+<script>
+    /**
+     * Yohoo - Application Logic
+     */
+
+    // --- Data Models & State ---
+    
+    const STORAGE_KEY = 'yohoo_v1_data';
+
+    // Default configuration from Spec 3.2
+    const defaultSections = [
+        { id: 'bob', title: 'Bob the Builder', icon: '🤖', links: [] },
+        { id: 'dai', title: 'Department of AI', icon: '🧠', links: [] },
+        { id: 'one-on-one', title: '1:1 Meetings', icon: '👥', links: [] },
+        { id: 'learning-labs', title: 'Learning Labs', icon: '🎓', links: [] },
+        { id: 'ai-productivity', title: 'Everyday AI', icon: '⚡', links: [] },
+        { id: 'pm-days', title: 'PM Days', icon: '📊', links: [] },
+        { id: 'development', title: 'Development', icon: '⚡', links: [] },
+        { id: 'communication', title: 'Communication', icon: '💬', links: [] },
+        { id: 'media', title: 'Media & Ent.', icon: '🎬', links: [] },
+        { id: 'tools', title: 'Tools & Utilities', icon: '🔧', links: [] },
+        { id: 'misc', title: 'Misc', icon: '📌', links: [] }
+    ];
+
+    // Seed some example data if empty (for demo purposes)
+    const exampleLinks = [
+        { id: 'l1', title: 'ChatGPT', url: 'https://chat.openai.com', sectionId: 'dai', date: Date.now() },
+        { id: 'l2', title: 'GitHub', url: 'https://github.com', sectionId: 'development', date: Date.now() },
+        { id: 'l3', title: 'Jira', url: 'https://jira.atlassian.com', sectionId: 'bob', date: Date.now() },
+        { id: 'l4', title: 'YouTube', url: 'https://youtube.com', sectionId: 'media', date: Date.now() },
+    ];
+
+    let appState = {
+        sections: JSON.parse(JSON.stringify(defaultSections)),
+        trash: []
+    };
+
+    // --- Initialization ---
+
+    function init() {
+        loadState();
+        loadFontScale();
+        render();
+        startClock();
+        setupEventListeners();
+    }
+
+    function loadState() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            appState = JSON.parse(stored);
+        } else {
+            // Seed example links for first run
+            exampleLinks.forEach(link => {
+                const section = appState.sections.find(s => s.id === link.sectionId);
+                if (section) section.links.push(link);
+            });
+            saveState();
+        }
+    }
+
+    function loadFontScale() {
+        const scale = localStorage.getItem('yohoo_font_scale');
+        if (scale) {
+            document.documentElement.style.setProperty('--font-scale', scale);
+            // Update slider to match loaded value
+            const slider = document.getElementById('fontSlider');
+            if (slider) slider.value = scale;
+        }
+    }
+
+    function saveFontScale(scale) {
+        localStorage.setItem('yohoo_font_scale', scale);
+    }
+
+    function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    // --- Rendering ---
+
+    function getFaviconUrl(url) {
+        try {
+            const domain = new URL(url).hostname;
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+        } catch (e) {
+            return ''; // Fallback
+        }
+    }
+
+    function render() {
+        const grid = document.getElementById('mainGrid');
+        grid.innerHTML = '';
+
+        appState.sections.forEach(section => {
+            const sectionEl = document.createElement('div');
+            sectionEl.className = 'section';
+            sectionEl.dataset.id = section.id;
+            
+            // Section Header (draggable for reordering)
+            const headerEl = document.createElement('div');
+            headerEl.className = 'section-header';
+            headerEl.draggable = true;
+            headerEl.innerHTML = `
+                <span class="section-title">${section.icon} ${section.title}</span>
+            `;
+            
+            // Attach drag events to header
+            headerEl.addEventListener('dragstart', handleSectionDragStart);
+            headerEl.addEventListener('dragend', handleDragEnd);
+            
+            sectionEl.appendChild(headerEl);
+
+            // Link List
+            const listEl = document.createElement('ul');
+            listEl.className = 'link-list';
+            listEl.dataset.sectionId = section.id;
+
+            section.links.forEach(link => {
+                const li = document.createElement('li');
+                li.className = 'link-item';
+                li.draggable = true;
+                li.dataset.id = link.id;
+                li.dataset.url = link.url;
+                li.dataset.title = link.title;
+                li.dataset.sectionId = section.id;
+                
+                // Truncate display title to 70 characters
+                const displayTitle = link.title.length > 70 ? link.title.substring(0, 70) + '...' : link.title;
+                
+                li.innerHTML = `
+                    <a href="${link.url}" class="link-content" target="_blank">
+                        <img src="${getFaviconUrl(link.url)}" class="favicon" alt="" onerror="this.style.display='none'">
+                        <span class="link-title" title="${link.title}">${displayTitle}</span>
+                    </a>
+                    <div class="link-actions">
+                        <button class="edit-btn" title="Edit">✏️</button>
+                        <button class="delete-btn" title="Delete">🗑</button>
+                    </div>
+                `;
+
+                // Edit Event
+                li.querySelector('.edit-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    enterEditMode(li, link, section.id);
+                });
+
+                // Delete Event
+                li.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    moveToTrash(link.id, section.id);
+                });
+
+                // Drag Events (Link)
+                li.addEventListener('dragstart', handleLinkDragStart);
+                li.addEventListener('dragend', handleDragEnd);
+
+                listEl.appendChild(li);
+            });
+
+            // Drag Events (Section - for drop target when reordering)
+            sectionEl.addEventListener('dragover', handleSectionDragOver);
+            sectionEl.addEventListener('dragleave', handleSectionDragLeave);
+            sectionEl.addEventListener('drop', handleSectionDrop);
+
+            // Drag Events (List - for receiving links)
+            listEl.addEventListener('dragover', handleLinkDragOver);
+            listEl.addEventListener('dragleave', handleLinkDragLeave);
+            listEl.addEventListener('drop', handleLinkDrop);
+
+            sectionEl.appendChild(listEl);
+            grid.appendChild(sectionEl);
+        });
+
+        renderTrash();
+    }
+
+    function renderTrash() {
+        const container = document.getElementById('trashContent');
+        const countSpan = document.getElementById('trashCount');
+        
+        countSpan.textContent = appState.trash.length;
+        container.innerHTML = '';
+
+        appState.trash.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'trash-item';
+            div.innerHTML = `
+                <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:10px;">
+                    <a href="${item.url}" target="_blank" style="color:var(--text-muted); text-decoration:none;">${item.title}</a>
+                </div>
+                <button class="restore-btn">Restore</button>
+            `;
+            div.querySelector('.restore-btn').onclick = () => restoreFromTrash(item.id);
+            container.appendChild(div);
+        });
+    }
+
+    // --- Core Functionality ---
+
+    function moveToTrash(linkId, sectionId) {
+        const section = appState.sections.find(s => s.id === sectionId);
+        const linkIndex = section.links.findIndex(l => l.id === linkId);
+        
+        if (linkIndex > -1) {
+            const [link] = section.links.splice(linkIndex, 1);
+            link.originalSectionId = sectionId; // Remember where it came from
+            appState.trash.unshift(link);
+            saveState();
+            render();
+        }
+    }
+
+    function restoreFromTrash(linkId) {
+        const trashIndex = appState.trash.findIndex(t => t.id === linkId);
+        if (trashIndex > -1) {
+            const [link] = appState.trash.splice(trashIndex, 1);
+            const targetSectionId = link.originalSectionId || 'misc';
+            
+            const section = appState.sections.find(s => s.id === targetSectionId) || appState.sections[0];
+            section.links.push(link);
+            
+            saveState();
+            render();
+        }
+    }
+
+    function createLink(title, url, sectionId) {
+        const newLink = {
+            id: 'link_' + Date.now() + Math.random().toString(36).substr(2, 9),
+            title: title || url,
+            url: url,
+            sectionId: sectionId,
+            date: Date.now()
+        };
+
+        const section = appState.sections.find(s => s.id === sectionId);
+        if (section) {
+            section.links.push(newLink);
+            saveState();
+            render();
+        }
+    }
+
+    function addSection(title) {
+        const id = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        appState.sections.unshift({
+            id: id,
+            title: title,
+            icon: '📂', // Default icon
+            links: []
+        });
+        saveState();
+        render();
+    }
+
+    // --- Drag and Drop Logic ---
+
+    let draggedItem = null;
+    let draggedType = null; // 'link' or 'section'
+
+    function handleLinkDragStart(e) {
+        e.stopPropagation(); // Prevent bubbling to section
+        
+        const linkId = this.dataset.id;
+        const sectionId = this.dataset.sectionId;
+        
+        draggedItem = {
+            id: linkId,
+            sectionId: sectionId,
+            element: this
+        };
+        draggedType = 'link';
+        this.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', linkId);
+        
+        debugLog('Link drag started', { linkId, sectionId });
+    }
+
+    function handleSectionDragStart(e) {
+        // 'this' is the header, parent is the section
+        const sectionEl = this.parentElement;
+        const sectionId = sectionEl.dataset.id;
+        
+        draggedItem = {
+            id: sectionId,
+            index: appState.sections.findIndex(s => s.id === sectionId)
+        };
+        draggedType = 'section';
+        sectionEl.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        
+        debugLog('Section drag started', { sectionId, index: draggedItem.index });
+    }
+
+    function handleDragEnd(e) {
+        // For sections, 'this' is the header, need to remove class from parent
+        if (draggedType === 'section' && this.classList.contains('section-header')) {
+            this.parentElement.classList.remove('dragging');
+        } else {
+            this.classList.remove('dragging');
+        }
+        
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        draggedItem = null;
+        draggedType = null;
+    }
+
+    function handleLinkDragOver(e) {
+        // Don't handle section drags - let them bubble to section element
+        if (draggedType === 'section') return;
+        
+        e.preventDefault(); // Necessary for drop
+        e.stopPropagation(); // Prevent bubbling
+        this.classList.add('drag-over');
+        e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleLinkDragLeave(e) {
+        // Only remove drag-over for link drags
+        if (draggedType !== 'section') {
+            this.classList.remove('drag-over');
+        }
+    }
+    
+    function handleSectionDragLeave(e) {
+        if (draggedType !== 'section') return;
+        
+        // Only remove if we're actually leaving the section (not just entering a child)
+        if (!this.contains(e.relatedTarget)) {
+            this.classList.remove('drag-over');
+        }
+    }
+
+    function handleSectionDragOver(e) {
+        if (draggedType !== 'section') return;
+        
+        e.preventDefault();
+        e.stopPropagation(); // Prevent event from bubbling
+        
+        // Only highlight if this is a different section than the one being dragged
+        if (this.dataset.id !== draggedItem.id) {
+            this.classList.add('drag-over');
+            e.dataTransfer.dropEffect = 'move';
+        }
+    }
+
+    function handleLinkDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('drag-over');
+        const targetSectionId = this.dataset.sectionId;
+
+        debugLog('Link drop', { targetSectionId, draggedType, draggedItem });
+
+        // CASE 1: Internal Link Move
+        if (draggedType === 'link' && draggedItem) {
+            const sourceSection = appState.sections.find(s => s.id === draggedItem.sectionId);
+            const targetSection = appState.sections.find(s => s.id === targetSectionId);
+            
+            if (!sourceSection || !targetSection) {
+                debugLog('ERROR: Section not found', { sourceSection, targetSection });
+                return;
+            }
+            
+            const linkIndex = sourceSection.links.findIndex(l => l.id === draggedItem.id);
+
+            if (linkIndex > -1) {
+                const [link] = sourceSection.links.splice(linkIndex, 1);
+                link.sectionId = targetSectionId;
+                targetSection.links.push(link);
+                saveState();
+                render();
+                debugLog('Link moved successfully', { from: sourceSection.id, to: targetSection.id });
+            }
+        }
+        // CASE 2: External URL Drop (from address bar or bookmarks)
+        else if (!draggedItem) {
+            const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+            debugLog('External drop on link-list', { url, targetSectionId });
+            
+            if (url && isValidURL(url)) {
+                 // Try to get HTML content to parse title, otherwise use URL
+                 const html = e.dataTransfer.getData('text/html');
+                 let title = url;
+                 if (html) {
+                     const temp = document.createElement('div');
+                     temp.innerHTML = html;
+                     const anchor = temp.querySelector('a');
+                     if (anchor) title = anchor.innerText || anchor.textContent;
+                 }
+                 
+                 // Check if this URL already exists - if so, UPDATE the title instead of creating new
+                 let existingLink = null;
+                 let existingSection = null;
+                 
+                 for (const section of appState.sections) {
+                     const found = section.links.find(l => l.url === url);
+                     if (found) {
+                         existingLink = found;
+                         existingSection = section;
+                         break;
+                     }
+                 }
+                 
+                 if (existingLink && title !== url) {
+                     // UPDATE: This is a bookmark drag to refresh the title!
+                     const oldTitle = existingLink.title;
+                     existingLink.title = title;
+                     saveState();
+                     render();
+                     debugLog(`Updated title: "${oldTitle}" → "${title}"`);
+                     
+                     // Visual feedback - briefly highlight the updated link
+                     setTimeout(() => {
+                         const updatedEl = document.querySelector(`[data-url="${url}"]`);
+                         if (updatedEl) {
+                             updatedEl.style.backgroundColor = '#90EE90';
+                             setTimeout(() => {
+                                 updatedEl.style.backgroundColor = '';
+                             }, 1000);
+                         }
+                     }, 100);
+                 } else {
+                     // CREATE: New link
+                     createLink(title, url, targetSectionId);
+                     debugLog(`Created new link: ${title}`);
+                 }
+            }
+        }
+    }
+
+    function handleSectionDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        debugLog('Section drop fired', { 
+            targetId: this.dataset.id, 
+            draggedType: draggedType,
+            draggedItem: draggedItem 
+        });
+        
+        if (draggedType !== 'section') return;
+        
+        this.classList.remove('drag-over');
+        
+        const targetId = this.dataset.id;
+        const targetIndex = appState.sections.findIndex(s => s.id === targetId);
+        const sourceIndex = draggedItem.index;
+
+        debugLog('Section reorder', { 
+            sourceIndex: sourceIndex, 
+            targetIndex: targetIndex,
+            sourceId: draggedItem.id,
+            targetId: targetId
+        });
+
+        if (sourceIndex !== targetIndex) {
+            const [section] = appState.sections.splice(sourceIndex, 1);
+            appState.sections.splice(targetIndex, 0, section);
+            saveState();
+            render();
+            debugLog('Section reordered successfully');
+        }
+    }
+
+    // --- Search & Utilities ---
+
+    function isValidURL(url) {
+        // Accept http, https, file, and www URLs
+        return url && (
+            url.startsWith('http://') || 
+            url.startsWith('https://') || 
+            url.startsWith('file://') || 
+            url.startsWith('www.')
+        );
+    }
+
+    function filterLinks(query) {
+        const links = document.querySelectorAll('.link-item');
+        const q = query.toLowerCase();
+
+        links.forEach(link => {
+            const title = link.dataset.title.toLowerCase();
+            const url = link.dataset.url.toLowerCase();
+            if (title.includes(q) || url.includes(q)) {
+                link.style.display = 'flex';
+            } else {
+                link.style.display = 'none';
+            }
+        });
+    }
+
+    function startClock() {
+        const el = document.getElementById('clock');
+        const update = () => {
+            const now = new Date();
+            el.textContent = now.toLocaleTimeString([], { hour12: false });
+            // Update every second
+        };
+        update();
+        setInterval(update, 1000);
+    }
+
+    function setupEventListeners() {
+        // Search
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => filterLinks(e.target.value));
+        
+        // Keyboard Shortcut "/"
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+
+        // Add Section
+        document.getElementById('addSectionBtn').addEventListener('click', () => {
+            const title = prompt("Enter new section name:");
+            if (title) addSection(title);
+        });
+
+        // Trash Toggle
+        document.getElementById('trashToggle').addEventListener('click', () => {
+            document.getElementById('trashContent').classList.toggle('open');
+        });
+
+        // Font Size Slider
+        document.getElementById('fontSlider').addEventListener('input', (e) => {
+            const scale = parseFloat(e.target.value);
+            document.documentElement.style.setProperty('--font-scale', scale);
+            saveFontScale(scale);
+        });
+
+        // Refresh Titles
+        document.getElementById('refreshTitlesBtn').addEventListener('click', refreshDocumentTitles);
+
+        // Document-level drag handlers for external drops (bookmarks, files, etc.)
+        document.addEventListener('dragover', (e) => {
+            // Must prevent default to allow drop
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        document.addEventListener('drop', (e) => {
+            // Prevent default behavior (e.g., opening the file in browser)
+            e.preventDefault();
+            
+            // If dropped on a link-list, let that handler manage it
+            if (e.target.closest('.link-list')) {
+                return;
+            }
+            
+            // Otherwise, handle it at document level - add to first section
+            const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+            debugLog('Document-level drop detected', { url });
+            
+            if (url && isValidURL(url)) {
+                // Try to get title from HTML content
+                const html = e.dataTransfer.getData('text/html');
+                let title = url;
+                if (html) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = html;
+                    const anchor = temp.querySelector('a');
+                    if (anchor) title = anchor.innerText || anchor.textContent;
+                }
+                
+                // Check if this URL already exists
+                let existingLink = null;
+                let existingSection = null;
+                
+                for (const section of appState.sections) {
+                    const found = section.links.find(l => l.url === url);
+                    if (found) {
+                        existingLink = found;
+                        existingSection = section;
+                        break;
+                    }
+                }
+                
+                if (existingLink && title !== url) {
+                    // UPDATE: Refresh the title
+                    const oldTitle = existingLink.title;
+                    existingLink.title = title;
+                    saveState();
+                    render();
+                    debugLog(`Updated title: "${oldTitle}" → "${title}"`);
+                    
+                    // Visual feedback
+                    setTimeout(() => {
+                        const updatedEl = document.querySelector(`[data-url="${url}"]`);
+                        if (updatedEl) {
+                            updatedEl.style.backgroundColor = '#90EE90';
+                            setTimeout(() => {
+                                updatedEl.style.backgroundColor = '';
+                            }, 1000);
+                        }
+                    }, 100);
+                } else {
+                    // CREATE: Add to first section (or ask user)
+                    const targetSection = appState.sections[0];
+                    createLink(title, url, targetSection.id);
+                    debugLog(`Created new link in ${targetSection.title}: ${title}`);
+                }
+            }
+        });
+    }
+
+    // --- Font Size Controls ---
+
+    function changeFontSize(delta) {
+        const currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--font-scale')) || 1.0;
+        const newScale = Math.max(0.7, Math.min(1.5, currentScale + delta));
+        document.documentElement.style.setProperty('--font-scale', newScale);
+        saveFontScale(newScale);
+    }
+
+    // --- Refresh Document Titles ---
+
+    function isRefreshableURL(url) {
+        return url.includes('docs.google.com') || 
+               url.includes('miro.com/app/board');
+    }
+
+    async function fetchPageTitle(url) {
+        try {
+            // Try to fetch with no-cors mode first (won't get content but avoids CORS errors)
+            const response = await fetch(url, { mode: 'no-cors' });
+            // Note: no-cors mode doesn't allow reading response, so this won't work
+            // This is a limitation of browser security - we can't read cross-origin content
+            return null;
+        } catch (error) {
+            console.error(`Failed to fetch title for ${url}:`, error);
+            return null;
+        }
+    }
+
+    async function refreshDocumentTitles() {
+        const btn = document.getElementById('refreshTitlesBtn');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        
+        btn.textContent = '🔍 Finding links...';
+        
+        let refreshableLinks = [];
+        for (const section of appState.sections) {
+            for (const link of section.links) {
+                if (isRefreshableURL(link.url)) {
+                    refreshableLinks.push({
+                        section: section.title,
+                        title: link.title,
+                        url: link.url,
+                        linkObj: link
+                    });
+                }
+            }
+        }
+
+        if (refreshableLinks.length === 0) {
+            btn.disabled = false;
+            btn.textContent = '✓ No Google/Miro links';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 3000);
+            return;
+        }
+
+        btn.textContent = `Found ${refreshableLinks.length} links`;
+        
+        let message = `Found ${refreshableLinks.length} Google Workspace/Miro link(s):\n\n`;
+        refreshableLinks.forEach((item, idx) => {
+            message += `${idx + 1}. [${item.section}] ${item.title}\n`;
+        });
+        message += '\n💡 WORKAROUND: To update titles:\n';
+        message += '1. Visit each link in your browser (they will update in your bookmarks)\n';
+        message += '2. Drag the bookmark from your browser\'s bookmark bar\n';
+        message += '3. Drop it anywhere on this page\n';
+        message += '4. The title will be automatically updated!\n\n';
+        message += 'This works because browsers provide fresh titles when dragging bookmarks.';
+        
+        alert(message);
+
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+
+    // --- Edit Mode ---
+
+    function enterEditMode(linkItem, link, sectionId) {
+        // Disable dragging while editing
+        linkItem.draggable = false;
+        
+        // Get current title
+        const currentTitle = link.title;
+        
+        // Replace link content with input field
+        const linkContent = linkItem.querySelector('.link-content');
+        const originalHTML = linkContent.outerHTML;
+        
+        linkContent.outerHTML = `
+            <input type="text" class="link-edit-input" value="${currentTitle.replace(/"/g, '&quot;')}" />
+        `;
+        
+        const input = linkItem.querySelector('.link-edit-input');
+        input.focus();
+        input.select();
+        
+        // Save function
+        const saveEdit = () => {
+            const newTitle = input.value.trim();
+            
+            if (newTitle && newTitle !== currentTitle) {
+                // Update the link title in appState
+                const section = appState.sections.find(s => s.id === sectionId);
+                const linkToUpdate = section.links.find(l => l.id === link.id);
+                linkToUpdate.title = newTitle;
+                saveState();
+                debugLog(`Updated link title: "${currentTitle}" → "${newTitle}"`);
+            }
+            
+            // Re-render to exit edit mode
+            render();
+        };
+        
+        // Save on blur (when clicking outside)
+        input.addEventListener('blur', saveEdit);
+        
+        // Save on Enter key
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveEdit();
+            } else if (e.key === 'Escape') {
+                // Cancel edit - just re-render
+                render();
+            }
+        });
+    }
+
+
+    // --- Debug Console ---
+
+    function debugLog(message, data = null) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEl = document.getElementById('debugLog');
+        if (logEl) {
+            const entry = document.createElement('div');
+            entry.className = 'debug-entry';
+            entry.innerHTML = `<span style="color:#yellow">[${timestamp}]</span> ${message}`;
+            if (data) {
+                entry.innerHTML += `<br><span style="color:#cyan">${JSON.stringify(data, null, 2)}</span>`;
+            }
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        console.log(`[DEBUG] ${message}`, data || '');
+    }
+
+    // Setup debug console toggle
+    document.getElementById('debugToggle').addEventListener('click', () => {
+        const console = document.getElementById('debugConsole');
+        console.classList.toggle('visible');
+    });
+
+    // Enhanced drop handler with debug logging
+    const originalHandleLinkDrop = handleLinkDrop;
+    handleLinkDrop = function(e) {
+        debugLog('DROP EVENT TRIGGERED');
+        debugLog('draggedType', draggedType);
+        debugLog('draggedItem', draggedItem);
+        
+        // Log all available data transfer types
+        const types = Array.from(e.dataTransfer.types);
+        debugLog('Available data types', types);
+        
+        // Try to extract all data
+        types.forEach(type => {
+            try {
+                const data = e.dataTransfer.getData(type);
+                debugLog(`Data for type "${type}"`, data ? data.substring(0, 200) : 'empty');
+            } catch (err) {
+                debugLog(`Failed to get data for type "${type}"`, err.message);
+            }
+        });
+        
+        // Call original handler
+        originalHandleLinkDrop.call(this, e);
+    };
+
+    // Run
+    init();
+    debugLog('Yohoo initialized successfully');
+
+</script>
+</body>
+</html>
