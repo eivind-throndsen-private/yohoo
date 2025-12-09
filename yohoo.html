@@ -227,6 +227,26 @@
             gap: 0.25rem;
         }
 
+        .section-delete-btn {
+            background: none;
+            color: var(--text-muted);
+            padding: 2px 4px;
+            opacity: 0;
+            pointer-events: none;
+            font-size: calc(0.5rem * var(--font-scale));
+            border: none;
+            cursor: pointer;
+        }
+
+        .section:hover .section-delete-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .section-delete-btn:hover {
+            color: var(--delete-icon);
+        }
+
         /* Links */
         .link-list {
             list-style: none;
@@ -465,7 +485,6 @@
                 <input type="range" id="fontSlider" min="0.7" max="2.0" step="0.1" value="1.6" title="Adjust font size">
                 <span class="font-slider-label">A+</span>
             </div>
-            <button id="refreshTitlesBtn" title="Refresh Google Workspace and Miro document titles">🔄 Refresh Titles</button>
             <button id="addSectionBtn">+ Add Section</button>
         </div>
         <div style="margin-top: 0.25rem; font-size: 0.45rem; color: var(--text-muted);">
@@ -602,9 +621,24 @@
             const headerEl = document.createElement('div');
             headerEl.className = 'section-header';
             headerEl.draggable = true;
+            
+            // Add delete button only if this is not the Misc section
+            const deleteBtn = section.id !== 'misc' ? `<button class="section-delete-btn" title="Delete section">🗑</button>` : '';
+            
             headerEl.innerHTML = `
                 <span class="section-title">${section.icon} ${section.title}</span>
+                ${deleteBtn}
             `;
+            
+            // Add delete handler if button exists
+            if (section.id !== 'misc') {
+                const deleteBtnEl = headerEl.querySelector('.section-delete-btn');
+                deleteBtnEl.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    deleteSection(section.id);
+                });
+            }
             
             // Attach drag events to header
             headerEl.addEventListener('dragstart', handleSectionDragStart);
@@ -755,6 +789,43 @@
         });
         saveState();
         render();
+    }
+
+    function deleteSection(sectionId) {
+        // Cannot delete the Misc section
+        if (sectionId === 'misc') {
+            debugLog('Cannot delete Misc section');
+            return;
+        }
+
+        const sectionIndex = appState.sections.findIndex(s => s.id === sectionId);
+        if (sectionIndex === -1) {
+            debugLog('Section not found', { sectionId });
+            return;
+        }
+
+        const section = appState.sections[sectionIndex];
+        const miscSection = appState.sections.find(s => s.id === 'misc');
+
+        if (!miscSection) {
+            debugLog('ERROR: Misc section not found - cannot delete section');
+            return;
+        }
+
+        // Transfer all links to Misc section
+        if (section.links && section.links.length > 0) {
+            section.links.forEach(link => {
+                link.sectionId = 'misc';
+                miscSection.links.push(link);
+            });
+            debugLog(`Transferred ${section.links.length} links from "${section.title}" to Misc`);
+        }
+
+        // Remove the section
+        appState.sections.splice(sectionIndex, 1);
+        saveState();
+        render();
+        debugLog(`Deleted section: ${section.title}`);
     }
 
     // --- Drag and Drop Logic ---
@@ -1037,9 +1108,6 @@
             saveFontScale(scale);
         });
 
-        // Refresh Titles
-        document.getElementById('refreshTitlesBtn').addEventListener('click', refreshDocumentTitles);
-
         // Document-level drag handlers for external drops (bookmarks, files, etc.)
         document.addEventListener('dragover', (e) => {
             // Must prevent default to allow drop
@@ -1110,84 +1178,6 @@
                 }
             }
         });
-    }
-
-    // --- Font Size Controls ---
-
-    function changeFontSize(delta) {
-        const currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--font-scale')) || 1.0;
-        const newScale = Math.max(0.7, Math.min(1.5, currentScale + delta));
-        document.documentElement.style.setProperty('--font-scale', newScale);
-        saveFontScale(newScale);
-    }
-
-    // --- Refresh Document Titles ---
-
-    function isRefreshableURL(url) {
-        return url.includes('docs.google.com') || 
-               url.includes('miro.com/app/board');
-    }
-
-    async function fetchPageTitle(url) {
-        try {
-            // Try to fetch with no-cors mode first (won't get content but avoids CORS errors)
-            const response = await fetch(url, { mode: 'no-cors' });
-            // Note: no-cors mode doesn't allow reading response, so this won't work
-            // This is a limitation of browser security - we can't read cross-origin content
-            return null;
-        } catch (error) {
-            console.error(`Failed to fetch title for ${url}:`, error);
-            return null;
-        }
-    }
-
-    async function refreshDocumentTitles() {
-        const btn = document.getElementById('refreshTitlesBtn');
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        
-        btn.textContent = '🔍 Finding links...';
-        
-        let refreshableLinks = [];
-        for (const section of appState.sections) {
-            for (const link of section.links) {
-                if (isRefreshableURL(link.url)) {
-                    refreshableLinks.push({
-                        section: section.title,
-                        title: link.title,
-                        url: link.url,
-                        linkObj: link
-                    });
-                }
-            }
-        }
-
-        if (refreshableLinks.length === 0) {
-            btn.disabled = false;
-            btn.textContent = '✓ No Google/Miro links';
-            setTimeout(() => {
-                btn.textContent = originalText;
-            }, 3000);
-            return;
-        }
-
-        btn.textContent = `Found ${refreshableLinks.length} links`;
-        
-        let message = `Found ${refreshableLinks.length} Google Workspace/Miro link(s):\n\n`;
-        refreshableLinks.forEach((item, idx) => {
-            message += `${idx + 1}. [${item.section}] ${item.title}\n`;
-        });
-        message += '\n💡 WORKAROUND: To update titles:\n';
-        message += '1. Visit each link in your browser (they will update in your bookmarks)\n';
-        message += '2. Drag the bookmark from your browser\'s bookmark bar\n';
-        message += '3. Drop it anywhere on this page\n';
-        message += '4. The title will be automatically updated!\n\n';
-        message += 'This works because browsers provide fresh titles when dragging bookmarks.';
-        
-        alert(message);
-
-        btn.disabled = false;
-        btn.textContent = originalText;
     }
 
     // --- Edit Mode ---
