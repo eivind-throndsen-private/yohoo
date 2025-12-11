@@ -1154,33 +1154,40 @@
 
         // Add URL
         document.getElementById('addUrlBtn').addEventListener('click', () => {
-            const url = prompt("Enter URL:");
+            let url = prompt("Enter URL (e.g., vg.no or https://example.com):");
             if (!url) return;
 
-            // Validate URL
+            // Clean up input
+            url = url.trim();
+
+            // Auto-add https:// if no protocol specified
+            if (!url.startsWith('http://') &&
+                !url.startsWith('https://') &&
+                !url.startsWith('file://')) {
+                // If it starts with www., add https://
+                // Otherwise, just add https:// to whatever was entered
+                url = 'https://' + url;
+                debugLog('Auto-added https:// to URL', { url });
+            }
+
+            // Validate the final URL
             if (!isValidURL(url)) {
-                alert("Invalid URL. Please enter a valid URL starting with http://, https://, file://, or www.");
+                alert("Invalid URL format. Please try again.");
                 return;
             }
 
             // Prompt for title
             const title = prompt("Enter title (leave empty to use URL):", url);
 
-            // Show section selection dialog
-            const sectionNames = appState.sections.map((s, i) => `${i + 1}. ${s.title}`).join('\n');
-            const sectionChoice = prompt(
-                `Choose a section (enter number 1-${appState.sections.length}):\n\n${sectionNames}`,
-                "1"
-            );
-
-            if (!sectionChoice) return;
-
-            const sectionIndex = parseInt(sectionChoice) - 1;
-            if (isNaN(sectionIndex) || sectionIndex < 0 || sectionIndex >= appState.sections.length) {
-                alert("Invalid section number. Adding to first section.");
-                createLink(title || url, url, appState.sections[0].id);
+            // Automatically add to Misc section
+            const miscSection = appState.sections.find(s => s.id === 'misc');
+            if (miscSection) {
+                createLink(title || url, url, miscSection.id);
+                debugLog('Added link to Misc section', { url, title: title || url });
             } else {
-                createLink(title || url, url, appState.sections[sectionIndex].id);
+                // Fallback to first section if Misc doesn't exist
+                createLink(title || url, url, appState.sections[0].id);
+                debugLog('Misc section not found, added to first section', { url });
             }
         });
 
