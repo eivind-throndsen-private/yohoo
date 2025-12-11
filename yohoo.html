@@ -144,11 +144,8 @@
             opacity: 0.9;
         }
 
-        /* Font Size Slider - Upper Right Corner */
+        /* Font Size Slider - Bottom Controls */
         .font-slider-container {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
             display: flex;
             align-items: center;
             gap: 0.375rem;
@@ -381,6 +378,19 @@
             border: 2px dashed var(--header-color);
         }
 
+        /* Bottom Controls */
+        .bottom-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
         /* Trash */
         .trash-container {
             border-top: 1px solid var(--border-color);
@@ -494,6 +504,10 @@
             .shortcut-hint {
                 display: none;
             }
+            .bottom-controls {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -501,17 +515,11 @@
 
 <div class="container">
     <header>
-        <div class="font-slider-container">
-            <span class="font-slider-label">A-</span>
-            <input type="range" id="fontSlider" min="1.1" max="2.4" step="0.1" value="2.0" title="Adjust font size">
-            <span class="font-slider-label">A+</span>
-        </div>
         <div class="controls">
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Search links..." autocomplete="off">
                 <span class="shortcut-hint">/</span>
             </div>
-            <button id="addSectionBtn">+ Add Section</button>
         </div>
         <div style="margin-top: 0.25rem; font-size: 0.45rem; color: var(--text-muted);">
             Drag sections to reorder | Drag links to organize | Drop URLs from browser bar
@@ -527,6 +535,18 @@
         </div>
         <div id="trashContent" class="trash-content">
             </div>
+    </div>
+
+    <div class="bottom-controls">
+        <div class="font-slider-container">
+            <span class="font-slider-label">A-</span>
+            <input type="range" id="fontSlider" min="1.1" max="2.4" step="0.1" value="2.0" title="Adjust font size">
+            <span class="font-slider-label">A+</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button id="addUrlBtn">+ Add URL</button>
+            <button id="addSectionBtn">+ Add Section</button>
+        </div>
     </div>
 
     <footer>
@@ -1129,6 +1149,38 @@
             if (e.key === '/' && document.activeElement !== searchInput) {
                 e.preventDefault();
                 searchInput.focus();
+            }
+        });
+
+        // Add URL
+        document.getElementById('addUrlBtn').addEventListener('click', () => {
+            const url = prompt("Enter URL:");
+            if (!url) return;
+
+            // Validate URL
+            if (!isValidURL(url)) {
+                alert("Invalid URL. Please enter a valid URL starting with http://, https://, file://, or www.");
+                return;
+            }
+
+            // Prompt for title
+            const title = prompt("Enter title (leave empty to use URL):", url);
+
+            // Show section selection dialog
+            const sectionNames = appState.sections.map((s, i) => `${i + 1}. ${s.title}`).join('\n');
+            const sectionChoice = prompt(
+                `Choose a section (enter number 1-${appState.sections.length}):\n\n${sectionNames}`,
+                "1"
+            );
+
+            if (!sectionChoice) return;
+
+            const sectionIndex = parseInt(sectionChoice) - 1;
+            if (isNaN(sectionIndex) || sectionIndex < 0 || sectionIndex >= appState.sections.length) {
+                alert("Invalid section number. Adding to first section.");
+                createLink(title || url, url, appState.sections[0].id);
+            } else {
+                createLink(title || url, url, appState.sections[sectionIndex].id);
             }
         });
 
