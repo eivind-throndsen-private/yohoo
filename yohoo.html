@@ -22,7 +22,7 @@
             --radius: 4px;
             
             /* Font Scaling */
-            --font-scale: 1.6;
+            --font-scale: 2.0;
             
             /* Hover Effects */
             --hover-bg: rgba(107, 78, 61, 0.08);
@@ -54,11 +54,30 @@
             margin-bottom: 1rem;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo {
+            height: 35px;
+            width: auto;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .logo:hover {
+            opacity: 1;
         }
 
         .header-top {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             margin-bottom: 0.5rem;
         }
@@ -67,12 +86,6 @@
             color: var(--header-color);
             font-size: calc(1rem * var(--font-scale));
             font-weight: 700;
-        }
-
-        .clock {
-            font-family: monospace;
-            font-size: calc(0.625rem * var(--font-scale));
-            color: var(--header-color);
         }
 
         .controls {
@@ -131,11 +144,18 @@
             opacity: 0.9;
         }
 
-        /* Font Size Slider */
+        /* Font Size Slider - Upper Right Corner */
         .font-slider-container {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
             display: flex;
             align-items: center;
             gap: 0.375rem;
+            background-color: var(--section-bg);
+            padding: 0.375rem 0.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
         }
 
         .font-slider-label {
@@ -306,7 +326,7 @@
             font-size: calc(0.5rem * var(--font-scale));
         }
 
-        .delete-btn, .edit-btn {
+        .delete-btn, .edit-btn, .fetch-btn {
             background: none;
             color: var(--text-muted);
             padding: 2px;
@@ -316,7 +336,8 @@
         }
 
         .link-item:hover .delete-btn,
-        .link-item:hover .edit-btn {
+        .link-item:hover .edit-btn,
+        .link-item:hover .fetch-btn {
             opacity: 1;
             pointer-events: auto;
         }
@@ -327,6 +348,15 @@
 
         .edit-btn:hover {
             color: var(--link-color);
+        }
+
+        .fetch-btn:hover {
+            color: var(--link-color);
+        }
+
+        .fetch-btn.fetching {
+            opacity: 0.5;
+            cursor: wait;
         }
 
         .link-edit-input {
@@ -471,19 +501,15 @@
 
 <div class="container">
     <header>
-        <div class="header-top">
-            <h1>Yohoo!</h1>
-            <div id="clock" class="clock">00:00:00</div>
+        <div class="font-slider-container">
+            <span class="font-slider-label">A-</span>
+            <input type="range" id="fontSlider" min="1.1" max="2.4" step="0.1" value="2.0" title="Adjust font size">
+            <span class="font-slider-label">A+</span>
         </div>
         <div class="controls">
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Search links..." autocomplete="off">
                 <span class="shortcut-hint">/</span>
-            </div>
-            <div class="font-slider-container">
-                <span class="font-slider-label">A-</span>
-                <input type="range" id="fontSlider" min="0.7" max="2.0" step="0.1" value="1.6" title="Adjust font size">
-                <span class="font-slider-label">A+</span>
             </div>
             <button id="addSectionBtn">+ Add Section</button>
         </div>
@@ -561,7 +587,6 @@
         loadState();
         loadFontScale();
         render();
-        startClock();
         setupEventListeners();
     }
 
@@ -660,8 +685,8 @@
                 li.dataset.title = link.title;
                 li.dataset.sectionId = section.id;
                 
-                // Truncate display title to 70 characters
-                const displayTitle = link.title.length > 70 ? link.title.substring(0, 70) + '...' : link.title;
+                // Truncate display title to 50 characters
+                const displayTitle = link.title.length > 40 ? link.title.substring(0, 70) + '...' : link.title;
                 
                 li.innerHTML = `
                     <a href="${link.url}" class="link-content" target="_blank">
@@ -669,10 +694,18 @@
                         <span class="link-title" title="${link.title}">${displayTitle}</span>
                     </a>
                     <div class="link-actions">
+                        <button class="fetch-btn" title="Fetch page title">🔄</button>
                         <button class="edit-btn" title="Edit">✏️</button>
                         <button class="delete-btn" title="Delete">🗑</button>
                     </div>
                 `;
+
+                // Fetch Title Event
+                li.querySelector('.fetch-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    fetchTitle(link.id, link.url, section.id, e.target);
+                });
 
                 // Edit Event
                 li.querySelector('.edit-btn').addEventListener('click', (e) => {
@@ -856,7 +889,7 @@
         // 'this' is the header, parent is the section
         const sectionEl = this.parentElement;
         const sectionId = sectionEl.dataset.id;
-        
+
         draggedItem = {
             id: sectionId,
             index: appState.sections.findIndex(s => s.id === sectionId)
@@ -864,7 +897,8 @@
         draggedType = 'section';
         sectionEl.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
-        
+        e.dataTransfer.setData('text/plain', sectionId); // Required for Chrome on Windows
+
         debugLog('Section drag started', { sectionId, index: draggedItem.index });
     }
 
@@ -955,14 +989,32 @@
             debugLog('External drop on link-list', { url, targetSectionId });
             
             if (url && isValidURL(url)) {
-                 // Try to get HTML content to parse title, otherwise use URL
-                 const html = e.dataTransfer.getData('text/html');
+                 // Try multiple methods to extract title from bookmark drag
                  let title = url;
+                 
+                 // Method 1: Try text/html for bookmark bar drags
+                 const html = e.dataTransfer.getData('text/html');
                  if (html) {
                      const temp = document.createElement('div');
                      temp.innerHTML = html;
                      const anchor = temp.querySelector('a');
-                     if (anchor) title = anchor.innerText || anchor.textContent;
+                     if (anchor && anchor.textContent) {
+                         title = anchor.textContent.trim();
+                         debugLog('Extracted title from HTML', { title });
+                     }
+                 }
+                 
+                 // Method 2: Try text/plain as fallback (might contain title)
+                 if (title === url) {
+                     const plainText = e.dataTransfer.getData('text/plain');
+                     if (plainText && plainText !== url) {
+                         // Sometimes bookmark drags include title in plain text
+                         const lines = plainText.split('\n');
+                         if (lines.length > 1 && lines[0] !== url) {
+                             title = lines[0].trim();
+                             debugLog('Extracted title from plain text', { title });
+                         }
+                     }
                  }
                  
                  // Check if this URL already exists - if so, UPDATE the title instead of creating new
@@ -1066,16 +1118,6 @@
         });
     }
 
-    function startClock() {
-        const el = document.getElementById('clock');
-        const update = () => {
-            const now = new Date();
-            el.textContent = now.toLocaleTimeString([], { hour12: false });
-            // Update every second
-        };
-        update();
-        setInterval(update, 1000);
-    }
 
     function setupEventListeners() {
         // Search
@@ -1129,14 +1171,32 @@
             debugLog('Document-level drop detected', { url });
             
             if (url && isValidURL(url)) {
-                // Try to get title from HTML content
-                const html = e.dataTransfer.getData('text/html');
+                // Try multiple methods to extract title from bookmark drag
                 let title = url;
+                
+                // Method 1: Try text/html for bookmark bar drags
+                const html = e.dataTransfer.getData('text/html');
                 if (html) {
                     const temp = document.createElement('div');
                     temp.innerHTML = html;
                     const anchor = temp.querySelector('a');
-                    if (anchor) title = anchor.innerText || anchor.textContent;
+                    if (anchor && anchor.textContent) {
+                        title = anchor.textContent.trim();
+                        debugLog('Extracted title from HTML', { title });
+                    }
+                }
+                
+                // Method 2: Try text/plain as fallback (might contain title)
+                if (title === url) {
+                    const plainText = e.dataTransfer.getData('text/plain');
+                    if (plainText && plainText !== url) {
+                        // Sometimes bookmark drags include title in plain text
+                        const lines = plainText.split('\n');
+                        if (lines.length > 1 && lines[0] !== url) {
+                            title = lines[0].trim();
+                            debugLog('Extracted title from plain text', { title });
+                        }
+                    }
                 }
                 
                 // Check if this URL already exists
@@ -1178,6 +1238,56 @@
                 }
             }
         });
+    }
+
+    // --- Fetch Title ---
+
+    async function fetchTitle(linkId, url, sectionId, buttonElement) {
+        const PROXY_URL = 'http://localhost:3001/fetch-title';
+        
+        // Add fetching state
+        buttonElement.classList.add('fetching');
+        buttonElement.disabled = true;
+        
+        debugLog('Fetching title for URL', { linkId, url });
+        
+        try {
+            // Call proxy server
+            const response = await fetch(
+                `${PROXY_URL}?url=${encodeURIComponent(url)}`
+            );
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Update the link in appState
+            const section = appState.sections.find(s => s.id === sectionId);
+            const link = section.links.find(l => l.id === linkId);
+            
+            if (link) {
+                const oldTitle = link.title;
+                link.title = data.title;
+                saveState();
+                render();
+                debugLog(`Fetched title successfully: "${oldTitle}" → "${data.title}"`);
+            }
+            
+        } catch (error) {
+            debugLog('Fetch title error', { error: error.message });
+            
+            // Check if proxy is unreachable
+            if (error.message === 'Failed to fetch') {
+                alert('Proxy server not running.\n\nStart it with:\n  make proxy\n\nOr use the edit button (✏️) to set title manually.');
+            } else {
+                alert(`Could not fetch title:\n${error.message}\n\nUse the edit button (✏️) to set title manually.`);
+            }
+        } finally {
+            // Remove fetching state
+            buttonElement.classList.remove('fetching');
+            buttonElement.disabled = false;
+        }
     }
 
     // --- Edit Mode ---
