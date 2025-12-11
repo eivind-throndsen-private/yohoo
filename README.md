@@ -72,6 +72,66 @@ That's it! The page will open in your default browser.
    make parse && make generate
    ```
 
+### Using the Proxy Server for Title Fetching
+
+The proxy server allows you to automatically fetch and update page titles for your links, bypassing CORS restrictions.
+
+#### Starting the Proxy
+
+```bash
+make proxy
+```
+
+The server will start on `http://localhost:3001` and display:
+```
+✅ Starting Yohoo Proxy Server on http://127.0.0.1:3001
+📝 Logging to: logs/proxy_server.log
+⏹️  Press CTRL+C to quit
+```
+
+#### Using the Fetch Title Feature
+
+1. **Start the proxy server** in a terminal: `make proxy`
+2. **Open yohoo.html** in your browser
+3. **Hover over any link** to reveal the action buttons
+4. **Click the 🔄 button** to fetch the page title
+
+The title will be automatically updated and saved. If the proxy is not running, you'll get a helpful error message with instructions.
+
+#### Proxy Features
+
+- ✅ **CORS-Free Fetching** - Works with any website, including local files
+- ✅ **Smart Title Extraction** - Tries `<title>`, `og:title`, and `twitter:title` tags
+- ✅ **Multiple URL Schemes** - Supports `http://`, `https://`, and `file://` URLs
+- ✅ **Port Conflict Detection** - Clear error if port 3001 is already in use
+- ✅ **Detailed Logging** - All requests logged to `logs/proxy_server.log`
+- ✅ **Security** - Localhost-only binding, no external access
+- ✅ **Timeout Protection** - 10-second timeout for unresponsive sites
+
+#### Stopping the Proxy
+
+Press `Ctrl+C` in the terminal where the proxy is running.
+
+#### Troubleshooting the Proxy
+
+**Port already in use:**
+```bash
+# Find what's using port 3001
+lsof -i :3001
+
+# Kill the process or change PORT in proxy_server.py
+```
+
+**Proxy not responding:**
+- Check that you ran `make install` to install Flask and dependencies
+- Verify the proxy is running with: `curl http://localhost:3001/health`
+- Check logs in `logs/proxy_server.log`
+
+**Title fetch fails:**
+- Some sites block requests from unknown user agents
+- Timeout after 10 seconds for slow-loading pages
+- Use the edit button (✏️) to manually set titles for problematic sites
+
 ## Project Structure
 
 ```
@@ -104,6 +164,7 @@ yohoo/
 make help      # Show available commands
 make install   # Create virtual environment and install dependencies
 make run       # Open yohoo.html in browser
+make proxy     # Start local proxy server for title fetching
 make parse     # Parse bookmarks file
 make generate  # Generate HTML from data
 make test      # Run tests
