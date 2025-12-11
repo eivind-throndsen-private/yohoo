@@ -1,6 +1,6 @@
 # Yohoo! - Personal Start Page
 
-A smart, customizable browser start page that combines your bookmarks with browser history analysis to surface your most frequently visited links.
+A smart, customizable, editable browser start page. 
 
 ## Features
 
@@ -11,7 +11,6 @@ A smart, customizable browser start page that combines your bookmarks with brows
 - 🎭 **Drag & Drop** - Reorganize links and sections with ease
 - 🗑️ **Trash System** - Soft-delete links with undo capability
 - 💾 **Local Storage** - All customizations saved in your browser
-- 🔄 **Auto-generation** - Python scripts to refresh from bookmarks + history
 
 ## Quick Start
 
