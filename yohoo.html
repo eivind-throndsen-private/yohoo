@@ -204,9 +204,17 @@
         /* Grid System - Three Column Layout */
         .grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--gap);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            align-items: flex-start;
             margin-bottom: 1.5rem;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 100px;
         }
 
         /* Sections */
@@ -217,13 +225,12 @@
             padding: 0.5rem;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1),
+                        box-shadow 0.2s,
+                        background-color 0.2s;
         }
 
-        .section.dragging {
-            opacity: 0.5;
-            border: 2px dashed var(--header-color);
-        }
+        /* Section drag preview classes removed */
 
         .section-header {
             display: flex;
@@ -262,6 +269,88 @@
 
         .section-delete-btn:hover {
             color: var(--delete-icon);
+        }
+
+        /* Section edit button */
+        .section-edit-btn {
+            background: none;
+            color: var(--text-muted);
+            padding: 2px 4px;
+            opacity: 0;
+            pointer-events: none;
+            font-size: calc(0.5rem * var(--font-scale));
+            border: none;
+            cursor: pointer;
+        }
+
+        .section:hover .section-edit-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .section-edit-btn:hover {
+            color: var(--link-color);
+        }
+
+        /* Section Drag and Drop Styles */
+        .section-header {
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .section-header:active {
+            cursor: grabbing;
+        }
+
+        .section-header[aria-grabbed="true"] {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: scale(1.02);
+        }
+
+        .section-placeholder {
+            border: 2px dashed rgba(107, 78, 61, 0.4);
+            background-color: rgba(107, 78, 61, 0.05);
+            border-radius: 4px;
+            min-height: 80px;
+            transition: all 0.15s ease;
+            margin-bottom: 12px;
+        }
+
+        .section-dragging {
+            opacity: 0.9;
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            position: fixed;
+            pointer-events: none;
+            transition: all 0.1s ease;
+        }
+
+        .section-header-dragging {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .grid-dragging .section:not(.section-dragging) {
+            transition: transform 0.2s;
+        }
+
+        .drag-over {
+            background-color: rgba(107, 78, 61, 0.1);
+            border-color: var(--header-color);
+        }
+
+        /* Section title input field */
+        .section-title-input {
+            width: 100%;
+            max-width: 200px;
+            padding: 0.25rem;
+            border: 1px solid var(--link-color);
+            border-radius: 2px;
+            background-color: var(--section-bg);
+            color: var(--text-main);
+            font-size: calc(0.55rem * var(--font-scale));
+            font-weight: 600;
+            outline: 2px solid var(--link-color);
         }
 
         /* Links */
@@ -374,8 +463,10 @@
 
         /* Drag Over Visuals */
         .drag-over {
-            background-color: rgba(196, 163, 255, 0.1);
-            border: 2px dashed var(--header-color);
+            background-color: rgba(107, 78, 61, 0.12);
+            border: 2px dashed var(--link-color);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         /* Bottom Controls */
@@ -522,7 +613,7 @@
             </div>
         </div>
         <div style="margin-top: 0.25rem; font-size: 0.45rem; color: var(--text-muted);">
-            Drag sections to reorder | Drag links to organize | Drop URLs from browser bar
+            Drag links to organize | Drop URLs from browser bar
         </div>
     </header>
 
@@ -598,8 +689,27 @@
 
     let appState = {
         sections: JSON.parse(JSON.stringify(defaultSections)),
-        trash: []
+        trash: [],
+        layout: null // Will store column-based layout
     };
+
+    // Initialize default layout (distribute sections across 3 columns)
+    function getDefaultLayout() {
+        const sections = appState.sections.map(s => s.id);
+        const numCols = 3;
+        const columns = [
+            { id: 'col-1', sections: [] },
+            { id: 'col-2', sections: [] },
+            { id: 'col-3', sections: [] }
+        ];
+
+        sections.forEach((sectionId, index) => {
+            const colIndex = index % numCols;
+            columns[colIndex].sections.push(sectionId);
+        });
+
+        return { columns };
+    }
 
     // --- Initialization ---
 
@@ -614,12 +724,18 @@
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             appState = JSON.parse(stored);
+            // Ensure layout exists (backwards compatibility)
+            if (!appState.layout) {
+                appState.layout = getDefaultLayout();
+            }
         } else {
             // Seed example links for first run
             exampleLinks.forEach(link => {
                 const section = appState.sections.find(s => s.id === link.sectionId);
                 if (section) section.links.push(link);
             });
+            // Initialize default layout
+            appState.layout = getDefaultLayout();
             saveState();
         }
     }
@@ -657,21 +773,48 @@
         const grid = document.getElementById('mainGrid');
         grid.innerHTML = '';
 
-        appState.sections.forEach(section => {
+        // Create global placeholder if it doesn't exist
+        let placeholderEl = document.getElementById('section-placeholder');
+        if (!placeholderEl) {
+            placeholderEl = document.createElement('div');
+            placeholderEl.id = 'section-placeholder';
+            placeholderEl.className = 'section-placeholder';
+            placeholderEl.setAttribute('aria-hidden', 'true');
+            placeholderEl.style.display = 'none';
+        }
+
+        // Render columns
+        appState.layout.columns.forEach(column => {
+            const columnEl = document.createElement('div');
+            columnEl.className = 'column';
+            columnEl.dataset.columnId = column.id;
+            columnEl.setAttribute('role', 'list');
+            columnEl.setAttribute('aria-label', `Column ${column.id.replace('col-', '')}`);
+
+            // Render sections in this column
+            column.sections.forEach(sectionId => {
+                const section = appState.sections.find(s => s.id === sectionId);
+                if (!section) return;
             const sectionEl = document.createElement('div');
             sectionEl.className = 'section';
             sectionEl.dataset.id = section.id;
-            
-            // Section Header (draggable for reordering)
+            sectionEl.setAttribute('role', 'listitem');
+
+            // Section Header (draggable for reordering via pointer events)
             const headerEl = document.createElement('div');
             headerEl.className = 'section-header';
-            headerEl.draggable = true;
-            
+            headerEl.setAttribute('tabindex', '0');
+            headerEl.setAttribute('role', 'button');
+            headerEl.setAttribute('aria-grabbed', 'false');
+
             // Add delete button only if this is not the Misc section
             const deleteBtn = section.id !== 'misc' ? `<button class="section-delete-btn" title="Delete section">🗑</button>` : '';
             
             headerEl.innerHTML = `
-                <span class="section-title">${section.icon} ${section.title}</span>
+                <div style="display: flex; align-items: center; gap: 0.25rem;">
+                    <span class="section-title">${section.icon} ${section.title}</span>
+                    <button class="section-edit-btn" title="Edit section name">✏️</button>
+                </div>
                 ${deleteBtn}
             `;
             
@@ -684,11 +827,20 @@
                     deleteSection(section.id);
                 });
             }
-            
-            // Attach drag events to header
-            headerEl.addEventListener('dragstart', handleSectionDragStart);
-            headerEl.addEventListener('dragend', handleDragEnd);
-            
+
+            // Add edit handler
+            const editBtn = headerEl.querySelector('.section-edit-btn');
+            if (editBtn) {
+                editBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    enterSectionEditMode(headerEl, section);
+                });
+            }
+
+            // Add pointer event for drag initiation
+            headerEl.addEventListener('pointerdown', handleSectionPointerDown);
+
             sectionEl.appendChild(headerEl);
 
             // Link List
@@ -748,19 +900,19 @@
                 listEl.appendChild(li);
             });
 
-            // Drag Events (Section - for drop target when reordering)
-            sectionEl.addEventListener('dragover', handleSectionDragOver);
-            sectionEl.addEventListener('dragleave', handleSectionDragLeave);
-            sectionEl.addEventListener('drop', handleSectionDrop);
+            // Section drag events removed
 
             // Drag Events (List - for receiving links)
             listEl.addEventListener('dragover', handleLinkDragOver);
             listEl.addEventListener('dragleave', handleLinkDragLeave);
             listEl.addEventListener('drop', handleLinkDrop);
 
-            sectionEl.appendChild(listEl);
-            grid.appendChild(sectionEl);
-        });
+                sectionEl.appendChild(listEl);
+                columnEl.appendChild(sectionEl);
+            }); // End section loop
+
+            grid.appendChild(columnEl);
+        }); // End column loop
 
         renderTrash();
     }
@@ -881,10 +1033,232 @@
         debugLog(`Deleted section: ${section.title}`);
     }
 
-    // --- Drag and Drop Logic ---
+    // --- Drag and Drop Logic (Pointer-based for sections) ---
 
+    let dragState = {
+        isDragging: false,
+        draggedEl: null,        // the section element
+        draggedClone: null,     // visual clone that follows pointer
+        placeholderEl: null,
+        startColumnEl: null,
+        offsetX: 0,
+        offsetY: 0,
+        sectionId: null
+    };
+
+    // Keep legacy link drag state
     let draggedItem = null;
-    let draggedType = null; // 'link' or 'section'
+    let draggedType = null;
+
+    // Section drag handlers (pointer-based)
+    function handleSectionPointerDown(e) {
+        // Ignore if clicking on buttons
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+
+        const headerEl = e.currentTarget;
+        const sectionEl = headerEl.parentElement;
+        const sectionId = sectionEl.dataset.id;
+
+        // Prevent text selection
+        e.preventDefault();
+
+        // Record initial position
+        const rect = sectionEl.getBoundingClientRect();
+        dragState.offsetX = e.clientX - rect.left;
+        dragState.offsetY = e.clientY - rect.top;
+        dragState.draggedEl = sectionEl;
+        dragState.sectionId = sectionId;
+        dragState.startColumnEl = sectionEl.parentElement;
+
+        // Wait for movement before starting drag (prevent accidental drags)
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const threshold = 5;
+
+        function checkMovement(moveEvent) {
+            const dx = Math.abs(moveEvent.clientX - startX);
+            const dy = Math.abs(moveEvent.clientY - startY);
+
+            if (dx > threshold || dy > threshold) {
+                // Start drag
+                window.removeEventListener('pointermove', checkMovement);
+                window.removeEventListener('pointerup', cancelDrag);
+                startSectionDrag(moveEvent);
+            }
+        }
+
+        function cancelDrag() {
+            window.removeEventListener('pointermove', checkMovement);
+            window.removeEventListener('pointerup', cancelDrag);
+            dragState.draggedEl = null;
+        }
+
+        window.addEventListener('pointermove', checkMovement);
+        window.addEventListener('pointerup', cancelDrag);
+    }
+
+    function startSectionDrag(e) {
+        dragState.isDragging = true;
+        const sectionEl = dragState.draggedEl;
+        const rect = sectionEl.getBoundingClientRect();
+
+        // Create visual clone
+        const clone = sectionEl.cloneNode(true);
+        clone.style.position = 'fixed';
+        clone.style.width = `${rect.width}px`;
+        clone.style.height = `${rect.height}px`;
+        clone.style.left = `${e.clientX - dragState.offsetX}px`;
+        clone.style.top = `${e.clientY - dragState.offsetY}px`;
+        clone.style.opacity = '0.9';
+        clone.style.pointerEvents = 'none';
+        clone.style.zIndex = '1000';
+        clone.style.transform = 'scale(1.02)';
+        clone.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.2)';
+        document.body.appendChild(clone);
+        dragState.draggedClone = clone;
+
+        // Get or create placeholder
+        let placeholderEl = document.getElementById('section-placeholder');
+        if (!placeholderEl) {
+            placeholderEl = document.createElement('div');
+            placeholderEl.id = 'section-placeholder';
+            placeholderEl.className = 'section-placeholder';
+            placeholderEl.setAttribute('aria-hidden', 'true');
+        }
+        placeholderEl.style.height = `${rect.height}px`;
+        placeholderEl.style.display = 'block';
+        dragState.placeholderEl = placeholderEl;
+
+        // Insert placeholder where section was
+        sectionEl.style.opacity = '0.4';
+        sectionEl.parentElement.insertBefore(placeholderEl, sectionEl);
+
+        // Update ARIA
+        sectionEl.querySelector('.section-header').setAttribute('aria-grabbed', 'true');
+
+        // Add global event listeners
+        window.addEventListener('pointermove', handleSectionPointerMove);
+        window.addEventListener('pointerup', handleSectionPointerUp);
+        window.addEventListener('keydown', handleSectionDragEscape);
+
+        debugLog('Section drag started', { sectionId: dragState.sectionId });
+    }
+
+    function handleSectionPointerMove(e) {
+        if (!dragState.isDragging) return;
+
+        // Update clone position
+        dragState.draggedClone.style.left = `${e.clientX - dragState.offsetX}px`;
+        dragState.draggedClone.style.top = `${e.clientY - dragState.offsetY}px`;
+
+        // Find target column based on mouse X position
+        const columns = Array.from(document.querySelectorAll('.column'));
+        let targetColumn = null;
+
+        for (const column of columns) {
+            const rect = column.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right) {
+                targetColumn = column;
+                break;
+            }
+        }
+
+        if (!targetColumn) targetColumn = dragState.startColumnEl;
+
+        // Find insertion point within column based on mouse Y position
+        const sections = Array.from(targetColumn.querySelectorAll('.section')).filter(
+            s => s !== dragState.draggedEl
+        );
+
+        let insertBefore = null;
+        for (const section of sections) {
+            const rect = section.getBoundingClientRect();
+            const middle = rect.top + rect.height / 2;
+
+            if (e.clientY < middle) {
+                insertBefore = section;
+                break;
+            }
+        }
+
+        // Move placeholder
+        if (insertBefore) {
+            targetColumn.insertBefore(dragState.placeholderEl, insertBefore);
+        } else {
+            targetColumn.appendChild(dragState.placeholderEl);
+        }
+    }
+
+    function handleSectionPointerUp(e) {
+        if (!dragState.isDragging) return;
+
+        // Insert dragged element at placeholder position
+        const placeholder = dragState.placeholderEl;
+        placeholder.parentElement.insertBefore(dragState.draggedEl, placeholder);
+
+        // Remove placeholder
+        placeholder.remove();
+
+        // Remove clone
+        dragState.draggedClone.remove();
+
+        // Reset element opacity
+        dragState.draggedEl.style.opacity = '';
+
+        // Update ARIA
+        dragState.draggedEl.querySelector('.section-header').setAttribute('aria-grabbed', 'false');
+
+        // Rebuild and save layout
+        rebuildLayoutFromDOM();
+        saveState();
+
+        // Cleanup
+        cleanupSectionDrag();
+
+        debugLog('Section drag completed');
+    }
+
+    function handleSectionDragEscape(e) {
+        if (e.key === 'Escape' && dragState.isDragging) {
+            // Return to original position
+            dragState.startColumnEl.insertBefore(dragState.draggedEl, dragState.placeholderEl);
+            dragState.placeholderEl.remove();
+            dragState.draggedClone.remove();
+            dragState.draggedEl.style.opacity = '';
+            dragState.draggedEl.querySelector('.section-header').setAttribute('aria-grabbed', 'false');
+
+            cleanupSectionDrag();
+            debugLog('Section drag cancelled');
+        }
+    }
+
+    function cleanupSectionDrag() {
+        window.removeEventListener('pointermove', handleSectionPointerMove);
+        window.removeEventListener('pointerup', handleSectionPointerUp);
+        window.removeEventListener('keydown', handleSectionDragEscape);
+
+        dragState.isDragging = false;
+        dragState.draggedEl = null;
+        dragState.draggedClone = null;
+        dragState.placeholderEl = null;
+        dragState.startColumnEl = null;
+        dragState.sectionId = null;
+    }
+
+    function rebuildLayoutFromDOM() {
+        const columns = Array.from(document.querySelectorAll('.column'));
+        appState.layout.columns = columns.map((columnEl, index) => {
+            const sections = Array.from(columnEl.querySelectorAll('.section')).map(
+                sectionEl => sectionEl.dataset.id
+            );
+            return {
+                id: columnEl.dataset.columnId,
+                sections: sections
+            };
+        });
+
+        debugLog('Layout rebuilt from DOM', appState.layout);
+    }
 
     function handleLinkDragStart(e) {
         e.stopPropagation(); // Prevent bubbling to section
@@ -905,34 +1279,18 @@
         debugLog('Link drag started', { linkId, sectionId });
     }
 
-    function handleSectionDragStart(e) {
-        // 'this' is the header, parent is the section
-        const sectionEl = this.parentElement;
-        const sectionId = sectionEl.dataset.id;
-
-        draggedItem = {
-            id: sectionId,
-            index: appState.sections.findIndex(s => s.id === sectionId)
-        };
-        draggedType = 'section';
-        sectionEl.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', sectionId); // Required for Chrome on Windows
-
-        debugLog('Section drag started', { sectionId, index: draggedItem.index });
-    }
-
     function handleDragEnd(e) {
-        // For sections, 'this' is the header, need to remove class from parent
-        if (draggedType === 'section' && this.classList.contains('section-header')) {
-            this.parentElement.classList.remove('dragging');
-        } else {
-            this.classList.remove('dragging');
+        // For link drags only
+        if (draggedType === 'link') {
+            draggedItem = null;
+            draggedType = null;
+            document.querySelectorAll('.link-item.dragging').forEach(el =>
+                el.classList.remove('dragging')
+            );
+            document.querySelectorAll('.drag-over').forEach(el =>
+                el.classList.remove('drag-over')
+            );
         }
-        
-        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-        draggedItem = null;
-        draggedType = null;
     }
 
     function handleLinkDragOver(e) {
@@ -952,27 +1310,6 @@
         }
     }
     
-    function handleSectionDragLeave(e) {
-        if (draggedType !== 'section') return;
-        
-        // Only remove if we're actually leaving the section (not just entering a child)
-        if (!this.contains(e.relatedTarget)) {
-            this.classList.remove('drag-over');
-        }
-    }
-
-    function handleSectionDragOver(e) {
-        if (draggedType !== 'section') return;
-        
-        e.preventDefault();
-        e.stopPropagation(); // Prevent event from bubbling
-        
-        // Only highlight if this is a different section than the one being dragged
-        if (this.dataset.id !== draggedItem.id) {
-            this.classList.add('drag-over');
-            e.dataTransfer.dropEffect = 'move';
-        }
-    }
 
     function handleLinkDrop(e) {
         e.preventDefault();
@@ -1077,39 +1414,6 @@
         }
     }
 
-    function handleSectionDrop(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        debugLog('Section drop fired', { 
-            targetId: this.dataset.id, 
-            draggedType: draggedType,
-            draggedItem: draggedItem 
-        });
-        
-        if (draggedType !== 'section') return;
-        
-        this.classList.remove('drag-over');
-        
-        const targetId = this.dataset.id;
-        const targetIndex = appState.sections.findIndex(s => s.id === targetId);
-        const sourceIndex = draggedItem.index;
-
-        debugLog('Section reorder', { 
-            sourceIndex: sourceIndex, 
-            targetIndex: targetIndex,
-            sourceId: draggedItem.id,
-            targetId: targetId
-        });
-
-        if (sourceIndex !== targetIndex) {
-            const [section] = appState.sections.splice(sourceIndex, 1);
-            appState.sections.splice(targetIndex, 0, section);
-            saveState();
-            render();
-            debugLog('Section reordered successfully');
-        }
-    }
 
     // --- Search & Utilities ---
 
@@ -1404,6 +1708,63 @@
 
 
     // --- Debug Console ---
+
+    function enterSectionEditMode(headerElement, section) {
+        // Disable dragging while editing
+        headerElement.draggable = false;
+
+        // Get current title (without icon)
+        const currentTitle = section.title;
+
+        // Find the section title element
+        const titleElement = headerElement.querySelector('.section-title');
+
+        // Replace with input field (preserve icon)
+        titleElement.outerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                <span>${section.icon}</span>
+                <input type="text" class="section-title-input" value="${currentTitle.replace(/"/g, '&quot;')}" />
+            </div>
+        `;
+
+        const input = headerElement.querySelector('.section-title-input');
+        input.focus();
+        input.select();
+
+        // Save function
+        const saveEdit = () => {
+            const newTitle = input.value.trim();
+
+            if (newTitle && newTitle !== currentTitle) {
+                // Update the section title in appState (ID remains unchanged)
+                const sectionToUpdate = appState.sections.find(s => s.id === section.id);
+                if (sectionToUpdate) {
+                    sectionToUpdate.title = newTitle;
+                    saveState();
+                    debugLog(`Updated section title: "${currentTitle}" → "${newTitle}"`, {
+                        sectionId: section.id
+                    });
+                }
+            }
+
+            // Re-render to exit edit mode
+            render();
+        };
+
+        // Save on blur (when clicking outside)
+        input.addEventListener('blur', saveEdit);
+
+        // Save on Enter key, cancel on Escape
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveEdit();
+            } else if (e.key === 'Escape') {
+                // Cancel edit - just re-render
+                render();
+            }
+        });
+    }
 
     function debugLog(message, data = null) {
         const timestamp = new Date().toLocaleTimeString();
