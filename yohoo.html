@@ -1420,16 +1420,43 @@
     function isValidURL(url) {
         // Accept http, https, file, www, and specific browser-specific internal URLs
         const allowedSchemes = ['http', 'https', 'file', 'www', 'chrome', 'edge', 'about', 'brave'];
-        return url && (
+
+        // Normalize url
+        url = (url || '').trim();
+
+        // Handle empty or obviously invalid URLs
+        if (!url) return false;
+
+        // Direct scheme matches
+        if (
             url.startsWith('http://') ||
             url.startsWith('https://') ||
             url.startsWith('file://') ||
-            url.startsWith('www.') ||
-            (
-                /^[a-z]+:\/\//.test(url) &&
-                allowedSchemes.includes(url.split('://')[0])
-            )
-        );
+            url.startsWith('www.')
+        ) return true;
+
+        // Scheme validation with more lenient checks
+        const schemeMatch = url.match(/^([a-z]+):\/\//);
+        if (schemeMatch) {
+            const scheme = schemeMatch[1];
+
+            // More permissive allowed schemes
+            const extendedAllowedSchemes = [
+                ...allowedSchemes,
+                'chrome-extension',
+                'moz-extension',
+                'about'
+            ];
+
+            // Additional checks for internal URLs
+            if (
+                extendedAllowedSchemes.includes(scheme) ||
+                scheme.startsWith('chrome') ||
+                scheme.startsWith('about')
+            ) return true;
+        }
+
+        return false;
     }
 
     function filterLinks(query) {
@@ -1539,12 +1566,14 @@
 
             // Log available data transfer types and their contents
             const dataTypes = e.dataTransfer.types;
+            let debugInfo = { types: {} };
             dataTypes.forEach(type => {
                 try {
                     const data = e.dataTransfer.getData(type);
+                    debugInfo.types[type] = data;
                     debugLog(`Data for type "${type}"`, {
                         data: data,
-                        length: data.length
+                        length: data ? data.length : 0
                     });
                 } catch (err) {
                     debugLog(`Error getting data for type "${type}"`, { error: err.message });
@@ -1567,14 +1596,21 @@
 
             let url = null;
             for (let type of urlTypes) {
-                url = e.dataTransfer.getData(type);
-                if (url) {
+                url = (e.dataTransfer.getData(type) || '').trim();
+
+                // If URL is just 'about:blank', try another type
+                if (url && url !== 'about:blank') {
                     debugLog(`URL extracted from ${type}`, { url });
                     break;
                 }
             }
 
-            debugLog('Extracted URL for document-level drop', { url });
+            // Fallback to a specific type if no valid URL found
+            if (!url && debugInfo.types['text/plain']) {
+                url = debugInfo.types['text/plain'].trim();
+            }
+
+            debugLog('Extracted URL for document-level drop', { url, valid: isValidURL(url) });
 
             if (url && isValidURL(url)) {
                 // Try multiple methods to extract title from bookmark drag
@@ -1602,6 +1638,15 @@
                             title = lines[0].trim();
                             debugLog('Extracted title from plain text', { title });
                         }
+                    }
+                }
+
+                // If no meaningful title found, use descriptive text based on URL type
+                if (title === url) {
+                    if (url.startsWith('chrome://')) {
+                        title = `Chrome Settings: ${url.replace('chrome://', '')}`;
+                    } else if (url.startsWith('about:')) {
+                        title = `Browser Page: ${url.replace('about:', '')}`;
                     }
                 }
 
@@ -1637,15 +1682,16 @@
                         }
                     }, 100);
                 } else {
-                    // CREATE: Add to first section (or ask user)
-                    const targetSection = appState.sections[0];
-                    createLink(title, url, targetSection.id);
-                    debugLog(`Created new link in ${targetSection.title}: ${title}`);
+                    // CREATE: Add to Misc section
+                    const miscSection = appState.sections.find(s => s.id === 'misc') || appState.sections[0];
+                    createLink(title, url, miscSection.id);
+                    debugLog(`Created new link in ${miscSection.title}: ${title}`);
                 }
             } else {
                 debugLog('Invalid URL or no URL found in drop event', {
                     urlValid: url ? isValidURL(url) : false,
-                    url
+                    url,
+                    fullDataTransfer: debugInfo
                 });
             }
         });
