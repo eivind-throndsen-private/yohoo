@@ -638,6 +638,13 @@
             <button id="addUrlBtn">+ Add URL</button>
             <button id="addSectionBtn">+ Add Section</button>
         </div>
+        <div style="display: flex; gap: 0.5rem; border-left: 1px solid var(--border-color); padding-left: 1rem;">
+            <button id="exportDataBtn" title="Export all data to JSON file">📥 Export</button>
+            <label for="importFileInput" style="margin: 0;">
+                <button type="button" id="importDataBtn" title="Import data from JSON file">📤 Import</button>
+            </label>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+        </div>
     </div>
 
     <footer>
@@ -756,6 +763,244 @@
 
     function saveState() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    /**
+     * Export current Yohoo state to downloadable JSON file.
+     * Includes sections, links, layout, trash, and font scale.
+     * Filename format: yohoo-backup-YYYY-MM-DD-HHMMSS.json
+     */
+    function exportYohooData() {
+        debugLog('Starting export...');
+
+        const fontScale = localStorage.getItem('yohoo_font_scale') || '2.0';
+
+        const exportData = {
+            version: '1.0.0',
+            exportDate: new Date().toISOString(),
+            exportedBy: 'Yohoo Export Feature',
+            data: {
+                sections: JSON.parse(JSON.stringify(appState.sections)),
+                trash: JSON.parse(JSON.stringify(appState.trash)),
+                layout: JSON.parse(JSON.stringify(appState.layout)),
+                fontScale: parseFloat(fontScale)
+            },
+            metadata: {
+                sectionCount: appState.sections.length,
+                linkCount: appState.sections.reduce((sum, s) => sum + s.links.length, 0),
+                trashCount: appState.trash.length,
+                columns: appState.layout.columns.length
+            }
+        };
+
+        // Create download
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        // Generate filename with timestamp
+        const timestamp = new Date().toISOString()
+            .replace(/:/g, '-')
+            .replace(/\..+/, '')
+            .replace('T', '-');
+        const filename = `yohoo-backup-${timestamp}.json`;
+
+        // Trigger download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        debugLog('Export completed', { filename, ...exportData.metadata });
+    }
+
+    /**
+     * Validate import data structure before importing.
+     * @param {Object} data - Parsed JSON data to validate
+     * @returns {Object} { valid: boolean, errors: string[], warnings: string[] }
+     */
+    function validateImportData(data) {
+        const errors = [];
+        const warnings = [];
+
+        // Check basic structure
+        if (!data || typeof data !== 'object') {
+            errors.push('Invalid JSON structure');
+            return { valid: false, errors, warnings };
+        }
+
+        if (!data.version) {
+            warnings.push('No version field found - may be old format');
+        }
+
+        if (!data.data) {
+            errors.push('Missing required "data" field');
+            return { valid: false, errors, warnings };
+        }
+
+        const { sections, trash, layout, fontScale } = data.data;
+
+        // Validate sections
+        if (!Array.isArray(sections)) {
+            errors.push('Invalid sections: must be an array');
+        } else {
+            sections.forEach((section, i) => {
+                if (!section.id || !section.title || !Array.isArray(section.links)) {
+                    errors.push(`Invalid section at index ${i}: missing id, title, or links`);
+                }
+            });
+        }
+
+        // Validate layout
+        if (!layout || !layout.columns || !Array.isArray(layout.columns)) {
+            errors.push('Invalid layout: missing columns array');
+        }
+
+        // Validate trash
+        if (!Array.isArray(trash)) {
+            warnings.push('Invalid trash array - will default to empty');
+        }
+
+        // Validate font scale
+        if (typeof fontScale !== 'number' || fontScale < 1.1 || fontScale > 2.4) {
+            warnings.push('Invalid font scale - will default to 2.0');
+        }
+
+        return {
+            valid: errors.length === 0,
+            errors,
+            warnings
+        };
+    }
+
+    /**
+     * Show preview of import data and get user confirmation.
+     * @param {Object} data - Validated import data
+     * @param {Object} validation - Validation result
+     * @returns {boolean} User confirmation
+     */
+    function showImportPreview(data, validation) {
+        const { metadata } = data;
+        const { warnings } = validation;
+
+        let message = '=== IMPORT PREVIEW ===\n\n';
+
+        if (metadata) {
+            message += `Sections: ${metadata.sectionCount}\n`;
+            message += `Links: ${metadata.linkCount}\n`;
+            message += `Trash items: ${metadata.trashCount}\n`;
+            message += `Export date: ${new Date(data.exportDate).toLocaleString()}\n`;
+        }
+
+        if (warnings.length > 0) {
+            message += '\n⚠️ WARNINGS:\n';
+            warnings.forEach(w => message += `  - ${w}\n`);
+        }
+
+        message += '\n🚨 IMPORTANT: This will COMPLETELY REPLACE your current data!\n';
+        message += 'Current sections, links, and layout will be overwritten.\n\n';
+        message += 'Continue with import?';
+
+        return confirm(message);
+    }
+
+    /**
+     * Import Yohoo data from JSON file.
+     * Completely replaces current state after validation and confirmation.
+     * @param {string} fileContent - JSON string content from file
+     */
+    function importYohooData(fileContent) {
+        try {
+            debugLog('Starting import...');
+
+            // Parse JSON
+            const importData = JSON.parse(fileContent);
+
+            // Validate
+            const validation = validateImportData(importData);
+
+            if (!validation.valid) {
+                const errorMsg = 'Import failed - Invalid data structure:\n\n' +
+                    validation.errors.join('\n');
+                alert(errorMsg);
+                debugLog('Import validation failed', validation.errors);
+                return;
+            }
+
+            // Show preview and get confirmation
+            const confirmed = showImportPreview(importData, validation);
+
+            if (!confirmed) {
+                debugLog('Import cancelled by user');
+                return;
+            }
+
+            // Perform import
+            const { sections, trash, layout, fontScale } = importData.data;
+
+            // Update appState
+            appState.sections = sections || [];
+            appState.trash = trash || [];
+            appState.layout = layout || getDefaultLayout();
+
+            // Update font scale
+            const validFontScale = (fontScale >= 1.1 && fontScale <= 2.4) ? fontScale : 2.0;
+            document.documentElement.style.setProperty('--font-scale', validFontScale);
+            saveFontScale(validFontScale);
+
+            // Update slider
+            const slider = document.getElementById('fontSlider');
+            if (slider) slider.value = validFontScale;
+
+            // Save and render
+            saveState();
+            render();
+
+            debugLog('Import completed successfully', importData.metadata);
+            alert('✅ Import successful!');
+
+        } catch (error) {
+            debugLog('Import error', { error: error.message });
+            alert(`Import failed:\n\n${error.message}\n\nYour current data has been preserved.`);
+        }
+    }
+
+    /**
+     * Handle file input change event for import.
+     * Reads file content and triggers import process.
+     * @param {Event} event - File input change event
+     */
+    function handleImportFile(event) {
+        const file = event.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        // Validate file type
+        if (!file.name.endsWith('.json')) {
+            alert('Please select a JSON file (.json)');
+            return;
+        }
+
+        // Read file
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            importYohooData(e.target.result);
+            // Reset file input so same file can be selected again
+            event.target.value = '';
+        };
+
+        reader.onerror = () => {
+            alert('Failed to read file. Please try again.');
+            debugLog('FileReader error', reader.error);
+        };
+
+        reader.readAsText(file);
     }
 
     // --- Rendering ---
@@ -1578,6 +1823,19 @@
             document.documentElement.style.setProperty('--font-scale', scale);
             saveFontScale(scale);
         });
+
+        // Export button
+        document.getElementById('exportDataBtn').addEventListener('click', () => {
+            exportYohooData();
+        });
+
+        // Import button (triggers hidden file input)
+        document.getElementById('importDataBtn').addEventListener('click', () => {
+            document.getElementById('importFileInput').click();
+        });
+
+        // File input change handler
+        document.getElementById('importFileInput').addEventListener('change', handleImportFile);
 
         // Document-level drag handlers for external drops (bookmarks, files, etc.)
         document.addEventListener('dragover', (e) => {
