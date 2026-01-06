@@ -1528,20 +1528,58 @@
         document.addEventListener('drop', (e) => {
             // Prevent default behavior (e.g., opening the file in browser)
             e.preventDefault();
-            
+
+            // Extensive debug logging
+            debugLog('Document-level drop event triggered', {
+                targetClass: e.target.className,
+                targetId: e.target.id,
+                targetNodeName: e.target.nodeName,
+                eventPhase: e.eventPhase
+            });
+
+            // Log available data transfer types and their contents
+            const dataTypes = e.dataTransfer.types;
+            dataTypes.forEach(type => {
+                try {
+                    const data = e.dataTransfer.getData(type);
+                    debugLog(`Data for type "${type}"`, {
+                        data: data,
+                        length: data.length
+                    });
+                } catch (err) {
+                    debugLog(`Error getting data for type "${type}"`, { error: err.message });
+                }
+            });
+
             // If dropped on a link-list, let that handler manage it
             if (e.target.closest('.link-list')) {
+                debugLog('Drop event on link-list, returning');
                 return;
             }
-            
-            // Otherwise, handle it at document level - add to first section
-            const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
-            debugLog('Document-level drop detected', { url });
-            
+
+            // Attempt to extract URL from different data types
+            const urlTypes = [
+                'text/uri-list',
+                'text/plain',
+                'text/html',
+                'URL'
+            ];
+
+            let url = null;
+            for (let type of urlTypes) {
+                url = e.dataTransfer.getData(type);
+                if (url) {
+                    debugLog(`URL extracted from ${type}`, { url });
+                    break;
+                }
+            }
+
+            debugLog('Extracted URL for document-level drop', { url });
+
             if (url && isValidURL(url)) {
                 // Try multiple methods to extract title from bookmark drag
                 let title = url;
-                
+
                 // Method 1: Try text/html for bookmark bar drags
                 const html = e.dataTransfer.getData('text/html');
                 if (html) {
@@ -1553,7 +1591,7 @@
                         debugLog('Extracted title from HTML', { title });
                     }
                 }
-                
+
                 // Method 2: Try text/plain as fallback (might contain title)
                 if (title === url) {
                     const plainText = e.dataTransfer.getData('text/plain');
@@ -1566,11 +1604,11 @@
                         }
                     }
                 }
-                
+
                 // Check if this URL already exists
                 let existingLink = null;
                 let existingSection = null;
-                
+
                 for (const section of appState.sections) {
                     const found = section.links.find(l => l.url === url);
                     if (found) {
@@ -1579,7 +1617,7 @@
                         break;
                     }
                 }
-                
+
                 if (existingLink && title !== url) {
                     // UPDATE: Refresh the title
                     const oldTitle = existingLink.title;
@@ -1587,7 +1625,7 @@
                     saveState();
                     render();
                     debugLog(`Updated title: "${oldTitle}" → "${title}"`);
-                    
+
                     // Visual feedback
                     setTimeout(() => {
                         const updatedEl = document.querySelector(`[data-url="${url}"]`);
@@ -1604,6 +1642,11 @@
                     createLink(title, url, targetSection.id);
                     debugLog(`Created new link in ${targetSection.title}: ${title}`);
                 }
+            } else {
+                debugLog('Invalid URL or no URL found in drop event', {
+                    urlValid: url ? isValidURL(url) : false,
+                    url
+                });
             }
         });
     }
