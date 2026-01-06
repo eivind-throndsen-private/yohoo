@@ -1588,27 +1588,39 @@
 
             // Attempt to extract URL from different data types
             const urlTypes = [
+                'text/plain',     // Try text/plain first to prioritize specific URLs
                 'text/uri-list',
-                'text/plain',
                 'text/html',
                 'URL'
             ];
 
-            let url = null;
-            for (let type of urlTypes) {
-                url = (e.dataTransfer.getData(type) || '').trim();
+            let urls = {};
+            let preferredUrl = null;
 
-                // If URL is just 'about:blank', try another type
-                if (url && url !== 'about:blank') {
-                    debugLog(`URL extracted from ${type}`, { url });
-                    break;
+            // Collect URLs from different types
+            for (let type of urlTypes) {
+                const rawUrl = (e.dataTransfer.getData(type) || '').trim();
+                if (rawUrl) {
+                    urls[type] = rawUrl;
+                    debugLog(`URL extracted from ${type}`, { url: rawUrl });
                 }
             }
 
-            // Fallback to a specific type if no valid URL found
-            if (!url && debugInfo.types['text/plain']) {
-                url = debugInfo.types['text/plain'].trim();
+            // Prioritization logic
+            if (urls['text/plain'] && urls['text/plain'] !== 'about:blank') {
+                preferredUrl = urls['text/plain'];
+            } else if (urls['text/uri-list'] && urls['text/uri-list'] !== 'about:blank') {
+                preferredUrl = urls['text/uri-list'];
             }
+
+            // Fallback
+            let url = preferredUrl || Object.values(urls).find(u => u !== 'about:blank');
+
+            debugLog('Url extraction results', {
+                allUrls: urls,
+                preferredUrl,
+                finalUrl: url
+            });
 
             debugLog('Extracted URL for document-level drop', { url, valid: isValidURL(url) });
 
