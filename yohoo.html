@@ -1418,13 +1418,17 @@
     // --- Search & Utilities ---
 
     function isValidURL(url) {
-        // Accept http, https, file, www, and browser-specific internal URLs with any scheme
+        // Accept http, https, file, www, and specific browser-specific internal URLs
+        const allowedSchemes = ['http', 'https', 'file', 'www', 'chrome', 'edge', 'about', 'brave'];
         return url && (
             url.startsWith('http://') ||
             url.startsWith('https://') ||
             url.startsWith('file://') ||
             url.startsWith('www.') ||
-            /^[a-z]+:\/\//.test(url)  // Any valid URL scheme
+            (
+                /^[a-z]+:\/\//.test(url) &&
+                allowedSchemes.includes(url.split('://')[0])
+            )
         );
     }
 
