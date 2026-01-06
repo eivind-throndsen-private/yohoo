@@ -1342,9 +1342,23 @@
         }
         // CASE 2: External URL Drop (from address bar or bookmarks)
         else if (!draggedItem) {
-            const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
-            debugLog('External drop on link-list', { url, targetSectionId });
-            
+            // Extract URLs from different types with prioritization
+            let urls = {
+                'text/plain': (e.dataTransfer.getData('text/plain') || '').trim(),
+                'text/uri-list': (e.dataTransfer.getData('text/uri-list') || '').trim(),
+                'text/html': (e.dataTransfer.getData('text/html') || '').trim()
+            };
+
+            // Prioritize text/plain and avoid about:blank
+            let url = null;
+            if (urls['text/plain'] && urls['text/plain'] !== 'about:blank' && !urls['text/plain'].includes('about:blank#blocked')) {
+                url = urls['text/plain'];
+            } else if (urls['text/uri-list'] && urls['text/uri-list'] !== 'about:blank' && !urls['text/uri-list'].includes('about:blank#blocked')) {
+                url = urls['text/uri-list'];
+            }
+
+            debugLog('External drop on link-list', { url, targetSectionId, allUrls: urls });
+
             if (url && isValidURL(url)) {
                  // Try multiple methods to extract title from bookmark drag
                  let title = url;
