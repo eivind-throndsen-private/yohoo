@@ -901,7 +901,8 @@
         }
 
         message += '\n🚨 IMPORTANT: This will COMPLETELY REPLACE your current data!\n';
-        message += 'Current sections, links, and layout will be overwritten.\n\n';
+        message += 'Current sections, links, and layout will be overwritten.\n';
+        message += '\n✅ Your current settings will be automatically backed up before import.\n\n';
         message += 'Continue with import?';
 
         return confirm(message);
@@ -909,6 +910,7 @@
 
     /**
      * Import Yohoo data from JSON file.
+     * Automatically backs up current state before importing.
      * Completely replaces current state after validation and confirmation.
      * @param {string} fileContent - JSON string content from file
      */
@@ -938,8 +940,52 @@
                 return;
             }
 
+            // AUTOMATIC BACKUP: Export current state before importing
+            debugLog('Creating automatic backup before import...');
+            const fontScale = localStorage.getItem('yohoo_font_scale') || '2.0';
+
+            const backupData = {
+                version: '1.0.0',
+                exportDate: new Date().toISOString(),
+                exportedBy: 'Yohoo Auto-Backup (before import)',
+                data: {
+                    sections: JSON.parse(JSON.stringify(appState.sections)),
+                    trash: JSON.parse(JSON.stringify(appState.trash)),
+                    layout: JSON.parse(JSON.stringify(appState.layout)),
+                    fontScale: parseFloat(fontScale)
+                },
+                metadata: {
+                    sectionCount: appState.sections.length,
+                    linkCount: appState.sections.reduce((sum, s) => sum + s.links.length, 0),
+                    trashCount: appState.trash.length,
+                    columns: appState.layout.columns.length
+                }
+            };
+
+            // Create backup download
+            const backupStr = JSON.stringify(backupData, null, 2);
+            const backupBlob = new Blob([backupStr], { type: 'application/json' });
+            const backupUrl = URL.createObjectURL(backupBlob);
+
+            const timestamp = new Date().toISOString()
+                .replace(/:/g, '-')
+                .replace(/\..+/, '')
+                .replace('T', '-');
+            const backupFilename = `yohoo-auto-backup-${timestamp}.json`;
+
+            // Trigger backup download
+            const backupLink = document.createElement('a');
+            backupLink.href = backupUrl;
+            backupLink.download = backupFilename;
+            document.body.appendChild(backupLink);
+            backupLink.click();
+            document.body.removeChild(backupLink);
+            URL.revokeObjectURL(backupUrl);
+
+            debugLog('Auto-backup created', { filename: backupFilename, ...backupData.metadata });
+
             // Perform import
-            const { sections, trash, layout, fontScale } = importData.data;
+            const { sections, trash, layout, fontScale: importFontScale } = importData.data;
 
             // Update appState
             appState.sections = sections || [];
@@ -947,7 +993,7 @@
             appState.layout = layout || getDefaultLayout();
 
             // Update font scale
-            const validFontScale = (fontScale >= 1.1 && fontScale <= 2.4) ? fontScale : 2.0;
+            const validFontScale = (importFontScale >= 1.1 && importFontScale <= 2.4) ? importFontScale : 2.0;
             document.documentElement.style.setProperty('--font-scale', validFontScale);
             saveFontScale(validFontScale);
 
@@ -960,7 +1006,7 @@
             render();
 
             debugLog('Import completed successfully', importData.metadata);
-            alert('✅ Import successful!');
+            alert(`✅ Import successful!\n\nYour previous settings were automatically backed up to:\n${backupFilename}`);
 
         } catch (error) {
             debugLog('Import error', { error: error.message });
