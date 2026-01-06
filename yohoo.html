@@ -762,6 +762,15 @@
 
     function getFaviconUrl(url) {
         try {
+            // For browser-specific internal URLs, return empty favicon
+            if (url.startsWith('chrome://') ||
+                url.startsWith('edge://') ||
+                url.startsWith('about:') ||
+                url.startsWith('brave://') ||
+                url.startsWith('file://')) {
+                return ''; // No favicon for internal URLs
+            }
+
             const domain = new URL(url).hostname;
             return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
         } catch (e) {
@@ -860,8 +869,19 @@
                 // Truncate display title to 50 characters
                 const displayTitle = link.title.length > 40 ? link.title.substring(0, 70) + '...' : link.title;
                 
+                // Check if this is a browser internal URL
+                const isInternalUrl = link.url.startsWith('chrome://') ||
+                                     link.url.startsWith('edge://') ||
+                                     link.url.startsWith('about:') ||
+                                     link.url.startsWith('brave://');
+
+                // For internal URLs, add onclick handler to copy URL
+                const linkAttr = isInternalUrl
+                    ? `href="#" onclick="event.preventDefault(); navigator.clipboard.writeText('${link.url}'); alert('URL copied to clipboard: ${link.url}\\n\\nPaste it in your browser address bar.'); return false;"`
+                    : `href="${link.url}" target="_blank"`;
+
                 li.innerHTML = `
-                    <a href="${link.url}" class="link-content" target="_blank">
+                    <a ${linkAttr} class="link-content">
                         <img src="${getFaviconUrl(link.url)}" class="favicon" alt="" onerror="this.style.display='none'">
                         <span class="link-title" title="${link.title}">${displayTitle}</span>
                     </a>
