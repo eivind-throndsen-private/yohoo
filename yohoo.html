@@ -600,6 +600,204 @@
                 gap: 0.75rem;
             }
         }
+
+        /* Settings Modal */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(44, 36, 22, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-modal.visible {
+            display: flex;
+        }
+
+        .settings-modal-content {
+            background-color: var(--section-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            background-color: var(--bg-color);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .settings-header h2 {
+            margin: 0;
+            color: var(--header-color);
+            font-size: calc(0.7rem * var(--font-scale));
+        }
+
+        .settings-close-btn {
+            background: none;
+            color: var(--text-muted);
+            font-size: calc(0.8rem * var(--font-scale));
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            border: none;
+            transition: color 0.2s;
+        }
+
+        .settings-close-btn:hover {
+            color: var(--delete-icon);
+        }
+
+        .settings-body {
+            padding: 1.5rem;
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-section-title {
+            color: var(--header-color);
+            font-weight: 600;
+            font-size: calc(0.6rem * var(--font-scale));
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-control {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .settings-control-label {
+            color: var(--text-main);
+            font-size: calc(0.5rem * var(--font-scale));
+            font-weight: 500;
+        }
+
+        .settings-control-description {
+            color: var(--text-muted);
+            font-size: calc(0.45rem * var(--font-scale));
+            margin-top: -0.25rem;
+        }
+
+        .settings-trigger-btn {
+            background-color: var(--header-color);
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: calc(0.5rem * var(--font-scale));
+            transition: opacity 0.2s;
+        }
+
+        .settings-trigger-btn:hover {
+            opacity: 0.9;
+        }
+
+        .color-picker-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .color-picker-container input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            background-color: var(--bg-color);
+        }
+
+        .color-preset-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .color-preset-btn {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: calc(0.7rem * var(--font-scale));
+            background: var(--section-bg);
+            transition: all 0.2s;
+        }
+
+        .color-preset-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--header-color);
+        }
+
+        .settings-button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .secondary-btn {
+            background-color: var(--section-bg);
+            color: var(--header-color);
+            border: 1px solid var(--border-color);
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: calc(0.5rem * var(--font-scale));
+            transition: all 0.2s;
+        }
+
+        .secondary-btn:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .secondary-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .settings-modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+
+            .settings-body {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -611,6 +809,7 @@
                 <input type="text" id="searchInput" placeholder="Search links..." autocomplete="off">
                 <span class="shortcut-hint">/</span>
             </div>
+            <button id="settingsBtn" class="settings-trigger-btn" title="Open Settings" style="margin-left: auto;">⚙️ Settings</button>
         </div>
         <div style="margin-top: 0.25rem; font-size: 0.45rem; color: var(--text-muted);">
             Drag links to organize | Drop URLs from browser bar
@@ -638,13 +837,6 @@
             <button id="addUrlBtn">+ Add URL</button>
             <button id="addSectionBtn">+ Add Section</button>
         </div>
-        <div style="display: flex; gap: 0.5rem; border-left: 1px solid var(--border-color); padding-left: 1rem;">
-            <button id="exportDataBtn" title="Export all data to JSON file">📥 Export</button>
-            <label for="importFileInput" style="margin: 0;">
-                <button type="button" id="importDataBtn" title="Import data from JSON file">📤 Import</button>
-            </label>
-            <input type="file" id="importFileInput" accept=".json" style="display: none;">
-        </div>
     </div>
 
     <footer>
@@ -653,7 +845,6 @@
 </div>
 
 <!-- Debug Console -->
-<button class="debug-toggle" id="debugToggle">🐛 Debug</button>
 <div class="debug-console" id="debugConsole">
     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 2px solid #0f0; padding-bottom: 5px;">
         <strong>DEBUG CONSOLE</strong>
@@ -723,8 +914,15 @@
     function init() {
         loadState();
         loadFontScale();
+        loadBackgroundColor(); // Load custom background color
         render();
         setupEventListeners();
+        initSettingsModal(); // Initialize settings modal
+    }
+
+    function loadBackgroundColor() {
+        const bgColor = localStorage.getItem(BG_COLOR_KEY) || DEFAULT_BG_COLOR;
+        applyBackgroundColor(bgColor);
     }
 
     function loadState() {
@@ -1269,12 +1467,13 @@
         if (trashIndex > -1) {
             const [link] = appState.trash.splice(trashIndex, 1);
             const targetSectionId = link.originalSectionId || 'misc';
-            
+
             const section = appState.sections.find(s => s.id === targetSectionId) || appState.sections[0];
             section.links.push(link);
-            
+
             saveState();
             render();
+            updateTrashControls(); // Update settings trash button count
         }
     }
 
@@ -1303,6 +1502,12 @@
             icon: '📂', // Default icon
             links: []
         });
+
+        // Add to layout: prepend to first column
+        if (appState.layout && appState.layout.columns.length > 0) {
+            appState.layout.columns[0].sections.unshift(id);
+        }
+
         saveState();
         render();
     }
@@ -1804,9 +2009,29 @@
         // Search
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('input', (e) => filterLinks(e.target.value));
-        
-        // Keyboard Shortcut "/"
+
+        // Consolidated keyboard handler (ESC and "/" shortcuts)
         document.addEventListener('keydown', (e) => {
+            // Priority 1: ESC key - Close settings modal if open
+            if (e.key === 'Escape') {
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal && settingsModal.classList.contains('visible')) {
+                    closeSettingsModal();
+                    e.preventDefault();
+                    return;
+                }
+
+                // Priority 2: ESC key - Clear search if it has focus
+                if (document.activeElement === searchInput && searchInput.value) {
+                    searchInput.value = '';
+                    searchInput.blur();
+                    filterLinks('');
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Keyboard Shortcut "/" - Focus search
             if (e.key === '/' && document.activeElement !== searchInput) {
                 e.preventDefault();
                 searchInput.focus();
@@ -1868,20 +2093,16 @@
             const scale = parseFloat(e.target.value);
             document.documentElement.style.setProperty('--font-scale', scale);
             saveFontScale(scale);
+
+            // Sync with settings slider (bidirectional)
+            const fontSliderSettings = document.getElementById('fontSliderSettings');
+            if (fontSliderSettings) {
+                fontSliderSettings.value = scale;
+            }
         });
 
-        // Export button
-        document.getElementById('exportDataBtn').addEventListener('click', () => {
-            exportYohooData();
-        });
-
-        // Import button (triggers hidden file input)
-        document.getElementById('importDataBtn').addEventListener('click', () => {
-            document.getElementById('importFileInput').click();
-        });
-
-        // File input change handler
-        document.getElementById('importFileInput').addEventListener('change', handleImportFile);
+        // Export/Import buttons removed - now in Settings modal
+        // Event listeners set up in initSettingsModal()
 
         // Document-level drag handlers for external drops (bookmarks, files, etc.)
         document.addEventListener('dragover', (e) => {
@@ -2226,41 +2447,345 @@
         console.log(`[DEBUG] ${message}`, data || '');
     }
 
-    // Setup debug console toggle
-    document.getElementById('debugToggle').addEventListener('click', () => {
-        const console = document.getElementById('debugConsole');
-        console.classList.toggle('visible');
-    });
+    // --- Settings Modal Management ---
 
-    // Enhanced drop handler with debug logging
-    const originalHandleLinkDrop = handleLinkDrop;
-    handleLinkDrop = function(e) {
-        debugLog('DROP EVENT TRIGGERED');
-        debugLog('draggedType', draggedType);
-        debugLog('draggedItem', draggedItem);
-        
-        // Log all available data transfer types
-        const types = Array.from(e.dataTransfer.types);
-        debugLog('Available data types', types);
-        
-        // Try to extract all data
-        types.forEach(type => {
-            try {
-                const data = e.dataTransfer.getData(type);
-                debugLog(`Data for type "${type}"`, data ? data.substring(0, 200) : 'empty');
-            } catch (err) {
-                debugLog(`Failed to get data for type "${type}"`, err.message);
+    const DEFAULT_BG_COLOR = '#FFEFCF';
+    const BG_COLOR_KEY = 'yohoo_bg_color';
+
+    function openSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        if (!modal) {
+            console.error('Settings modal not found');
+            return;
+        }
+        modal.classList.add('visible');
+        updateTrashControls(); // Refresh trash count
+
+        // Sync debug checkbox state
+        const debugCheckbox = document.getElementById('debugToggleCheckbox');
+        const debugConsole = document.getElementById('debugConsole');
+        if (debugCheckbox && debugConsole) {
+            debugCheckbox.checked = debugConsole.classList.contains('visible');
+        }
+
+        // Sync font slider state
+        const fontSliderSettings = document.getElementById('fontSliderSettings');
+        const fontSlider = document.getElementById('fontSlider');
+        if (fontSliderSettings && fontSlider) {
+            fontSliderSettings.value = fontSlider.value;
+        }
+
+        debugLog('Settings modal opened');
+    }
+
+    function closeSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        if (!modal) {
+            console.error('Settings modal not found');
+            return;
+        }
+        modal.classList.remove('visible');
+        debugLog('Settings modal closed');
+    }
+
+    // --- Background Color Picker ---
+
+    function applyBackgroundColor(color) {
+        document.documentElement.style.setProperty('--bg-color', color);
+        // Also update the preview swatch
+        const preview = document.getElementById('colorPreview');
+        if (preview) {
+            preview.style.backgroundColor = color;
+        }
+    }
+
+    function initColorPicker() {
+        const picker = document.getElementById('bgColorPicker');
+        const preview = document.getElementById('colorPreview');
+        const applyBtn = document.getElementById('applyColorBtn');
+        const resetBtn = document.getElementById('resetColorBtn');
+
+        // Null checks
+        if (!picker || !preview || !applyBtn || !resetBtn) {
+            console.error('Color picker elements not found');
+            return;
+        }
+
+        // Load saved color
+        const savedColor = localStorage.getItem(BG_COLOR_KEY) || DEFAULT_BG_COLOR;
+        picker.value = savedColor;
+        applyBackgroundColor(savedColor);
+
+        // Preview on change (no apply yet)
+        picker.addEventListener('input', (e) => {
+            preview.style.backgroundColor = e.target.value;
+        });
+
+        // Apply on button click
+        applyBtn.addEventListener('click', () => {
+            const color = picker.value;
+            applyBackgroundColor(color);
+            localStorage.setItem(BG_COLOR_KEY, color);
+            debugLog('Background color changed', { color });
+        });
+
+        // Reset to default
+        resetBtn.addEventListener('click', () => {
+            picker.value = DEFAULT_BG_COLOR;
+            applyBackgroundColor(DEFAULT_BG_COLOR);
+            localStorage.setItem(BG_COLOR_KEY, DEFAULT_BG_COLOR);
+            debugLog('Background color reset to default');
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.color-preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const color = btn.dataset.color;
+                picker.value = color;
+                preview.style.backgroundColor = color;
+            });
+        });
+    }
+
+    // --- Empty Trash Feature ---
+
+    function emptyTrash() {
+        if (appState.trash.length === 0) {
+            alert('Trash is already empty.');
+            return;
+        }
+
+        const count = appState.trash.length;
+        const confirmMsg = `⚠️ PERMANENTLY DELETE ${count} ITEM${count > 1 ? 'S' : ''}?\n\n` +
+                          `This action CANNOT be undone!\n\n` +
+                          `Items in trash:\n` +
+                          appState.trash.slice(0, 5).map(item => `• ${item.title}`).join('\n') +
+                          (count > 5 ? `\n... and ${count - 5} more` : '');
+
+        if (confirm(confirmMsg)) {
+            appState.trash = [];
+            saveState();
+            renderTrash();
+            updateTrashControls();
+            debugLog('Trash emptied', { itemsDeleted: count });
+            alert(`✅ ${count} item${count > 1 ? 's' : ''} permanently deleted.`);
+        }
+    }
+
+    function updateTrashControls() {
+        const emptyBtn = document.getElementById('emptyTrashBtn');
+        if (emptyBtn) {
+            const count = appState.trash.length;
+            emptyBtn.textContent = `Empty Trash${count > 0 ? ` (${count})` : ''}`;
+            emptyBtn.disabled = count === 0;
+        }
+    }
+
+    // --- Initialize Settings Modal ---
+
+    function initSettingsModal() {
+        // Defensive checks for critical elements
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsCloseBtn = document.getElementById('settingsCloseBtn');
+        const settingsModal = document.getElementById('settingsModal');
+
+        if (!settingsBtn || !settingsCloseBtn || !settingsModal) {
+            console.error('Settings modal elements not found in DOM');
+            return;
+        }
+
+        // Settings button click
+        settingsBtn.addEventListener('click', openSettingsModal);
+
+        // Close button click
+        settingsCloseBtn.addEventListener('click', closeSettingsModal);
+
+        // Click outside modal to close
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target.id === 'settingsModal') {
+                closeSettingsModal();
             }
         });
-        
-        // Call original handler
-        originalHandleLinkDrop.call(this, e);
-    };
 
-    // Run
-    init();
-    debugLog('Yohoo initialized successfully');
+        // ESC key handler now in consolidated keyboard handler in setupEventListeners()
+        // (Removed duplicate to prevent conflicts)
+
+        // Initialize color picker
+        initColorPicker();
+
+        // Initialize empty trash button
+        const emptyTrashBtn = document.getElementById('emptyTrashBtn');
+        if (emptyTrashBtn) {
+            emptyTrashBtn.addEventListener('click', emptyTrash);
+            updateTrashControls();
+        }
+
+        // Initialize export/import buttons in settings
+        const exportBtn = document.getElementById('exportDataBtnSettings');
+        const importBtn = document.getElementById('importDataBtnSettings');
+        const importInput = document.getElementById('importFileInputSettings');
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', exportYohooData);
+        }
+        if (importBtn && importInput) {
+            importBtn.addEventListener('click', () => importInput.click());
+            importInput.addEventListener('change', handleImportFile);
+        }
+
+        // Initialize font slider in settings (sync with original)
+        const fontSliderSettings = document.getElementById('fontSliderSettings');
+        const fontSlider = document.getElementById('fontSlider');
+
+        if (fontSliderSettings && fontSlider) {
+            // Sync settings slider with main slider value on init
+            fontSliderSettings.value = fontSlider.value;
+
+            fontSliderSettings.addEventListener('input', (e) => {
+                const scale = parseFloat(e.target.value);
+                document.documentElement.style.setProperty('--font-scale', scale);
+                localStorage.setItem('yohoo_font_scale', scale);
+                // Sync with bottom controls slider
+                fontSlider.value = scale;
+            });
+        }
+
+        // Initialize debug toggle checkbox
+        const debugCheckbox = document.getElementById('debugToggleCheckbox');
+        const debugConsole = document.getElementById('debugConsole');
+
+        if (debugCheckbox && debugConsole) {
+            // Set initial state based on console visibility
+            debugCheckbox.checked = debugConsole.classList.contains('visible');
+
+            debugCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    debugConsole.classList.add('visible');
+                    debugLog('Debug console enabled from settings');
+                } else {
+                    debugConsole.classList.remove('visible');
+                    debugLog('Debug console disabled from settings');
+                }
+            });
+        }
+    }
+
+    // Run - wrapped in DOMContentLoaded to ensure DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    debugLog('Yohoo initialization started');
 
 </script>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="settings-modal-content">
+        <div class="settings-header">
+            <h2 id="settingsModalTitle">⚙️ Settings</h2>
+            <button class="settings-close-btn" id="settingsCloseBtn" aria-label="Close Settings">✕</button>
+        </div>
+        <div class="settings-body">
+
+            <!-- Section 1: Appearance -->
+            <div class="settings-section">
+                <div class="settings-section-title">🎨 Appearance</div>
+
+                <!-- Background Color Picker -->
+                <div class="settings-control">
+                    <label class="settings-control-label" for="bgColorPicker">
+                        Background Color
+                    </label>
+                    <div class="settings-control-description">
+                        Choose a custom background color. Changes will be previewed before applying.
+                    </div>
+                    <div class="color-picker-container">
+                        <input type="color" id="bgColorPicker" value="#FFEFCF" />
+                        <div class="color-preview" id="colorPreview"></div>
+                        <button id="applyColorBtn" class="secondary-btn">Apply</button>
+                        <button id="resetColorBtn" class="secondary-btn">Reset to Default</button>
+                    </div>
+                    <div class="color-preset-buttons">
+                        <button class="color-preset-btn" data-color="#FFEFCF" title="Light Cream (Default)">🟡</button>
+                        <button class="color-preset-btn" data-color="#E8F4F8" title="Soft Blue">🔵</button>
+                        <button class="color-preset-btn" data-color="#F0F8E8" title="Mint Green">🟢</button>
+                        <button class="color-preset-btn" data-color="#F8E8F0" title="Soft Pink">🩷</button>
+                        <button class="color-preset-btn" data-color="#1E1E2E" title="Dark Mode">⚫</button>
+                    </div>
+                </div>
+
+                <!-- Font Size Slider -->
+                <div class="settings-control">
+                    <label class="settings-control-label" for="fontSliderSettings">
+                        Font Size
+                    </label>
+                    <div class="settings-control-description">
+                        Adjust the overall font size of the page.
+                    </div>
+                    <div class="font-slider-container">
+                        <span class="font-slider-label">A-</span>
+                        <input type="range" id="fontSliderSettings" min="1.1" max="2.4" step="0.1" value="2.0" title="Adjust font size">
+                        <span class="font-slider-label">A+</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Data Management -->
+            <div class="settings-section">
+                <div class="settings-section-title">💾 Data Management</div>
+
+                <div class="settings-control">
+                    <label class="settings-control-label">
+                        Export & Import
+                    </label>
+                    <div class="settings-control-description">
+                        Export your data to a JSON file or import from a previous backup. An automatic backup is created before importing.
+                    </div>
+                    <div class="settings-button-group">
+                        <button id="exportDataBtnSettings" class="secondary-btn" title="Export all data to JSON file">📥 Export Data</button>
+                        <label for="importFileInputSettings" style="margin: 0;">
+                            <button type="button" id="importDataBtnSettings" class="secondary-btn" title="Import data from JSON file">📤 Import Data</button>
+                        </label>
+                        <input type="file" id="importFileInputSettings" accept=".json" style="display: none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Trash Management -->
+            <div class="settings-section">
+                <div class="settings-section-title">🗑️ Trash Management</div>
+
+                <div class="settings-control">
+                    <label class="settings-control-label">
+                        Empty Trash
+                    </label>
+                    <div class="settings-control-description">
+                        Permanently delete all items in the trash. This action cannot be undone.
+                    </div>
+                    <button id="emptyTrashBtn" class="secondary-btn">Empty Trash</button>
+                </div>
+            </div>
+
+            <!-- Section 4: Developer Tools -->
+            <div class="settings-section">
+                <div class="settings-section-title">🐛 Developer Tools</div>
+
+                <div class="settings-control">
+                    <label class="settings-control-label">
+                        <input type="checkbox" id="debugToggleCheckbox" style="margin-right: 0.5rem;">
+                        Show Debug Console
+                    </label>
+                    <div class="settings-control-description">
+                        Display the debug console for troubleshooting and monitoring application events.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

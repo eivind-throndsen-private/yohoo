@@ -1,8 +1,8 @@
 # Yohoo - Personal Start Page Specification
 
 **Project**: Yohoo - Yahoo-like Personal Start Page
-**Version**: 1.1
-**Last Updated**: 2025-12-09
+**Version**: 1.2
+**Last Updated**: 2026-01-07
 **Status**: Active Development
 
 ---
@@ -149,6 +149,12 @@ Standard categories (from parse_bookmarks.py):
 | FR-008 | Display current time | ✅ Implemented |
 | FR-009 | Add new sections via modal | ⚠️ Partial (button exists) |
 | FR-010 | Drop URLs from browser address bar | ✅ Implemented |
+| FR-011 | Settings modal for configuration | ✅ Implemented |
+| FR-012 | Background color customization | ✅ Implemented |
+| FR-013 | Empty trash (permanent delete) | ✅ Implemented |
+| FR-014 | Export/Import data from settings | ✅ Implemented |
+| FR-015 | Font size adjustment from settings | ✅ Implemented |
+| FR-016 | Debug console toggle from settings | ✅ Implemented |
 
 ### 4.2 Script Features
 
@@ -167,7 +173,7 @@ Standard categories (from parse_bookmarks.py):
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
-| FF-001 | Dark/light mode toggle | Medium |
+| FF-001 | ~~Dark/light mode toggle~~ | ⚠️ Partial (custom color picker implemented) |
 | FF-002 | Edit link titles inline | Medium |
 | FF-003 | Custom themes/colors | Low |
 | FF-004 | Weather widget | Low |
@@ -235,7 +241,13 @@ Standard categories (from parse_bookmarks.py):
 - **Drag-and-drop**: Reorder sections and move links between sections
 - **Search**: Press `/` to activate search, `Escape` to clear
 - **Trash system**: Deleted links moved to collapsible trash section with restore capability
-- **Debug console**: Toggle button in bottom-right corner for troubleshooting
+- **Settings modal**: Centralized configuration accessible via ⚙️ button in header
+  - Background color picker with 5 presets and custom color support
+  - Font size adjustment slider
+  - Export/Import data management
+  - Empty trash (permanent delete)
+  - Debug console toggle
+- **Debug console**: Available in settings, displays timestamped logs for troubleshooting
 - **External URL drop**: Drag URLs from browser address bar into sections
 
 ---
@@ -339,7 +351,99 @@ yohoo/
 
 ---
 
-## 11. Dependencies
+## 11. Settings Modal (v1.2)
+
+The Settings Modal provides centralized access to all configuration options and data management features.
+
+### 11.1 Access
+
+**Location**: Header bar (right side)
+**Button**: ⚙️ Settings
+**Keyboard Shortcut**: ESC to close when open
+
+### 11.2 Sections
+
+#### Appearance
+- **Background Color Picker**
+  - Native HTML5 color input with live preview swatch
+  - Apply button to confirm changes
+  - Reset to Default button (restores #FFEFCF light cream)
+  - 5 preset colors for quick selection:
+    - 🟡 Light Cream (Default): `#FFEFCF`
+    - 🔵 Soft Blue: `#E8F4F8`
+    - 🟢 Mint Green: `#F0F8E8`
+    - 🩷 Soft Pink: `#F8E8F0`
+    - ⚫ Dark Mode: `#1E1E2E`
+  - Persists via localStorage (`yohoo_bg_color`)
+
+- **Font Size Slider**
+  - Range: 1.1x to 2.4x base size
+  - Real-time preview as slider moves
+  - Syncs with bottom controls font slider
+  - Persists via localStorage (`yohoo_font_scale`)
+
+#### Data Management
+- **Export Data**
+  - Downloads complete backup as JSON
+  - Filename format: `yohoo-backup-YYYY-MM-DD-HHMMSS.json`
+  - Includes: sections, links, layout, trash, font scale, metadata
+
+- **Import Data**
+  - Validates JSON structure before import
+  - Shows preview dialog with data summary
+  - Automatically creates backup before importing
+  - Auto-backup format: `yohoo-auto-backup-YYYY-MM-DD-HHMMSS.json`
+  - Confirms success with imported data statistics
+
+#### Trash Management
+- **Empty Trash**
+  - Permanently deletes all items in trash
+  - Requires confirmation dialog
+  - Shows first 5 items to be deleted
+  - Disabled when trash is empty
+  - Button displays count: "Empty Trash (N)"
+
+#### Developer Tools
+- **Show Debug Console**
+  - Checkbox toggle for debug console visibility
+  - Debug console displays in bottom-right corner
+  - Matrix-style black/green themed console
+  - Logs timestamped application events
+  - Includes Clear button within console
+
+### 11.3 localStorage Keys
+
+| Key | Purpose | Type | Default |
+|-----|---------|------|---------|
+| `yohoo_v1_data` | Main application state | JSON | Empty state |
+| `yohoo_font_scale` | Font size multiplier | Float | 2.0 |
+| `yohoo_bg_color` | Custom background color | Hex string | #FFEFCF |
+
+### 11.4 Modal Behavior
+
+- **Opening**: Click ⚙️ Settings button
+- **Closing**:
+  - Click ✕ close button
+  - Click outside modal (on overlay)
+  - Press ESC key
+- **Styling**: Consistent with light cream theme
+- **Responsive**: 90% width desktop, 95% width mobile
+- **Max Height**: 80vh with scrollable content
+
+### 11.5 Migration from Previous UI
+
+**Removed Elements** (v1.2):
+- Export/Import buttons from bottom controls
+- Standalone 🐛 Debug toggle button (bottom-right)
+- These features now exclusively available in Settings modal
+
+**Retained Elements**:
+- Font slider in bottom controls (syncs with Settings)
+- Add URL and Add Section buttons
+
+---
+
+## 12. Dependencies
 
 ### Python Scripts
 - beautifulsoup4 == 4.12.3
@@ -353,7 +457,7 @@ yohoo/
 
 ---
 
-## 12. Usage Workflow
+## 13. Usage Workflow
 
 ### Initial Setup
 ```bash

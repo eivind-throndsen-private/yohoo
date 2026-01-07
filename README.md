@@ -1,15 +1,17 @@
 # Yohoo! - Personal Start Page
 
-A smart, customizable, editable browser start page. 
+A smart, customizable, editable browser start page with powerful settings and customization options.
 
 ## Features
 
-- 🎨 **Modern Dark Theme** - Clean, easy-on-the-eyes interface
+- ⚙️ **Settings Modal** - Centralized configuration for all customizations
+- 🎨 **Custom Background Colors** - Choose from presets or pick any color
 - 🔍 **Fast Search** - Press `/` to quickly search your links
 - 🎯 **Smart Categorization** - Automatically organizes links into categories
 - 📊 **Usage Analytics** - Analyzes Chrome history to prioritize frequently visited sites
 - 🎭 **Drag & Drop** - Reorganize links and sections with ease
-- 🗑️ **Trash System** - Soft-delete links with undo capability
+- 🗑️ **Trash System** - Soft-delete with restore and empty trash options
+- 💾 **Data Management** - Export and import your complete configuration
 - 💾 **Local Storage** - All customizations saved in your browser
 
 ## Quick Start
@@ -47,11 +49,15 @@ That's it! The page will open in your default browser.
 ### Using the Start Page
 
 - **Search**: Press `/` or click the search box to filter links
+- **Settings**: Click ⚙️ Settings in the header to access configuration
 - **Reorganize**: Drag and drop links between sections
 - **Delete Links**: Hover over a link and click the 🗑️ icon
 - **Restore Links**: Expand the Trash section and click "Restore"
+- **Empty Trash**: Open Settings → Trash Management → Empty Trash (permanent)
 - **Add Sections**: Click "+ Add Section" to create new categories
 - **Drop URLs**: Drag external URLs into sections to add them
+- **Customize Colors**: Settings → Appearance → Background Color
+- **Export/Import**: Settings → Data Management → Export/Import Data
 
 ### Generating from Bookmarks & History
 
@@ -285,10 +291,35 @@ pip install -r requirements.txt
 2. Run `make parse` to regenerate bookmarks.json
 3. Check logs in `logs/` directory
 
-### Debug mode
-Press the "Debug" button in the bottom-right corner to view:
-- Event log
-- localStorage contents
+### Settings Modal
+
+Access the Settings modal by clicking the ⚙️ button in the header. Features include:
+
+#### Appearance
+- **Background Color**: Choose from 5 presets or pick any custom color
+  - Light Cream (default)
+  - Soft Blue
+  - Mint Green
+  - Soft Pink
+  - Dark Mode
+- **Font Size**: Adjust text size with slider (1.1x - 2.4x)
+
+#### Data Management
+- **Export Data**: Download complete backup as timestamped JSON file
+- **Import Data**: Restore from previous backup (auto-backup created before import)
+
+#### Trash Management
+- **Empty Trash**: Permanently delete all items in trash (with confirmation)
+- Shows trash item count
+
+#### Developer Tools
+- **Debug Console**: Toggle visibility of debug console with timestamped logs
+
+### Debug Mode
+Enable the debug console in Settings → Developer Tools to view:
+- Event log with timestamps
+- Drag-and-drop operations
+- localStorage operations
 - Error messages
 
 ## Development
@@ -330,6 +361,22 @@ Personal project - use as you wish!
 
 ---
 
-**Version**: 1.0  
-**Last Updated**: December 2025  
+**Version**: 1.2
+**Last Updated**: January 2026
 **Author**: Eivind Throndsen
+
+### Changelog
+
+#### v1.2 (January 2026)
+- ✨ Added Settings Modal with centralized configuration
+- 🎨 Added background color customization with 5 presets + custom color picker
+- 🗑️ Added Empty Trash feature for permanent deletion
+- 💾 Moved Export/Import to Settings for better organization
+- 🐛 Moved Debug console toggle to Settings
+- 🔧 Improved initialization with DOMContentLoaded wrapper
+- ✨ Added ESC key priority handling (modal first, then search)
+- 🎯 Added font slider synchronization between settings and main UI
+- ♿ Added ARIA labels for better accessibility
+
+#### v1.0 (December 2025)
+- Initial release with core functionality
