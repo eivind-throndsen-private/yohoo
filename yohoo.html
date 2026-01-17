@@ -855,7 +855,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-08 16:33 - "Replace dynamic GitHub API call with static commit info"
+            Last commit: 2026-01-08 16:35 - "Add documentation for pre-commit hook"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -928,8 +928,8 @@
 
     // --- Initialization ---
 
-    function init() {
-        loadState();
+    async function init() {
+        await loadState(); // Now async - waits for default-links.json if needed
         loadFontScale();
         loadBackgroundColor(); // Load custom background color
         render();
@@ -942,7 +942,7 @@
         applyBackgroundColor(bgColor);
     }
 
-    function loadState() {
+    async function loadState() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             appState = JSON.parse(stored);
@@ -951,15 +951,76 @@
                 appState.layout = getDefaultLayout();
             }
         } else {
-            // Seed example links for first run
-            exampleLinks.forEach(link => {
-                const section = appState.sections.find(s => s.id === link.sectionId);
-                if (section) section.links.push(link);
-            });
-            // Initialize default layout
-            appState.layout = getDefaultLayout();
-            saveState();
+            // Load from external default-links.json on first run
+            await loadDefaultLinks();
         }
+    }
+
+    /**
+     * Load default links from external default-links.json file.
+     * Falls back to hardcoded defaults if file cannot be loaded.
+     */
+    async function loadDefaultLinks() {
+        try {
+            debugLog('Attempting to load default-links.json...');
+            const response = await fetch('./default-links.json');
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const defaultData = await response.json();
+            debugLog('default-links.json loaded successfully');
+
+            // Validate using existing validation function
+            const validation = validateImportData(defaultData);
+
+            if (!validation.valid) {
+                throw new Error('Invalid default-links.json format: ' + validation.errors.join(', '));
+            }
+
+            if (validation.warnings.length > 0) {
+                console.warn('Warnings in default-links.json:', validation.warnings);
+            }
+
+            // Apply default data
+            appState.sections = JSON.parse(JSON.stringify(defaultData.data.sections));
+            appState.trash = defaultData.data.trash || [];
+            appState.layout = defaultData.data.layout || getDefaultLayout();
+
+            // Apply font scale if present
+            if (defaultData.data.fontScale) {
+                saveFontScale(defaultData.data.fontScale.toString());
+                loadFontScale();
+            }
+
+            saveState();
+            debugLog('Loaded defaults from default-links.json', {
+                sections: appState.sections.length,
+                links: appState.sections.reduce((sum, s) => sum + s.links.length, 0)
+            });
+
+        } catch (error) {
+            console.error('Failed to load default-links.json:', error);
+            console.log('Falling back to hardcoded defaults');
+            loadHardcodedDefaults();
+        }
+    }
+
+    /**
+     * Load hardcoded fallback defaults when default-links.json is unavailable.
+     * Uses the original example links as ultimate fallback.
+     */
+    function loadHardcodedDefaults() {
+        // Seed example links for first run (original behavior)
+        exampleLinks.forEach(link => {
+            const section = appState.sections.find(s => s.id === link.sectionId);
+            if (section) section.links.push(link);
+        });
+        // Initialize default layout
+        appState.layout = getDefaultLayout();
+        saveState();
+        debugLog('Loaded hardcoded fallback defaults');
     }
 
     function loadFontScale() {
@@ -1262,6 +1323,128 @@
         };
 
         reader.readAsText(file);
+    }
+
+    /**
+     * Reset to default links from default-links.json.
+     * Creates automatic backup before resetting.
+     */
+    async function resetToDefaults() {
+        const confirmed = confirm(
+            '🚨 RESET TO DEFAULTS\n\n' +
+            'This will replace all your current sections, links, and layout with the default configuration.\n\n' +
+            '✅ Your current data will be automatically backed up before resetting.\n\n' +
+            'Continue with reset?'
+        );
+
+        if (!confirmed) {
+            debugLog('Reset to defaults cancelled by user');
+            return;
+        }
+
+        try {
+            // Create automatic backup
+            const fontScale = localStorage.getItem('yohoo_font_scale') || '2.0';
+
+            const backupData = {
+                version: '1.0.0',
+                exportDate: new Date().toISOString(),
+                exportedBy: 'Yohoo Auto-Backup (Before Reset)',
+                data: {
+                    sections: JSON.parse(JSON.stringify(appState.sections)),
+                    trash: JSON.parse(JSON.stringify(appState.trash)),
+                    layout: JSON.parse(JSON.stringify(appState.layout)),
+                    fontScale: parseFloat(fontScale)
+                },
+                metadata: {
+                    sectionCount: appState.sections.length,
+                    linkCount: appState.sections.reduce((sum, s) => sum + s.links.length, 0),
+                    trashCount: appState.trash.length,
+                    columns: appState.layout.columns.length
+                }
+            };
+
+            // Download backup
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString()
+                .replace(/:/g, '-')
+                .replace(/\..+/, '')
+                .replace('T', '-');
+            const backupFilename = `yohoo-backup-before-reset-${timestamp}.json`;
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = backupFilename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            debugLog('Backup created before reset', { filename: backupFilename });
+
+            // Clear localStorage and reload defaults
+            localStorage.removeItem(STORAGE_KEY);
+            await loadDefaultLinks();
+
+            // Re-render
+            render();
+
+            alert(`✅ Reset complete!\n\nYour previous data has been saved to:\n${backupFilename}`);
+            debugLog('Reset to defaults completed');
+
+        } catch (error) {
+            console.error('Reset to defaults failed:', error);
+            alert(`Reset failed:\n\n${error.message}\n\nYour current data has been preserved.`);
+            debugLog('Reset error', { error: error.message });
+        }
+    }
+
+    /**
+     * Save current link set as default template.
+     * Exports as default-links.json format for user to replace the defaults file.
+     */
+    function saveCurrentAsDefault() {
+        const fontScale = localStorage.getItem('yohoo_font_scale') || '2.0';
+
+        const defaultTemplate = {
+            version: '1.0.0',
+            exportDate: new Date().toISOString(),
+            exportedBy: 'Yohoo - Save as Default Template',
+            data: {
+                sections: JSON.parse(JSON.stringify(appState.sections)),
+                trash: [], // Empty trash for clean defaults
+                layout: JSON.parse(JSON.stringify(appState.layout)),
+                fontScale: parseFloat(fontScale)
+            },
+            metadata: {
+                sectionCount: appState.sections.length,
+                linkCount: appState.sections.reduce((sum, s) => sum + s.links.length, 0),
+                trashCount: 0,
+                columns: appState.layout.columns.length
+            }
+        };
+
+        // Create download with specific filename
+        const dataStr = JSON.stringify(defaultTemplate, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'default-links.json';
+        link.click();
+        URL.revokeObjectURL(url);
+
+        alert(
+            '💾 Default template saved!\n\n' +
+            'To use this as your new defaults:\n' +
+            '1. Save the downloaded "default-links.json" file\n' +
+            '2. Place it in the same folder as yohoo.html\n' +
+            '3. Replace the existing default-links.json file\n\n' +
+            'Note: This works when running locally. On GitHub Pages, you\'ll need to commit the file to your repository.'
+        );
+
+        debugLog('Saved current state as default template', defaultTemplate.metadata);
     }
 
     // --- Rendering ---
@@ -2818,6 +3001,18 @@
             importInput.addEventListener('change', handleImportFile);
         }
 
+        // Initialize reset to defaults button
+        const resetToDefaultsBtn = document.getElementById('resetToDefaultsBtn');
+        if (resetToDefaultsBtn) {
+            resetToDefaultsBtn.addEventListener('click', resetToDefaults);
+        }
+
+        // Initialize save as default button
+        const saveAsDefaultBtn = document.getElementById('saveAsDefaultBtn');
+        if (saveAsDefaultBtn) {
+            saveAsDefaultBtn.addEventListener('click', saveCurrentAsDefault);
+        }
+
         // Initialize font slider in settings (sync with original)
         const fontSliderSettings = document.getElementById('fontSliderSettings');
         const fontSlider = document.getElementById('fontSlider');
@@ -2935,6 +3130,28 @@
                         </label>
                         <input type="file" id="importFileInputSettings" accept=".json" style="display: none;">
                     </div>
+                </div>
+
+                <div class="settings-control">
+                    <label class="settings-control-label">
+                        Reset to Defaults
+                    </label>
+                    <div class="settings-control-description">
+                        Reset all links, sections, and layout to the default configuration from default-links.json.
+                        Your current data will be automatically backed up before resetting.
+                    </div>
+                    <button id="resetToDefaultsBtn" class="secondary-btn" title="Reset to default links">🔄 Reset to Defaults</button>
+                </div>
+
+                <div class="settings-control">
+                    <label class="settings-control-label">
+                        Save as Default Template
+                    </label>
+                    <div class="settings-control-description">
+                        Export your current link set in the default-links.json format.
+                        Save the downloaded file as "default-links.json" to make it the new default configuration.
+                    </div>
+                    <button id="saveAsDefaultBtn" class="secondary-btn" title="Export as default template">💾 Save Current as Default Template</button>
                 </div>
             </div>
 
