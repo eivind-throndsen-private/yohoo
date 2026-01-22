@@ -5,6 +5,105 @@
   "data": {
     "sections": [
       {
+        "id": "vend",
+        "title": "Vend",
+        "icon": "💼",
+        "links": [
+          {
+            "id": "link-vend-0000",
+            "title": "Vibe",
+            "url": "https://vibe.vend.com/home/",
+            "date": 1768646555436
+          }
+        ]
+      },
+      {
+        "id": "productivity-tools",
+        "title": "Productivity & Tools",
+        "icon": "🛠️",
+        "links": [
+          {
+            "id": "link-0062",
+            "title": "Notion",
+            "url": "https://www.notion.so",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0063",
+            "title": "Figma",
+            "url": "https://www.figma.com",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0064",
+            "title": "Miro",
+            "url": "https://miro.com",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0065",
+            "title": "Canva",
+            "url": "https://www.canva.com",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0066",
+            "title": "Excalidraw",
+            "url": "https://excalidraw.com",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0067",
+            "title": "Carbon",
+            "url": "https://carbon.now.sh",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0068",
+            "title": "Regex101",
+            "url": "https://regex101.com",
+            "date": 1768646555437
+          }
+        ]
+      },
+      {
+        "id": "ai-research",
+        "title": "AI & Research",
+        "icon": "🤖",
+        "links": [
+          {
+            "id": "link-0069",
+            "title": "Claude",
+            "url": "https://claude.ai",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0070",
+            "title": "ChatGPT",
+            "url": "https://chat.openai.com",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0071",
+            "title": "Perplexity",
+            "url": "https://www.perplexity.ai",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0072",
+            "title": "Wolfram Alpha",
+            "url": "https://www.wolframalpha.com",
+            "date": 1768646555437
+          },
+          {
+            "id": "link-0073",
+            "title": "Google Scholar",
+            "url": "https://scholar.google.com",
+            "date": 1768646555437
+          }
+        ]
+      },
+      {
         "id": "norwegian-essentials",
         "title": "Norwegian Essentials",
         "icon": "🇳🇴",
@@ -447,92 +546,6 @@
         ]
       },
       {
-        "id": "productivity-tools",
-        "title": "Productivity & Tools",
-        "icon": "🛠️",
-        "links": [
-          {
-            "id": "link-0062",
-            "title": "Notion",
-            "url": "https://www.notion.so",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0063",
-            "title": "Figma",
-            "url": "https://www.figma.com",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0064",
-            "title": "Miro",
-            "url": "https://miro.com",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0065",
-            "title": "Canva",
-            "url": "https://www.canva.com",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0066",
-            "title": "Excalidraw",
-            "url": "https://excalidraw.com",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0067",
-            "title": "Carbon",
-            "url": "https://carbon.now.sh",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0068",
-            "title": "Regex101",
-            "url": "https://regex101.com",
-            "date": 1768646555437
-          }
-        ]
-      },
-      {
-        "id": "ai-research",
-        "title": "AI & Research",
-        "icon": "🤖",
-        "links": [
-          {
-            "id": "link-0069",
-            "title": "Claude",
-            "url": "https://claude.ai",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0070",
-            "title": "ChatGPT",
-            "url": "https://chat.openai.com",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0071",
-            "title": "Perplexity",
-            "url": "https://www.perplexity.ai",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0072",
-            "title": "Wolfram Alpha",
-            "url": "https://www.wolframalpha.com",
-            "date": 1768646555437
-          },
-          {
-            "id": "link-0073",
-            "title": "Google Scholar",
-            "url": "https://scholar.google.com",
-            "date": 1768646555437
-          }
-        ]
-      },
-      {
         "id": "learn-norwegian",
         "title": "Learn Norwegian",
         "icon": "📚",
@@ -730,6 +743,9 @@
         {
           "id": "col-1",
           "sections": [
+            "vend",
+            "productivity-tools",
+            "ai-research",
             "norwegian-essentials",
             "international-news",
             "events-culture",
@@ -744,7 +760,6 @@
             "transport-travel",
             "norwegian-streaming",
             "government-official",
-            "productivity-tools",
             "online-learning",
             "interesting-fun"
           ]
@@ -755,7 +770,6 @@
             "norwegian-news",
             "global-streaming",
             "banking",
-            "ai-research",
             "outdoors-activities"
           ]
         }
@@ -764,8 +778,8 @@
     "fontScale": 2.0
   },
   "metadata": {
-    "sectionCount": 17,
-    "linkCount": 100,
+    "sectionCount": 18,
+    "linkCount": 101,
     "trashCount": 0,
     "columns": 3
   }
