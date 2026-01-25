@@ -457,17 +457,6 @@
             cursor: wait;
         }
 
-        .link-edit-input {
-            width: 100%;
-            padding: 0.25rem;
-            border: 1px solid var(--link-color);
-            border-radius: 2px;
-            background-color: var(--section-bg);
-            color: var(--text-main);
-            font-size: calc(0.5rem * var(--font-scale));
-            outline: 2px solid var(--link-color);
-        }
-
         .link-actions {
             display: flex;
             gap: 4px;
@@ -810,6 +799,150 @@
                 padding: 1rem;
             }
         }
+
+        /* Link Edit Modal */
+        .link-edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(44, 36, 22, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .link-edit-modal.visible {
+            display: flex;
+        }
+
+        .link-edit-modal-content {
+            background-color: var(--section-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .link-edit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            background-color: var(--bg-color);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .link-edit-header h3 {
+            margin: 0;
+            color: var(--header-color);
+            font-size: calc(0.7rem * var(--font-scale));
+        }
+
+        .link-edit-close-btn {
+            background: none;
+            color: var(--text-muted);
+            font-size: calc(0.8rem * var(--font-scale));
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            border: none;
+            transition: color 0.2s;
+        }
+
+        .link-edit-close-btn:hover {
+            color: var(--delete-icon);
+        }
+
+        .link-edit-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--header-color);
+            font-weight: 600;
+            font-size: calc(0.55rem * var(--font-scale));
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="url"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-size: calc(0.55rem * var(--font-scale));
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="url"]:focus {
+            outline: none;
+            border-color: var(--link-color);
+        }
+
+        .link-edit-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-top: 2px solid var(--border-color);
+            background-color: var(--bg-color);
+            border-radius: 0 0 8px 8px;
+        }
+
+        .secondary-btn {
+            background-color: var(--section-bg);
+            color: var(--text-muted);
+            border: 2px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: calc(0.5rem * var(--font-scale));
+            transition: all 0.2s;
+        }
+
+        .secondary-btn:hover {
+            background-color: var(--border-color);
+            color: var(--text-main);
+        }
+
+        .primary-btn {
+            background-color: var(--header-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: calc(0.5rem * var(--font-scale));
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .primary-btn:hover {
+            opacity: 0.9;
+        }
+
+        .form-error {
+            color: var(--delete-icon);
+            font-size: calc(0.5rem * var(--font-scale));
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -855,7 +988,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-18 00:40 - "Add configurable default links system with external JSON file"
+            Last commit: 2026-01-22 19:16 - "Add Vend section and reorder default links"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -935,6 +1068,7 @@
         render();
         setupEventListeners();
         initSettingsModal(); // Initialize settings modal
+        initLinkEditModal(); // Initialize link edit modal
     }
 
     function loadBackgroundColor() {
@@ -1592,7 +1726,7 @@
                 li.querySelector('.edit-btn').addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    enterEditMode(li, link, section.id);
+                    openLinkEditModal(link, section.id);
                 });
 
                 // Delete Event
@@ -2688,58 +2822,6 @@
 
     // --- Edit Mode ---
 
-    function enterEditMode(linkItem, link, sectionId) {
-        // Disable dragging while editing
-        linkItem.draggable = false;
-        
-        // Get current title
-        const currentTitle = link.title;
-        
-        // Replace link content with input field
-        const linkContent = linkItem.querySelector('.link-content');
-        const originalHTML = linkContent.outerHTML;
-        
-        linkContent.outerHTML = `
-            <input type="text" class="link-edit-input" value="${currentTitle.replace(/"/g, '&quot;')}" />
-        `;
-        
-        const input = linkItem.querySelector('.link-edit-input');
-        input.focus();
-        input.select();
-        
-        // Save function
-        const saveEdit = () => {
-            const newTitle = input.value.trim();
-            
-            if (newTitle && newTitle !== currentTitle) {
-                // Update the link title in appState
-                const section = appState.sections.find(s => s.id === sectionId);
-                const linkToUpdate = section.links.find(l => l.id === link.id);
-                linkToUpdate.title = newTitle;
-                saveState();
-                debugLog(`Updated link title: "${currentTitle}" → "${newTitle}"`);
-            }
-            
-            // Re-render to exit edit mode
-            render();
-        };
-        
-        // Save on blur (when clicking outside)
-        input.addEventListener('blur', saveEdit);
-        
-        // Save on Enter key
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                saveEdit();
-            } else if (e.key === 'Escape') {
-                // Cancel edit - just re-render
-                render();
-            }
-        });
-    }
-
-
     // --- Debug Console ---
 
     function enterSectionEditMode(headerElement, section) {
@@ -2813,6 +2895,247 @@
             logEl.scrollTop = logEl.scrollHeight;
         }
         console.log(`[DEBUG] ${message}`, data || '');
+    }
+
+    // --- Link Edit Modal Management ---
+
+    let currentEditingLink = null;  // Store reference to link being edited
+    let currentEditingSectionId = null;
+
+    function openLinkEditModal(link, sectionId) {
+        const modal = document.getElementById('linkEditModal');
+        if (!modal) {
+            console.error('Link edit modal not found');
+            return;
+        }
+
+        // Store reference to link being edited
+        currentEditingLink = link;
+        currentEditingSectionId = sectionId;
+
+        // Populate form inputs with current values
+        const titleInput = document.getElementById('linkEditTitle');
+        const urlInput = document.getElementById('linkEditUrl');
+
+        if (titleInput && urlInput) {
+            titleInput.value = link.title || '';
+            urlInput.value = link.url || '';
+
+            // Clear any previous error messages
+            const titleError = document.getElementById('titleError');
+            const urlError = document.getElementById('urlError');
+            if (titleError) titleError.style.display = 'none';
+            if (urlError) urlError.style.display = 'none';
+        }
+
+        // Show modal
+        modal.classList.add('visible');
+
+        // Focus on title input
+        if (titleInput) {
+            titleInput.focus();
+            titleInput.select();
+        }
+
+        debugLog('Link edit modal opened', {
+            linkId: link.id,
+            title: link.title,
+            url: link.url,
+            sectionId: sectionId
+        });
+    }
+
+    function validateUrl(url) {
+        // Check if URL is empty
+        if (!url || url.trim() === '') {
+            return { valid: false, error: 'URL is required' };
+        }
+
+        // Valid URL protocols
+        const validProtocols = ['http://', 'https://', 'chrome://', 'edge://', 'about:', 'brave://'];
+        const hasValidProtocol = validProtocols.some(protocol => url.toLowerCase().startsWith(protocol));
+
+        if (!hasValidProtocol) {
+            // Try to auto-add https:// if it looks like a domain
+            if (!url.includes('://') && !url.startsWith('about:')) {
+                return { valid: true, url: 'https://' + url, autoFixed: true };
+            }
+            return { valid: false, error: 'URL must start with http://, https://, or a valid browser protocol' };
+        }
+
+        return { valid: true, url: url };
+    }
+
+    function saveLinkEdit() {
+        const titleInput = document.getElementById('linkEditTitle');
+        const urlInput = document.getElementById('linkEditUrl');
+        const titleError = document.getElementById('titleError');
+        const urlError = document.getElementById('urlError');
+
+        if (!titleInput || !urlInput || !currentEditingLink || !currentEditingSectionId) {
+            console.error('Cannot save: missing inputs or link reference');
+            return;
+        }
+
+        // Get values
+        const newTitle = titleInput.value.trim();
+        const newUrl = urlInput.value.trim();
+
+        // Clear previous errors
+        if (titleError) titleError.style.display = 'none';
+        if (urlError) urlError.style.display = 'none';
+
+        // Validate title
+        if (!newTitle) {
+            if (titleError) {
+                titleError.textContent = 'Title is required';
+                titleError.style.display = 'block';
+            }
+            titleInput.focus();
+            return;
+        }
+
+        // Validate URL
+        const urlValidation = validateUrl(newUrl);
+        if (!urlValidation.valid) {
+            if (urlError) {
+                urlError.textContent = urlValidation.error;
+                urlError.style.display = 'block';
+            }
+            urlInput.focus();
+            return;
+        }
+
+        // Use auto-fixed URL if available
+        const finalUrl = urlValidation.url || newUrl;
+
+        // Update the link in appState
+        const section = appState.sections.find(s => s.id === currentEditingSectionId);
+        if (!section) {
+            console.error('Section not found:', currentEditingSectionId);
+            return;
+        }
+
+        const linkToUpdate = section.links.find(l => l.id === currentEditingLink.id);
+        if (!linkToUpdate) {
+            console.error('Link not found:', currentEditingLink.id);
+            return;
+        }
+
+        // Store old values for logging
+        const oldTitle = linkToUpdate.title;
+        const oldUrl = linkToUpdate.url;
+
+        // Update link
+        linkToUpdate.title = newTitle;
+        linkToUpdate.url = finalUrl;
+
+        // Save to localStorage
+        saveState();
+
+        debugLog('Link updated', {
+            linkId: linkToUpdate.id,
+            oldTitle: oldTitle,
+            newTitle: newTitle,
+            oldUrl: oldUrl,
+            newUrl: finalUrl,
+            autoFixed: urlValidation.autoFixed || false
+        });
+
+        // Close modal and re-render
+        closeLinkEditModal();
+        render();
+    }
+
+    function closeLinkEditModal() {
+        const modal = document.getElementById('linkEditModal');
+        if (!modal) {
+            console.error('Link edit modal not found');
+            return;
+        }
+
+        // Hide modal
+        modal.classList.remove('visible');
+
+        // Clear form inputs
+        const titleInput = document.getElementById('linkEditTitle');
+        const urlInput = document.getElementById('linkEditUrl');
+        if (titleInput) titleInput.value = '';
+        if (urlInput) urlInput.value = '';
+
+        // Clear error messages
+        const titleError = document.getElementById('titleError');
+        const urlError = document.getElementById('urlError');
+        if (titleError) titleError.style.display = 'none';
+        if (urlError) urlError.style.display = 'none';
+
+        // Clear references
+        currentEditingLink = null;
+        currentEditingSectionId = null;
+
+        debugLog('Link edit modal closed');
+    }
+
+    function initLinkEditModal() {
+        const modal = document.getElementById('linkEditModal');
+        const closeBtn = document.getElementById('linkEditCloseBtn');
+        const cancelBtn = document.getElementById('linkEditCancel');
+        const saveBtn = document.getElementById('linkEditSave');
+        const titleInput = document.getElementById('linkEditTitle');
+        const urlInput = document.getElementById('linkEditUrl');
+
+        if (!modal) {
+            console.error('Link edit modal not found');
+            return;
+        }
+
+        // Close button
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeLinkEditModal);
+        }
+
+        // Cancel button
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeLinkEditModal);
+        }
+
+        // Save button
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveLinkEdit);
+        }
+
+        // Click outside modal to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeLinkEditModal();
+            }
+        });
+
+        // Keyboard shortcuts
+        if (titleInput) {
+            titleInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Move to URL input
+                    if (urlInput) urlInput.focus();
+                } else if (e.key === 'Escape') {
+                    closeLinkEditModal();
+                }
+            });
+        }
+
+        if (urlInput) {
+            urlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveLinkEdit();
+                } else if (e.key === 'Escape') {
+                    closeLinkEditModal();
+                }
+            });
+        }
+
+        debugLog('Link edit modal initialized');
     }
 
     // --- Settings Modal Management ---
@@ -3185,6 +3508,32 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+</div>
+
+<!-- Link Edit Modal -->
+<div id="linkEditModal" class="link-edit-modal" role="dialog" aria-modal="true" aria-labelledby="linkEditModalTitle">
+    <div class="link-edit-modal-content">
+        <div class="link-edit-header">
+            <h3 id="linkEditModalTitle">✏️ Edit Link</h3>
+            <button class="link-edit-close-btn" id="linkEditCloseBtn" aria-label="Close">✕</button>
+        </div>
+        <div class="link-edit-body">
+            <div class="form-group">
+                <label for="linkEditTitle">Title</label>
+                <input type="text" id="linkEditTitle" placeholder="Link title" aria-required="true">
+                <div id="titleError" class="form-error" style="display: none;"></div>
+            </div>
+            <div class="form-group">
+                <label for="linkEditUrl">URL</label>
+                <input type="url" id="linkEditUrl" placeholder="https://example.com" aria-required="true">
+                <div id="urlError" class="form-error" style="display: none;"></div>
+            </div>
+        </div>
+        <div class="link-edit-footer">
+            <button class="secondary-btn" id="linkEditCancel">Cancel</button>
+            <button class="primary-btn" id="linkEditSave">Save</button>
         </div>
     </div>
 </div>
