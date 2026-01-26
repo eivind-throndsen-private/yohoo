@@ -725,41 +725,43 @@
         }
 
         .color-picker-container input[type="color"] {
-            width: 60px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border: 2px solid var(--border-color);
             border-radius: var(--radius);
             cursor: pointer;
-        }
-
-        .color-preview {
-            width: 40px;
-            height: 40px;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius);
-            background-color: var(--bg-color);
+            padding: 0;
+            background: transparent;
+            appearance: none;
         }
 
         .color-preset-buttons {
             display: flex;
             gap: 0.5rem;
             margin-top: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .color-preset-btn {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border: 2px solid var(--border-color);
-            border-radius: var(--radius);
+            border-radius: 999px;
             cursor: pointer;
-            font-size: calc(0.7rem * var(--font-scale));
+            font-size: 0;
             background: var(--section-bg);
-            transition: all 0.2s;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, border-color 0.2s;
         }
 
         .color-preset-btn:hover {
             transform: scale(1.1);
             border-color: var(--header-color);
+        }
+
+        .color-preset-btn.is-selected {
+            border-color: var(--header-color);
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
         }
 
         .settings-button-group {
@@ -988,7 +990,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-22 19:16 - "Add Vend section and reorder default links"
+            Last commit: 2026-01-25 17:13 - "Replace inline link editing with modal dialog"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -3142,6 +3144,30 @@
 
     const DEFAULT_BG_COLOR = '#FFEFCF';
     const BG_COLOR_KEY = 'yohoo_bg_color';
+    const LIGHT_THEME_VARS = {
+        '--section-bg': '#FFF8E7',
+        '--border-color': '#E6D5B0',
+        '--header-color': '#6B4E3D',
+        '--link-color': '#0066CC',
+        '--link-hover': '#0052A3',
+        '--text-muted': '#8B7355',
+        '--delete-icon': '#D32F2F',
+        '--text-main': '#2C2416',
+        '--hover-bg': 'rgba(107, 78, 61, 0.08)',
+        '--hover-accent': '#0066CC'
+    };
+    const DARK_THEME_VARS = {
+        '--section-bg': '#2A2B3D',
+        '--border-color': '#3A3B55',
+        '--header-color': '#F2D7A3',
+        '--link-color': '#93C5FD',
+        '--link-hover': '#BFDBFE',
+        '--text-muted': '#B7B0A4',
+        '--delete-icon': '#FF7B7B',
+        '--text-main': '#F5F1E8',
+        '--hover-bg': 'rgba(242, 215, 163, 0.12)',
+        '--hover-accent': '#93C5FD'
+    };
 
     function openSettingsModal() {
         const modal = document.getElementById('settingsModal');
@@ -3182,22 +3208,51 @@
     // --- Background Color Picker ---
 
     function applyBackgroundColor(color) {
+        applyThemeForBackground(color);
+    }
+
+    function applyThemeForBackground(color) {
+        const themeVars = isDarkColor(color) ? DARK_THEME_VARS : LIGHT_THEME_VARS;
+        setThemeVariables(themeVars);
         document.documentElement.style.setProperty('--bg-color', color);
-        // Also update the preview swatch
-        const preview = document.getElementById('colorPreview');
-        if (preview) {
-            preview.style.backgroundColor = color;
+        updatePresetSelection(color);
+    }
+
+    function setThemeVariables(themeVars) {
+        Object.entries(themeVars).forEach(([key, value]) => {
+            document.documentElement.style.setProperty(key, value);
+        });
+    }
+
+    function isDarkColor(color) {
+        const rgb = hexToRgb(color);
+        if (!rgb) {
+            return false;
         }
+        const luminance = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+        return luminance < 0.5;
+    }
+
+    function hexToRgb(color) {
+        const hex = color.replace('#', '').trim();
+        if (hex.length !== 6) {
+            return null;
+        }
+        const value = parseInt(hex, 16);
+        return {
+            r: (value >> 16) & 255,
+            g: (value >> 8) & 255,
+            b: value & 255
+        };
     }
 
     function initColorPicker() {
         const picker = document.getElementById('bgColorPicker');
-        const preview = document.getElementById('colorPreview');
         const applyBtn = document.getElementById('applyColorBtn');
         const resetBtn = document.getElementById('resetColorBtn');
 
         // Null checks
-        if (!picker || !preview || !applyBtn || !resetBtn) {
+        if (!picker || !applyBtn || !resetBtn) {
             console.error('Color picker elements not found');
             return;
         }
@@ -3209,7 +3264,7 @@
 
         // Preview on change (no apply yet)
         picker.addEventListener('input', (e) => {
-            preview.style.backgroundColor = e.target.value;
+            applyThemeForBackground(e.target.value);
         });
 
         // Apply on button click
@@ -3233,8 +3288,14 @@
             btn.addEventListener('click', () => {
                 const color = btn.dataset.color;
                 picker.value = color;
-                preview.style.backgroundColor = color;
+                applyThemeForBackground(color);
             });
+        });
+    }
+
+    function updatePresetSelection(color) {
+        document.querySelectorAll('.color-preset-btn').forEach(btn => {
+            btn.classList.toggle('is-selected', btn.dataset.color === color);
         });
     }
 
@@ -3406,16 +3467,15 @@
                     </div>
                     <div class="color-picker-container">
                         <input type="color" id="bgColorPicker" value="#FFEFCF" />
-                        <div class="color-preview" id="colorPreview"></div>
                         <button id="applyColorBtn" class="secondary-btn">Apply</button>
                         <button id="resetColorBtn" class="secondary-btn">Reset to Default</button>
                     </div>
                     <div class="color-preset-buttons">
-                        <button class="color-preset-btn" data-color="#FFEFCF" title="Light Cream (Default)">🟡</button>
-                        <button class="color-preset-btn" data-color="#E8F4F8" title="Soft Blue">🔵</button>
-                        <button class="color-preset-btn" data-color="#F0F8E8" title="Mint Green">🟢</button>
-                        <button class="color-preset-btn" data-color="#F8E8F0" title="Soft Pink">🩷</button>
-                        <button class="color-preset-btn" data-color="#1E1E2E" title="Dark Mode">⚫</button>
+                        <button class="color-preset-btn" data-color="#FFEFCF" title="Light Cream (Default)" aria-label="Light Cream (Default)" style="background-color: #FFEFCF;"></button>
+                        <button class="color-preset-btn" data-color="#E8F4F8" title="Soft Blue" aria-label="Soft Blue" style="background-color: #E8F4F8;"></button>
+                        <button class="color-preset-btn" data-color="#F0F8E8" title="Mint Green" aria-label="Mint Green" style="background-color: #F0F8E8;"></button>
+                        <button class="color-preset-btn" data-color="#F8E8F0" title="Soft Pink" aria-label="Soft Pink" style="background-color: #F8E8F0;"></button>
+                        <button class="color-preset-btn" data-color="#1E1E2E" title="Dark Mode" aria-label="Dark Mode" style="background-color: #1E1E2E;"></button>
                     </div>
                 </div>
 
