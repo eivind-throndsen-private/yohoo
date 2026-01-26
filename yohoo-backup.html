@@ -717,6 +717,24 @@
             opacity: 0.9;
         }
 
+        .color-picker-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .color-picker-container input[type="color"] {
+            width: 44px;
+            height: 44px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+            padding: 0;
+            background: transparent;
+            appearance: none;
+        }
+
         .color-preset-buttons {
             display: flex;
             gap: 0.5rem;
@@ -972,7 +990,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-26 15:10 - "Improve settings swatches and dark theme"
+            Last commit: 2026-01-25 17:13 - "Replace inline link editing with modal dialog"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -3229,17 +3247,48 @@
     }
 
     function initColorPicker() {
+        const picker = document.getElementById('bgColorPicker');
+        const applyBtn = document.getElementById('applyColorBtn');
+        const resetBtn = document.getElementById('resetColorBtn');
+
+        // Null checks
+        if (!picker || !applyBtn || !resetBtn) {
+            console.error('Color picker elements not found');
+            return;
+        }
+
         // Load saved color
         const savedColor = localStorage.getItem(BG_COLOR_KEY) || DEFAULT_BG_COLOR;
+        picker.value = savedColor;
         applyBackgroundColor(savedColor);
+
+        // Preview on change (no apply yet)
+        picker.addEventListener('input', (e) => {
+            applyThemeForBackground(e.target.value);
+        });
+
+        // Apply on button click
+        applyBtn.addEventListener('click', () => {
+            const color = picker.value;
+            applyBackgroundColor(color);
+            localStorage.setItem(BG_COLOR_KEY, color);
+            debugLog('Background color changed', { color });
+        });
+
+        // Reset to default
+        resetBtn.addEventListener('click', () => {
+            picker.value = DEFAULT_BG_COLOR;
+            applyBackgroundColor(DEFAULT_BG_COLOR);
+            localStorage.setItem(BG_COLOR_KEY, DEFAULT_BG_COLOR);
+            debugLog('Background color reset to default');
+        });
 
         // Preset buttons
         document.querySelectorAll('.color-preset-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const color = btn.dataset.color;
+                picker.value = color;
                 applyThemeForBackground(color);
-                localStorage.setItem(BG_COLOR_KEY, color);
-                debugLog('Background color changed', { color });
             });
         });
     }
@@ -3410,11 +3459,16 @@
 
                 <!-- Background Color Picker -->
                 <div class="settings-control">
-                    <label class="settings-control-label">
+                    <label class="settings-control-label" for="bgColorPicker">
                         Background Color
                     </label>
                     <div class="settings-control-description">
-                        Choose a preset background color.
+                        Choose a custom background color. Changes will be previewed before applying.
+                    </div>
+                    <div class="color-picker-container">
+                        <input type="color" id="bgColorPicker" value="#FFEFCF" />
+                        <button id="applyColorBtn" class="secondary-btn">Apply</button>
+                        <button id="resetColorBtn" class="secondary-btn">Reset to Default</button>
                     </div>
                     <div class="color-preset-buttons">
                         <button class="color-preset-btn" data-color="#FFEFCF" title="Light Cream (Default)" aria-label="Light Cream (Default)" style="background-color: #FFEFCF;"></button>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yohoo Settings Modal - Test Harness</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #6B4E3D;
+            border-bottom: 3px solid #6B4E3D;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            color: #8B7355;
+            margin-top: 2rem;
+        }
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-left: 4px solid #E6D5B0;
+        }
+        .test-item h3 {
+            margin: 0 0 0.5rem 0;
+            color: #6B4E3D;
+            font-size: 1rem;
+        }
+        .test-steps {
+            margin-left: 1rem;
+        }
+        .test-steps li {
+            margin: 0.5rem 0;
+        }
+        .expected {
+            color: #0066CC;
+            font-weight: 500;
+        }
+        .checkbox {
+            margin-right: 0.5rem;
+        }
+        .status-pass {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .status-fail {
+            color: #c62828;
+            font-weight: bold;
+        }
+        .info-box {
+            background: #E8F4F8;
+            border: 1px solid #0066CC;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .warning-box {
+            background: #FFF3CD;
+            border: 1px solid #856404;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        button {
+            background: #6B4E3D;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .test-status {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #E8F4F8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Yohoo Settings Modal - Test Harness</h1>
+
+    <div class="info-box">
+        <strong>Test Instructions:</strong>
+        <ul>
+            <li>Open <code>yohoo.html</code> in your browser</li>
+            <li>Follow each test scenario below</li>
+            <li>Check the box when the test passes</li>
+            <li>Note any failures or issues</li>
+        </ul>
+    </div>
+
+    <!-- Test Scenario 1: Settings Modal Interaction -->
+    <div class="test-section">
+        <h2>Test 1: Settings Modal Interaction</h2>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 1.1: Open Settings Modal</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Click the "⚙️ Settings" button in the header (right side)</li>
+                </ol>
+                <p class="expected">Expected: Settings modal appears with dark overlay, centered on screen</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 1.2: Close with X Button</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open settings modal</li>
+                    <li>Click the "✕" button in top-right corner</li>
+                </ol>
+                <p class="expected">Expected: Modal closes, overlay disappears</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 1.3: Close with Click Outside</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open settings modal</li>
+                    <li>Click on the dark overlay outside the modal content</li>
+                </ol>
+                <p class="expected">Expected: Modal closes</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 1.4: Close with ESC Key</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open settings modal</li>
+                    <li>Press ESC key</li>
+                </ol>
+                <p class="expected">Expected: Modal closes</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 1.5: Multiple Open/Close</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open and close settings modal 3 times using different methods</li>
+                </ol>
+                <p class="expected">Expected: No errors, modal works consistently each time</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scenario 2: Background Color Picker -->
+    <div class="test-section">
+        <h2>Test 2: Background Color Picker</h2>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 2.1: Preview Color Change</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open settings modal</li>
+                    <li>Change the color picker to a different color (e.g., red)</li>
+                </ol>
+                <p class="expected">Expected: Preview swatch changes color, but page background stays the same</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 2.2: Apply Color</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Change color picker to blue (#E8F4F8)</li>
+                    <li>Click "Apply" button</li>
+                </ol>
+                <p class="expected">Expected: Page background changes to blue immediately</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 2.3: Color Persistence</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Apply a custom color (e.g., green #F0F8E8)</li>
+                    <li>Reload the page (F5 or Cmd+R)</li>
+                </ol>
+                <p class="expected">Expected: Custom color persists after reload</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 2.4: Preset Buttons</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open settings</li>
+                    <li>Click each preset button (🟡🔵🟢🩷⚫)</li>
+                </ol>
+                <p class="expected">Expected: Color picker updates to preset color when clicked (still need to click Apply)</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 2.5: Reset to Default</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Apply a custom color</li>
+                    <li>Click "Reset to Default" button</li>
+                </ol>
+                <p class="expected">Expected: Background returns to light cream (#FFEFCF)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scenario 3: Export/Import in Settings -->
+    <div class="test-section">
+        <h2>Test 3: Export/Import in Settings</h2>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 3.1: Export Data</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open settings modal</li>
+                    <li>Click "📥 Export Data" button</li>
+                </ol>
+                <p class="expected">Expected: JSON file downloads with name like <code>yohoo-backup-2026-01-07-HHMMSS.json</code></p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 3.2: Import Valid File</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Export current data</li>
+                    <li>Click "📤 Import Data"</li>
+                    <li>Select the exported JSON file</li>
+                </ol>
+                <p class="expected">Expected: Preview dialog appears, confirms import, auto-backup created, success message shown</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 3.3: Import Invalid File</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Create a text file with invalid JSON</li>
+                    <li>Try to import it</li>
+                </ol>
+                <p class="expected">Expected: Error message shown, data unchanged</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 3.4: Old Export/Import Buttons Removed</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Check the bottom controls section</li>
+                </ol>
+                <p class="expected">Expected: Export/Import buttons are no longer visible in bottom controls</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scenario 4: Empty Trash -->
+    <div class="test-section">
+        <h2>Test 4: Empty Trash Functionality</h2>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 4.1: Empty Trash Button (Empty)</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Ensure trash is empty</li>
+                    <li>Open settings</li>
+                    <li>Check "Empty Trash" button</li>
+                </ol>
+                <p class="expected">Expected: Button says "Empty Trash" (no count) and is disabled</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 4.2: Empty Trash Button (With Items)</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Delete 2-3 links to trash</li>
+                    <li>Open settings</li>
+                    <li>Check "Empty Trash" button</li>
+                </ol>
+                <p class="expected">Expected: Button shows count (e.g., "Empty Trash (3)") and is enabled</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 4.3: Confirmation Dialog</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Add 3 items to trash</li>
+                    <li>Open settings and click "Empty Trash"</li>
+                </ol>
+                <p class="expected">Expected: Confirmation dialog shows warning, lists first 5 items, mentions action cannot be undone</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 4.4: Cancel Empty Trash</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Click "Empty Trash"</li>
+                    <li>Click "Cancel" in confirmation dialog</li>
+                </ol>
+                <p class="expected">Expected: Trash unchanged, items still there</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 4.5: Confirm Empty Trash</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Add 3 items to trash</li>
+                    <li>Click "Empty Trash" and confirm</li>
+                </ol>
+                <p class="expected">Expected: Success message shown, trash count becomes 0, trash panel empty, button disabled</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 4.6: Empty Trash Persistence</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Empty trash</li>
+                    <li>Reload page</li>
+                </ol>
+                <p class="expected">Expected: Trash still empty after reload</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scenario 5: Debug Toggle -->
+    <div class="test-section">
+        <h2>Test 5: Debug Console Toggle</h2>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 5.1: Debug Toggle Checkbox</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open settings</li>
+                    <li>Check "Show Debug Console" checkbox</li>
+                </ol>
+                <p class="expected">Expected: Debug console appears in bottom-right corner</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 5.2: Debug Toggle Uncheck</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Enable debug console</li>
+                    <li>Uncheck the checkbox</li>
+                </ol>
+                <p class="expected">Expected: Debug console disappears</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 5.3: Debug Logging Works</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Enable debug console</li>
+                    <li>Perform actions (open settings, apply color, etc.)</li>
+                </ol>
+                <p class="expected">Expected: Debug messages appear in console with timestamps</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 5.4: Old Debug Button Removed</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Check for standalone "🐛 Debug" button</li>
+                </ol>
+                <p class="expected">Expected: Old debug toggle button is no longer visible</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scenario 6: Font Slider -->
+    <div class="test-section">
+        <h2>Test 6: Font Slider in Settings</h2>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 6.1: Font Slider Changes Size</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open settings</li>
+                    <li>Move font slider left and right</li>
+                </ol>
+                <p class="expected">Expected: Page font size changes immediately as slider moves</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 6.2: Font Size Sync</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Change font size in settings</li>
+                    <li>Check bottom controls font slider</li>
+                </ol>
+                <p class="expected">Expected: Both sliders stay in sync</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 6.3: Font Size Persistence</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Change font size to minimum (1.1)</li>
+                    <li>Reload page</li>
+                </ol>
+                <p class="expected">Expected: Font size setting persists after reload</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scenario 7: localStorage Persistence -->
+    <div class="test-section">
+        <h2>Test 7: Overall localStorage Persistence</h2>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 7.1: All Settings Persist</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Apply custom background color (pink)</li>
+                    <li>Change font size to 1.5</li>
+                    <li>Add items to trash</li>
+                    <li>Reload page</li>
+                </ol>
+                <p class="expected">Expected: All settings (color, font, trash) persist correctly</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 7.2: Check localStorage Keys</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open browser DevTools (F12)</li>
+                    <li>Go to Application > Local Storage</li>
+                    <li>Check for <code>yohoo_bg_color</code> key</li>
+                </ol>
+                <p class="expected">Expected: Key exists with hex color value</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Scenario 8: Edge Cases & Errors -->
+    <div class="test-section">
+        <h2>Test 8: Edge Cases & Error Handling</h2>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 8.1: No Console Errors</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Open browser console (F12)</li>
+                    <li>Perform all tests above</li>
+                </ol>
+                <p class="expected">Expected: No JavaScript errors in console</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 8.2: Mobile Responsive</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Resize browser window to 400px wide</li>
+                    <li>Open settings modal</li>
+                </ol>
+                <p class="expected">Expected: Modal adjusts to 95% width, remains usable</p>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <h3><input type="checkbox" class="checkbox"> Test 8.3: Keyboard Navigation</h3>
+            <div class="test-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Use Tab key to navigate through settings controls</li>
+                    <li>Use Enter to activate buttons</li>
+                </ol>
+                <p class="expected">Expected: All controls accessible via keyboard</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-status">
+        <h2>Test Summary</h2>
+        <p>Total Tests: <strong id="totalTests">0</strong></p>
+        <p>Passed: <strong id="passedTests" class="status-pass">0</strong></p>
+        <p>Pending: <strong id="pendingTests">0</strong></p>
+        <button onclick="updateTestStatus()">Update Test Count</button>
+        <button onclick="resetTests()">Reset All Tests</button>
+    </div>
+
+    <div class="warning-box">
+        <strong>⚠️ Important Notes:</strong>
+        <ul>
+            <li>Run all tests in a clean browser session for accurate results</li>
+            <li>Clear localStorage before testing persistence features</li>
+            <li>Test in multiple browsers if possible (Chrome, Firefox, Safari)</li>
+            <li>Report any bugs or unexpected behavior</li>
+        </ul>
+    </div>
+
+    <script>
+        function updateTestStatus() {
+            const checkboxes = document.querySelectorAll('.checkbox');
+            const total = checkboxes.length;
+            const passed = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const pending = total - passed;
+
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('passedTests').textContent = passed;
+            document.getElementById('pendingTests').textContent = pending;
+        }
+
+        function resetTests() {
+            if (confirm('Reset all test checkboxes?')) {
+                document.querySelectorAll('.checkbox').forEach(cb => cb.checked = false);
+                updateTestStatus();
+            }
+        }
+
+        // Initialize test count on load
+        updateTestStatus();
+    </script>
+</body>
+</html>

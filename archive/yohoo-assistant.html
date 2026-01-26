@@ -316,18 +316,6 @@
             margin-bottom: 12px;
         }
 
-        .link-placeholder {
-            height: 2.5rem;
-            border: 2px dashed rgba(107, 78, 61, 0.4);
-            background-color: rgba(107, 78, 61, 0.05);
-            border-radius: 0.375rem;
-            margin: 0.25rem 0;
-            opacity: 0.6;
-            list-style: none;
-            pointer-events: none;
-            transition: all 0.15s ease;
-        }
-
         .section-dragging {
             opacity: 0.9;
             transform: scale(1.02);
@@ -455,6 +443,17 @@
         .fetch-btn.fetching {
             opacity: 0.5;
             cursor: wait;
+        }
+
+        .link-edit-input {
+            width: 100%;
+            padding: 0.25rem;
+            border: 1px solid var(--link-color);
+            border-radius: 2px;
+            background-color: var(--section-bg);
+            color: var(--text-main);
+            font-size: calc(0.5rem * var(--font-scale));
+            outline: 2px solid var(--link-color);
         }
 
         .link-actions {
@@ -601,332 +600,6 @@
                 gap: 0.75rem;
             }
         }
-
-        /* Settings Modal */
-        .settings-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(44, 36, 22, 0.7);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .settings-modal.visible {
-            display: flex;
-        }
-
-        .settings-modal-content {
-            background-color: var(--section-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 2px solid var(--border-color);
-            background-color: var(--bg-color);
-            border-radius: 8px 8px 0 0;
-        }
-
-        .settings-header h2 {
-            margin: 0;
-            color: var(--header-color);
-            font-size: calc(0.7rem * var(--font-scale));
-        }
-
-        .settings-close-btn {
-            background: none;
-            color: var(--text-muted);
-            font-size: calc(0.8rem * var(--font-scale));
-            padding: 0.25rem 0.5rem;
-            cursor: pointer;
-            border: none;
-            transition: color 0.2s;
-        }
-
-        .settings-close-btn:hover {
-            color: var(--delete-icon);
-        }
-
-        .settings-body {
-            padding: 1.5rem;
-        }
-
-        .settings-section {
-            margin-bottom: 2rem;
-        }
-
-        .settings-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .settings-section-title {
-            color: var(--header-color);
-            font-weight: 600;
-            font-size: calc(0.6rem * var(--font-scale));
-            margin-bottom: 0.75rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .settings-control {
-            margin-bottom: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .settings-control-label {
-            color: var(--text-main);
-            font-size: calc(0.5rem * var(--font-scale));
-            font-weight: 500;
-        }
-
-        .settings-control-description {
-            color: var(--text-muted);
-            font-size: calc(0.45rem * var(--font-scale));
-            margin-top: -0.25rem;
-        }
-
-        .settings-trigger-btn {
-            background-color: var(--header-color);
-            color: white;
-            border: none;
-            padding: 0.375rem 0.75rem;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: calc(0.5rem * var(--font-scale));
-            transition: opacity 0.2s;
-        }
-
-        .settings-trigger-btn:hover {
-            opacity: 0.9;
-        }
-
-        .color-preset-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .color-preset-btn {
-            width: 32px;
-            height: 32px;
-            border: 2px solid var(--border-color);
-            border-radius: 999px;
-            cursor: pointer;
-            font-size: 0;
-            background: var(--section-bg);
-            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .color-preset-btn:hover {
-            transform: scale(1.1);
-            border-color: var(--header-color);
-        }
-
-        .color-preset-btn.is-selected {
-            border-color: var(--header-color);
-            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
-        }
-
-        .settings-button-group {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .secondary-btn {
-            background-color: var(--section-bg);
-            color: var(--header-color);
-            border: 1px solid var(--border-color);
-            padding: 0.375rem 0.75rem;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: calc(0.5rem * var(--font-scale));
-            transition: all 0.2s;
-        }
-
-        .secondary-btn:hover {
-            background-color: var(--hover-bg);
-        }
-
-        .secondary-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        @media (max-width: 768px) {
-            .settings-modal-content {
-                width: 95%;
-                max-height: 90vh;
-            }
-
-            .settings-body {
-                padding: 1rem;
-            }
-        }
-
-        /* Link Edit Modal */
-        .link-edit-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(44, 36, 22, 0.7);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .link-edit-modal.visible {
-            display: flex;
-        }
-
-        .link-edit-modal-content {
-            background-color: var(--section-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .link-edit-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 2px solid var(--border-color);
-            background-color: var(--bg-color);
-            border-radius: 8px 8px 0 0;
-        }
-
-        .link-edit-header h3 {
-            margin: 0;
-            color: var(--header-color);
-            font-size: calc(0.7rem * var(--font-scale));
-        }
-
-        .link-edit-close-btn {
-            background: none;
-            color: var(--text-muted);
-            font-size: calc(0.8rem * var(--font-scale));
-            padding: 0.25rem 0.5rem;
-            cursor: pointer;
-            border: none;
-            transition: color 0.2s;
-        }
-
-        .link-edit-close-btn:hover {
-            color: var(--delete-icon);
-        }
-
-        .link-edit-body {
-            padding: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .form-group label {
-            display: block;
-            color: var(--header-color);
-            font-weight: 600;
-            font-size: calc(0.55rem * var(--font-scale));
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group input[type="text"],
-        .form-group input[type="url"] {
-            width: 100%;
-            padding: 0.5rem;
-            border: 2px solid var(--border-color);
-            border-radius: 4px;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-size: calc(0.55rem * var(--font-scale));
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input[type="text"]:focus,
-        .form-group input[type="url"]:focus {
-            outline: none;
-            border-color: var(--link-color);
-        }
-
-        .link-edit-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-            padding: 1rem 1.5rem;
-            border-top: 2px solid var(--border-color);
-            background-color: var(--bg-color);
-            border-radius: 0 0 8px 8px;
-        }
-
-        .secondary-btn {
-            background-color: var(--section-bg);
-            color: var(--text-muted);
-            border: 2px solid var(--border-color);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: calc(0.5rem * var(--font-scale));
-            transition: all 0.2s;
-        }
-
-        .secondary-btn:hover {
-            background-color: var(--border-color);
-            color: var(--text-main);
-        }
-
-        .primary-btn {
-            background-color: var(--header-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: calc(0.5rem * var(--font-scale));
-            font-weight: 600;
-            transition: opacity 0.2s;
-        }
-
-        .primary-btn:hover {
-            opacity: 0.9;
-        }
-
-        .form-error {
-            color: var(--delete-icon);
-            font-size: calc(0.5rem * var(--font-scale));
-            margin-top: 0.25rem;
-        }
     </style>
 </head>
 <body>
@@ -938,7 +611,6 @@
                 <input type="text" id="searchInput" placeholder="Search links..." autocomplete="off">
                 <span class="shortcut-hint">/</span>
             </div>
-            <button id="settingsBtn" class="settings-trigger-btn" title="Open Settings" style="margin-left: auto;">⚙️ Settings</button>
         </div>
         <div style="margin-top: 0.25rem; font-size: 0.45rem; color: var(--text-muted);">
             Drag links to organize | Drop URLs from browser bar
@@ -966,19 +638,22 @@
             <button id="addUrlBtn">+ Add URL</button>
             <button id="addSectionBtn">+ Add Section</button>
         </div>
+        <div style="display: flex; gap: 0.5rem; border-left: 1px solid var(--border-color); padding-left: 1rem;">
+            <button id="exportDataBtn" title="Export all data to JSON file">📥 Export</button>
+            <label for="importFileInput" style="margin: 0;">
+                <button type="button" id="importDataBtn" title="Import data from JSON file">📤 Import</button>
+            </label>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+        </div>
     </div>
 
     <footer>
-        <div>© 2025 Yohoo - Personal Start Page</div>
-        <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
-            <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-26 15:10 - "Improve settings swatches and dark theme"
-            <!-- /BUILD_COMMIT_INFO -->
-        </div>
+        © 2025 Yohoo - Personal Start Page
     </footer>
 </div>
 
 <!-- Debug Console -->
+<button class="debug-toggle" id="debugToggle">🐛 Debug</button>
 <div class="debug-console" id="debugConsole">
     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 2px solid #0f0; padding-bottom: 5px;">
         <strong>DEBUG CONSOLE</strong>
@@ -1045,22 +720,14 @@
 
     // --- Initialization ---
 
-    async function init() {
-        await loadState(); // Now async - waits for default-links.json if needed
+    function init() {
+        loadState();
         loadFontScale();
-        loadBackgroundColor(); // Load custom background color
         render();
         setupEventListeners();
-        initSettingsModal(); // Initialize settings modal
-        initLinkEditModal(); // Initialize link edit modal
     }
 
-    function loadBackgroundColor() {
-        const bgColor = localStorage.getItem(BG_COLOR_KEY) || DEFAULT_BG_COLOR;
-        applyBackgroundColor(bgColor);
-    }
-
-    async function loadState() {
+    function loadState() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             appState = JSON.parse(stored);
@@ -1069,76 +736,15 @@
                 appState.layout = getDefaultLayout();
             }
         } else {
-            // Load from external default-links.json on first run
-            await loadDefaultLinks();
-        }
-    }
-
-    /**
-     * Load default links from external default-links.json file.
-     * Falls back to hardcoded defaults if file cannot be loaded.
-     */
-    async function loadDefaultLinks() {
-        try {
-            debugLog('Attempting to load default-links.json...');
-            const response = await fetch('./default-links.json');
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const defaultData = await response.json();
-            debugLog('default-links.json loaded successfully');
-
-            // Validate using existing validation function
-            const validation = validateImportData(defaultData);
-
-            if (!validation.valid) {
-                throw new Error('Invalid default-links.json format: ' + validation.errors.join(', '));
-            }
-
-            if (validation.warnings.length > 0) {
-                console.warn('Warnings in default-links.json:', validation.warnings);
-            }
-
-            // Apply default data
-            appState.sections = JSON.parse(JSON.stringify(defaultData.data.sections));
-            appState.trash = defaultData.data.trash || [];
-            appState.layout = defaultData.data.layout || getDefaultLayout();
-
-            // Apply font scale if present
-            if (defaultData.data.fontScale) {
-                saveFontScale(defaultData.data.fontScale.toString());
-                loadFontScale();
-            }
-
-            saveState();
-            debugLog('Loaded defaults from default-links.json', {
-                sections: appState.sections.length,
-                links: appState.sections.reduce((sum, s) => sum + s.links.length, 0)
+            // Seed example links for first run
+            exampleLinks.forEach(link => {
+                const section = appState.sections.find(s => s.id === link.sectionId);
+                if (section) section.links.push(link);
             });
-
-        } catch (error) {
-            console.error('Failed to load default-links.json:', error);
-            console.log('Falling back to hardcoded defaults');
-            loadHardcodedDefaults();
+            // Initialize default layout
+            appState.layout = getDefaultLayout();
+            saveState();
         }
-    }
-
-    /**
-     * Load hardcoded fallback defaults when default-links.json is unavailable.
-     * Uses the original example links as ultimate fallback.
-     */
-    function loadHardcodedDefaults() {
-        // Seed example links for first run (original behavior)
-        exampleLinks.forEach(link => {
-            const section = appState.sections.find(s => s.id === link.sectionId);
-            if (section) section.links.push(link);
-        });
-        // Initialize default layout
-        appState.layout = getDefaultLayout();
-        saveState();
-        debugLog('Loaded hardcoded fallback defaults');
     }
 
     function loadFontScale() {
@@ -1443,128 +1049,6 @@
         reader.readAsText(file);
     }
 
-    /**
-     * Reset to default links from default-links.json.
-     * Creates automatic backup before resetting.
-     */
-    async function resetToDefaults() {
-        const confirmed = confirm(
-            '🚨 RESET TO DEFAULTS\n\n' +
-            'This will replace all your current sections, links, and layout with the default configuration.\n\n' +
-            '✅ Your current data will be automatically backed up before resetting.\n\n' +
-            'Continue with reset?'
-        );
-
-        if (!confirmed) {
-            debugLog('Reset to defaults cancelled by user');
-            return;
-        }
-
-        try {
-            // Create automatic backup
-            const fontScale = localStorage.getItem('yohoo_font_scale') || '2.0';
-
-            const backupData = {
-                version: '1.0.0',
-                exportDate: new Date().toISOString(),
-                exportedBy: 'Yohoo Auto-Backup (Before Reset)',
-                data: {
-                    sections: JSON.parse(JSON.stringify(appState.sections)),
-                    trash: JSON.parse(JSON.stringify(appState.trash)),
-                    layout: JSON.parse(JSON.stringify(appState.layout)),
-                    fontScale: parseFloat(fontScale)
-                },
-                metadata: {
-                    sectionCount: appState.sections.length,
-                    linkCount: appState.sections.reduce((sum, s) => sum + s.links.length, 0),
-                    trashCount: appState.trash.length,
-                    columns: appState.layout.columns.length
-                }
-            };
-
-            // Download backup
-            const dataStr = JSON.stringify(backupData, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const timestamp = new Date().toISOString()
-                .replace(/:/g, '-')
-                .replace(/\..+/, '')
-                .replace('T', '-');
-            const backupFilename = `yohoo-backup-before-reset-${timestamp}.json`;
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = backupFilename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-
-            debugLog('Backup created before reset', { filename: backupFilename });
-
-            // Clear localStorage and reload defaults
-            localStorage.removeItem(STORAGE_KEY);
-            await loadDefaultLinks();
-
-            // Re-render
-            render();
-
-            alert(`✅ Reset complete!\n\nYour previous data has been saved to:\n${backupFilename}`);
-            debugLog('Reset to defaults completed');
-
-        } catch (error) {
-            console.error('Reset to defaults failed:', error);
-            alert(`Reset failed:\n\n${error.message}\n\nYour current data has been preserved.`);
-            debugLog('Reset error', { error: error.message });
-        }
-    }
-
-    /**
-     * Save current link set as default template.
-     * Exports as default-links.json format for user to replace the defaults file.
-     */
-    function saveCurrentAsDefault() {
-        const fontScale = localStorage.getItem('yohoo_font_scale') || '2.0';
-
-        const defaultTemplate = {
-            version: '1.0.0',
-            exportDate: new Date().toISOString(),
-            exportedBy: 'Yohoo - Save as Default Template',
-            data: {
-                sections: JSON.parse(JSON.stringify(appState.sections)),
-                trash: [], // Empty trash for clean defaults
-                layout: JSON.parse(JSON.stringify(appState.layout)),
-                fontScale: parseFloat(fontScale)
-            },
-            metadata: {
-                sectionCount: appState.sections.length,
-                linkCount: appState.sections.reduce((sum, s) => sum + s.links.length, 0),
-                trashCount: 0,
-                columns: appState.layout.columns.length
-            }
-        };
-
-        // Create download with specific filename
-        const dataStr = JSON.stringify(defaultTemplate, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'default-links.json';
-        link.click();
-        URL.revokeObjectURL(url);
-
-        alert(
-            '💾 Default template saved!\n\n' +
-            'To use this as your new defaults:\n' +
-            '1. Save the downloaded "default-links.json" file\n' +
-            '2. Place it in the same folder as yohoo.html\n' +
-            '3. Replace the existing default-links.json file\n\n' +
-            'Note: This works when running locally. On GitHub Pages, you\'ll need to commit the file to your repository.'
-        );
-
-        debugLog('Saved current state as default template', defaultTemplate.metadata);
-    }
-
     // --- Rendering ---
 
     function getFaviconUrl(url) {
@@ -1710,7 +1194,7 @@
                 li.querySelector('.edit-btn').addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    openLinkEditModal(link, section.id);
+                    enterEditMode(li, link, section.id);
                 });
 
                 // Delete Event
@@ -1785,13 +1269,12 @@
         if (trashIndex > -1) {
             const [link] = appState.trash.splice(trashIndex, 1);
             const targetSectionId = link.originalSectionId || 'misc';
-
+            
             const section = appState.sections.find(s => s.id === targetSectionId) || appState.sections[0];
             section.links.push(link);
-
+            
             saveState();
             render();
-            updateTrashControls(); // Update settings trash button count
         }
     }
 
@@ -2113,88 +1596,6 @@
         debugLog('Link drag started', { linkId, sectionId });
     }
 
-    /**
-     * Finds the link that the dragged item should be inserted BEFORE.
-     * Returns the link ID, or null if should be inserted at end.
-     *
-     * @param {HTMLElement} targetList - The .link-list element
-     * @param {DragEvent} dragEvent - The drag event with clientX/clientY
-     * @param {HTMLElement} excludeElement - Element to exclude (the dragged link)
-     * @returns {string|null} - Link ID to insert before, or null for end
-     */
-    function findInsertionPoint(targetList, dragEvent, excludeElement) {
-        const linkElements = Array.from(targetList.querySelectorAll('.link-item'))
-            .filter(el => el !== excludeElement);
-
-        if (linkElements.length === 0) {
-            return null; // Empty section, insert at beginning
-        }
-
-        // Find the link element closest to the drag position
-        let closestElement = null;
-        let closestDistance = Infinity;
-
-        for (const linkEl of linkElements) {
-            const rect = linkEl.getBoundingClientRect();
-
-            // Calculate distance from drag point to element center
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const distance = Math.sqrt(
-                Math.pow(dragEvent.clientX - centerX, 2) +
-                Math.pow(dragEvent.clientY - centerY, 2)
-            );
-
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestElement = linkEl;
-            }
-        }
-
-        if (!closestElement) {
-            return null;
-        }
-
-        // Determine if we should insert before or after the closest element
-        const rect = closestElement.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        // Use the dominant direction (vertical for single column, horizontal for multi-column)
-        const deltaX = dragEvent.clientX - centerX;
-        const deltaY = dragEvent.clientY - centerY;
-
-        // Determine layout direction by checking if next sibling is to the right or below
-        const nextSibling = closestElement.nextElementSibling;
-        let isVerticalLayout = true;
-
-        if (nextSibling && nextSibling.classList.contains('link-item')) {
-            const nextRect = nextSibling.getBoundingClientRect();
-            const isBelow = nextRect.top > rect.bottom - 5; // 5px tolerance
-            const isRight = nextRect.left > rect.right - 5;
-            isVerticalLayout = isBelow && !isRight;
-        }
-
-        // Decide insertion position
-        let insertBefore = false;
-        if (isVerticalLayout) {
-            insertBefore = deltaY < 0; // Above center = insert before
-        } else {
-            insertBefore = deltaX < 0; // Left of center = insert before
-        }
-
-        if (insertBefore) {
-            return closestElement.dataset.id;
-        } else {
-            // Insert after this element = insert before next element
-            let nextEl = closestElement.nextElementSibling;
-            while (nextEl && !nextEl.classList.contains('link-item')) {
-                nextEl = nextEl.nextElementSibling;
-            }
-            return nextEl ? nextEl.dataset.id : null;
-        }
-    }
-
     function handleDragEnd(e) {
         // For link drags only
         if (draggedType === 'link') {
@@ -2206,54 +1607,17 @@
             document.querySelectorAll('.drag-over').forEach(el =>
                 el.classList.remove('drag-over')
             );
-            // Remove any remaining placeholders
-            document.querySelectorAll('.link-placeholder').forEach(el =>
-                el.remove()
-            );
         }
     }
 
     function handleLinkDragOver(e) {
         // Don't handle section drags - let them bubble to section element
         if (draggedType === 'section') return;
-
+        
         e.preventDefault(); // Necessary for drop
         e.stopPropagation(); // Prevent bubbling
+        this.classList.add('drag-over');
         e.dataTransfer.dropEffect = 'move';
-
-        // Only show placeholder for internal link moves
-        if (draggedType !== 'link' || !draggedItem) {
-            this.classList.add('drag-over');
-            return;
-        }
-
-        const targetList = this; // .link-list element
-        const excludeElement = draggedItem.element;
-
-        // Find insertion point using the waterproof algorithm
-        const insertBeforeLinkId = findInsertionPoint(targetList, e, excludeElement);
-
-        // Get or create placeholder
-        let placeholder = targetList.querySelector('.link-placeholder');
-        if (!placeholder) {
-            placeholder = document.createElement('li');
-            placeholder.className = 'link-placeholder';
-            placeholder.setAttribute('aria-hidden', 'true');
-        }
-
-        // Position placeholder based on link ID
-        if (insertBeforeLinkId === null) {
-            // Insert at end
-            targetList.appendChild(placeholder);
-        } else {
-            // Insert before specific link
-            const insertBeforeElement = targetList.querySelector(`[data-id="${insertBeforeLinkId}"]`);
-            if (insertBeforeElement) {
-                targetList.insertBefore(placeholder, insertBeforeElement);
-            } else {
-                targetList.appendChild(placeholder);
-            }
-        }
     }
 
     function handleLinkDragLeave(e) {
@@ -2268,13 +1632,7 @@
         e.preventDefault();
         e.stopPropagation();
         this.classList.remove('drag-over');
-
         const targetSectionId = this.dataset.sectionId;
-        const targetList = this;
-
-        // Remove placeholder
-        const placeholder = this.querySelector('.link-placeholder');
-        if (placeholder) placeholder.remove();
 
         debugLog('Link drop', { targetSectionId, draggedType, draggedItem });
 
@@ -2282,56 +1640,22 @@
         if (draggedType === 'link' && draggedItem) {
             const sourceSection = appState.sections.find(s => s.id === draggedItem.sectionId);
             const targetSection = appState.sections.find(s => s.id === targetSectionId);
-
+            
             if (!sourceSection || !targetSection) {
                 debugLog('ERROR: Section not found', { sourceSection, targetSection });
                 return;
             }
-
+            
             const linkIndex = sourceSection.links.findIndex(l => l.id === draggedItem.id);
-            if (linkIndex === -1) {
-                debugLog('ERROR: Link not found in source section');
-                return;
+
+            if (linkIndex > -1) {
+                const [link] = sourceSection.links.splice(linkIndex, 1);
+                link.sectionId = targetSectionId;
+                targetSection.links.push(link);
+                saveState();
+                render();
+                debugLog('Link moved successfully', { from: sourceSection.id, to: targetSection.id });
             }
-
-            // Find insertion point (returns link ID to insert before, or null for end)
-            const excludeElement = (draggedItem.sectionId === targetSectionId)
-                ? draggedItem.element
-                : null;
-
-            const insertBeforeLinkId = findInsertionPoint(targetList, e, excludeElement);
-
-            // Calculate array index from link ID
-            let insertIndex;
-            if (insertBeforeLinkId === null) {
-                insertIndex = targetSection.links.length; // End of list
-            } else {
-                insertIndex = targetSection.links.findIndex(l => l.id === insertBeforeLinkId);
-                if (insertIndex === -1) {
-                    debugLog('WARN: Insert-before link not found, defaulting to end');
-                    insertIndex = targetSection.links.length;
-                }
-            }
-
-            // Adjust index if moving within same section and moving down
-            if (draggedItem.sectionId === targetSectionId && insertIndex > linkIndex) {
-                insertIndex--; // Account for removal of source element
-            }
-
-            // Perform the move
-            const [link] = sourceSection.links.splice(linkIndex, 1);
-            link.sectionId = targetSectionId;
-            targetSection.links.splice(insertIndex, 0, link);
-
-            saveState();
-            render();
-
-            debugLog('Link moved successfully', {
-                from: sourceSection.id,
-                to: targetSection.id,
-                insertIndex,
-                insertBeforeLinkId
-            });
         }
         // CASE 2: External URL Drop (from address bar or bookmarks)
         else if (!draggedItem) {
@@ -2486,39 +1810,10 @@
         // Search
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('input', (e) => filterLinks(e.target.value));
-
-        // Helper: Check if user is currently editing text
-        function isEditingText(element) {
-            return (
-                element.tagName === 'INPUT' ||
-                element.tagName === 'TEXTAREA' ||
-                element.isContentEditable === true
-            );
-        }
-
-        // Consolidated keyboard handler (ESC and "/" shortcuts)
+        
+        // Keyboard Shortcut "/"
         document.addEventListener('keydown', (e) => {
-            // Priority 1: ESC key - Close settings modal if open
-            if (e.key === 'Escape') {
-                const settingsModal = document.getElementById('settingsModal');
-                if (settingsModal && settingsModal.classList.contains('visible')) {
-                    closeSettingsModal();
-                    e.preventDefault();
-                    return;
-                }
-
-                // Priority 2: ESC key - Clear search if it has focus
-                if (document.activeElement === searchInput && searchInput.value) {
-                    searchInput.value = '';
-                    searchInput.blur();
-                    filterLinks('');
-                    e.preventDefault();
-                    return;
-                }
-            }
-
-            // Keyboard Shortcut "/" - Focus search (only when not editing text)
-            if (e.key === '/' && !isEditingText(document.activeElement)) {
+            if (e.key === '/' && document.activeElement !== searchInput) {
                 e.preventDefault();
                 searchInput.focus();
             }
@@ -2579,16 +1874,20 @@
             const scale = parseFloat(e.target.value);
             document.documentElement.style.setProperty('--font-scale', scale);
             saveFontScale(scale);
-
-            // Sync with settings slider (bidirectional)
-            const fontSliderSettings = document.getElementById('fontSliderSettings');
-            if (fontSliderSettings) {
-                fontSliderSettings.value = scale;
-            }
         });
 
-        // Export/Import buttons removed - now in Settings modal
-        // Event listeners set up in initSettingsModal()
+        // Export button
+        document.getElementById('exportDataBtn').addEventListener('click', () => {
+            exportYohooData();
+        });
+
+        // Import button (triggers hidden file input)
+        document.getElementById('importDataBtn').addEventListener('click', () => {
+            document.getElementById('importFileInput').click();
+        });
+
+        // File input change handler
+        document.getElementById('importFileInput').addEventListener('change', handleImportFile);
 
         // Document-level drag handlers for external drops (bookmarks, files, etc.)
         document.addEventListener('dragover', (e) => {
@@ -2806,6 +2105,58 @@
 
     // --- Edit Mode ---
 
+    function enterEditMode(linkItem, link, sectionId) {
+        // Disable dragging while editing
+        linkItem.draggable = false;
+        
+        // Get current title
+        const currentTitle = link.title;
+        
+        // Replace link content with input field
+        const linkContent = linkItem.querySelector('.link-content');
+        const originalHTML = linkContent.outerHTML;
+        
+        linkContent.outerHTML = `
+            <input type="text" class="link-edit-input" value="${currentTitle.replace(/"/g, '&quot;')}" />
+        `;
+        
+        const input = linkItem.querySelector('.link-edit-input');
+        input.focus();
+        input.select();
+        
+        // Save function
+        const saveEdit = () => {
+            const newTitle = input.value.trim();
+            
+            if (newTitle && newTitle !== currentTitle) {
+                // Update the link title in appState
+                const section = appState.sections.find(s => s.id === sectionId);
+                const linkToUpdate = section.links.find(l => l.id === link.id);
+                linkToUpdate.title = newTitle;
+                saveState();
+                debugLog(`Updated link title: "${currentTitle}" → "${newTitle}"`);
+            }
+            
+            // Re-render to exit edit mode
+            render();
+        };
+        
+        // Save on blur (when clicking outside)
+        input.addEventListener('blur', saveEdit);
+        
+        // Save on Enter key
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveEdit();
+            } else if (e.key === 'Escape') {
+                // Cancel edit - just re-render
+                render();
+            }
+        });
+    }
+
+
     // --- Debug Console ---
 
     function enterSectionEditMode(headerElement, section) {
@@ -2881,668 +2232,41 @@
         console.log(`[DEBUG] ${message}`, data || '');
     }
 
-    // --- Link Edit Modal Management ---
+    // Setup debug console toggle
+    document.getElementById('debugToggle').addEventListener('click', () => {
+        const console = document.getElementById('debugConsole');
+        console.classList.toggle('visible');
+    });
 
-    let currentEditingLink = null;  // Store reference to link being edited
-    let currentEditingSectionId = null;
-
-    function openLinkEditModal(link, sectionId) {
-        const modal = document.getElementById('linkEditModal');
-        if (!modal) {
-            console.error('Link edit modal not found');
-            return;
-        }
-
-        // Store reference to link being edited
-        currentEditingLink = link;
-        currentEditingSectionId = sectionId;
-
-        // Populate form inputs with current values
-        const titleInput = document.getElementById('linkEditTitle');
-        const urlInput = document.getElementById('linkEditUrl');
-
-        if (titleInput && urlInput) {
-            titleInput.value = link.title || '';
-            urlInput.value = link.url || '';
-
-            // Clear any previous error messages
-            const titleError = document.getElementById('titleError');
-            const urlError = document.getElementById('urlError');
-            if (titleError) titleError.style.display = 'none';
-            if (urlError) urlError.style.display = 'none';
-        }
-
-        // Show modal
-        modal.classList.add('visible');
-
-        // Focus on title input
-        if (titleInput) {
-            titleInput.focus();
-            titleInput.select();
-        }
-
-        debugLog('Link edit modal opened', {
-            linkId: link.id,
-            title: link.title,
-            url: link.url,
-            sectionId: sectionId
-        });
-    }
-
-    function validateUrl(url) {
-        // Check if URL is empty
-        if (!url || url.trim() === '') {
-            return { valid: false, error: 'URL is required' };
-        }
-
-        // Valid URL protocols
-        const validProtocols = ['http://', 'https://', 'chrome://', 'edge://', 'about:', 'brave://'];
-        const hasValidProtocol = validProtocols.some(protocol => url.toLowerCase().startsWith(protocol));
-
-        if (!hasValidProtocol) {
-            // Try to auto-add https:// if it looks like a domain
-            if (!url.includes('://') && !url.startsWith('about:')) {
-                return { valid: true, url: 'https://' + url, autoFixed: true };
-            }
-            return { valid: false, error: 'URL must start with http://, https://, or a valid browser protocol' };
-        }
-
-        return { valid: true, url: url };
-    }
-
-    function saveLinkEdit() {
-        const titleInput = document.getElementById('linkEditTitle');
-        const urlInput = document.getElementById('linkEditUrl');
-        const titleError = document.getElementById('titleError');
-        const urlError = document.getElementById('urlError');
-
-        if (!titleInput || !urlInput || !currentEditingLink || !currentEditingSectionId) {
-            console.error('Cannot save: missing inputs or link reference');
-            return;
-        }
-
-        // Get values
-        const newTitle = titleInput.value.trim();
-        const newUrl = urlInput.value.trim();
-
-        // Clear previous errors
-        if (titleError) titleError.style.display = 'none';
-        if (urlError) urlError.style.display = 'none';
-
-        // Validate title
-        if (!newTitle) {
-            if (titleError) {
-                titleError.textContent = 'Title is required';
-                titleError.style.display = 'block';
-            }
-            titleInput.focus();
-            return;
-        }
-
-        // Validate URL
-        const urlValidation = validateUrl(newUrl);
-        if (!urlValidation.valid) {
-            if (urlError) {
-                urlError.textContent = urlValidation.error;
-                urlError.style.display = 'block';
-            }
-            urlInput.focus();
-            return;
-        }
-
-        // Use auto-fixed URL if available
-        const finalUrl = urlValidation.url || newUrl;
-
-        // Update the link in appState
-        const section = appState.sections.find(s => s.id === currentEditingSectionId);
-        if (!section) {
-            console.error('Section not found:', currentEditingSectionId);
-            return;
-        }
-
-        const linkToUpdate = section.links.find(l => l.id === currentEditingLink.id);
-        if (!linkToUpdate) {
-            console.error('Link not found:', currentEditingLink.id);
-            return;
-        }
-
-        // Store old values for logging
-        const oldTitle = linkToUpdate.title;
-        const oldUrl = linkToUpdate.url;
-
-        // Update link
-        linkToUpdate.title = newTitle;
-        linkToUpdate.url = finalUrl;
-
-        // Save to localStorage
-        saveState();
-
-        debugLog('Link updated', {
-            linkId: linkToUpdate.id,
-            oldTitle: oldTitle,
-            newTitle: newTitle,
-            oldUrl: oldUrl,
-            newUrl: finalUrl,
-            autoFixed: urlValidation.autoFixed || false
-        });
-
-        // Close modal and re-render
-        closeLinkEditModal();
-        render();
-    }
-
-    function closeLinkEditModal() {
-        const modal = document.getElementById('linkEditModal');
-        if (!modal) {
-            console.error('Link edit modal not found');
-            return;
-        }
-
-        // Hide modal
-        modal.classList.remove('visible');
-
-        // Clear form inputs
-        const titleInput = document.getElementById('linkEditTitle');
-        const urlInput = document.getElementById('linkEditUrl');
-        if (titleInput) titleInput.value = '';
-        if (urlInput) urlInput.value = '';
-
-        // Clear error messages
-        const titleError = document.getElementById('titleError');
-        const urlError = document.getElementById('urlError');
-        if (titleError) titleError.style.display = 'none';
-        if (urlError) urlError.style.display = 'none';
-
-        // Clear references
-        currentEditingLink = null;
-        currentEditingSectionId = null;
-
-        debugLog('Link edit modal closed');
-    }
-
-    function initLinkEditModal() {
-        const modal = document.getElementById('linkEditModal');
-        const closeBtn = document.getElementById('linkEditCloseBtn');
-        const cancelBtn = document.getElementById('linkEditCancel');
-        const saveBtn = document.getElementById('linkEditSave');
-        const titleInput = document.getElementById('linkEditTitle');
-        const urlInput = document.getElementById('linkEditUrl');
-
-        if (!modal) {
-            console.error('Link edit modal not found');
-            return;
-        }
-
-        // Close button
-        if (closeBtn) {
-            closeBtn.addEventListener('click', closeLinkEditModal);
-        }
-
-        // Cancel button
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', closeLinkEditModal);
-        }
-
-        // Save button
-        if (saveBtn) {
-            saveBtn.addEventListener('click', saveLinkEdit);
-        }
-
-        // Click outside modal to close
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeLinkEditModal();
+    // Enhanced drop handler with debug logging
+    const originalHandleLinkDrop = handleLinkDrop;
+    handleLinkDrop = function(e) {
+        debugLog('DROP EVENT TRIGGERED');
+        debugLog('draggedType', draggedType);
+        debugLog('draggedItem', draggedItem);
+        
+        // Log all available data transfer types
+        const types = Array.from(e.dataTransfer.types);
+        debugLog('Available data types', types);
+        
+        // Try to extract all data
+        types.forEach(type => {
+            try {
+                const data = e.dataTransfer.getData(type);
+                debugLog(`Data for type "${type}"`, data ? data.substring(0, 200) : 'empty');
+            } catch (err) {
+                debugLog(`Failed to get data for type "${type}"`, err.message);
             }
         });
-
-        // Keyboard shortcuts
-        if (titleInput) {
-            titleInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    // Move to URL input
-                    if (urlInput) urlInput.focus();
-                } else if (e.key === 'Escape') {
-                    closeLinkEditModal();
-                }
-            });
-        }
-
-        if (urlInput) {
-            urlInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    saveLinkEdit();
-                } else if (e.key === 'Escape') {
-                    closeLinkEditModal();
-                }
-            });
-        }
-
-        debugLog('Link edit modal initialized');
-    }
-
-    // --- Settings Modal Management ---
-
-    const DEFAULT_BG_COLOR = '#FFEFCF';
-    const BG_COLOR_KEY = 'yohoo_bg_color';
-    const LIGHT_THEME_VARS = {
-        '--section-bg': '#FFF8E7',
-        '--border-color': '#E6D5B0',
-        '--header-color': '#6B4E3D',
-        '--link-color': '#0066CC',
-        '--link-hover': '#0052A3',
-        '--text-muted': '#8B7355',
-        '--delete-icon': '#D32F2F',
-        '--text-main': '#2C2416',
-        '--hover-bg': 'rgba(107, 78, 61, 0.08)',
-        '--hover-accent': '#0066CC'
-    };
-    const DARK_THEME_VARS = {
-        '--section-bg': '#2A2B3D',
-        '--border-color': '#3A3B55',
-        '--header-color': '#F2D7A3',
-        '--link-color': '#93C5FD',
-        '--link-hover': '#BFDBFE',
-        '--text-muted': '#B7B0A4',
-        '--delete-icon': '#FF7B7B',
-        '--text-main': '#F5F1E8',
-        '--hover-bg': 'rgba(242, 215, 163, 0.12)',
-        '--hover-accent': '#93C5FD'
+        
+        // Call original handler
+        originalHandleLinkDrop.call(this, e);
     };
 
-    function openSettingsModal() {
-        const modal = document.getElementById('settingsModal');
-        if (!modal) {
-            console.error('Settings modal not found');
-            return;
-        }
-        modal.classList.add('visible');
-        updateTrashControls(); // Refresh trash count
-
-        // Sync debug checkbox state
-        const debugCheckbox = document.getElementById('debugToggleCheckbox');
-        const debugConsole = document.getElementById('debugConsole');
-        if (debugCheckbox && debugConsole) {
-            debugCheckbox.checked = debugConsole.classList.contains('visible');
-        }
-
-        // Sync font slider state
-        const fontSliderSettings = document.getElementById('fontSliderSettings');
-        const fontSlider = document.getElementById('fontSlider');
-        if (fontSliderSettings && fontSlider) {
-            fontSliderSettings.value = fontSlider.value;
-        }
-
-        debugLog('Settings modal opened');
-    }
-
-    function closeSettingsModal() {
-        const modal = document.getElementById('settingsModal');
-        if (!modal) {
-            console.error('Settings modal not found');
-            return;
-        }
-        modal.classList.remove('visible');
-        debugLog('Settings modal closed');
-    }
-
-    // --- Background Color Picker ---
-
-    function applyBackgroundColor(color) {
-        applyThemeForBackground(color);
-    }
-
-    function applyThemeForBackground(color) {
-        const themeVars = isDarkColor(color) ? DARK_THEME_VARS : LIGHT_THEME_VARS;
-        setThemeVariables(themeVars);
-        document.documentElement.style.setProperty('--bg-color', color);
-        updatePresetSelection(color);
-    }
-
-    function setThemeVariables(themeVars) {
-        Object.entries(themeVars).forEach(([key, value]) => {
-            document.documentElement.style.setProperty(key, value);
-        });
-    }
-
-    function isDarkColor(color) {
-        const rgb = hexToRgb(color);
-        if (!rgb) {
-            return false;
-        }
-        const luminance = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
-        return luminance < 0.5;
-    }
-
-    function hexToRgb(color) {
-        const hex = color.replace('#', '').trim();
-        if (hex.length !== 6) {
-            return null;
-        }
-        const value = parseInt(hex, 16);
-        return {
-            r: (value >> 16) & 255,
-            g: (value >> 8) & 255,
-            b: value & 255
-        };
-    }
-
-    function initColorPicker() {
-        // Load saved color
-        const savedColor = localStorage.getItem(BG_COLOR_KEY) || DEFAULT_BG_COLOR;
-        applyBackgroundColor(savedColor);
-
-        // Preset buttons
-        document.querySelectorAll('.color-preset-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const color = btn.dataset.color;
-                applyThemeForBackground(color);
-                localStorage.setItem(BG_COLOR_KEY, color);
-                debugLog('Background color changed', { color });
-            });
-        });
-    }
-
-    function updatePresetSelection(color) {
-        document.querySelectorAll('.color-preset-btn').forEach(btn => {
-            btn.classList.toggle('is-selected', btn.dataset.color === color);
-        });
-    }
-
-    // --- Empty Trash Feature ---
-
-    function emptyTrash() {
-        if (appState.trash.length === 0) {
-            alert('Trash is already empty.');
-            return;
-        }
-
-        const count = appState.trash.length;
-        const confirmMsg = `⚠️ PERMANENTLY DELETE ${count} ITEM${count > 1 ? 'S' : ''}?\n\n` +
-                          `This action CANNOT be undone!\n\n` +
-                          `Items in trash:\n` +
-                          appState.trash.slice(0, 5).map(item => `• ${item.title}`).join('\n') +
-                          (count > 5 ? `\n... and ${count - 5} more` : '');
-
-        if (confirm(confirmMsg)) {
-            appState.trash = [];
-            saveState();
-            renderTrash();
-            updateTrashControls();
-            debugLog('Trash emptied', { itemsDeleted: count });
-            alert(`✅ ${count} item${count > 1 ? 's' : ''} permanently deleted.`);
-        }
-    }
-
-    function updateTrashControls() {
-        const emptyBtn = document.getElementById('emptyTrashBtn');
-        if (emptyBtn) {
-            const count = appState.trash.length;
-            emptyBtn.textContent = `Empty Trash${count > 0 ? ` (${count})` : ''}`;
-            emptyBtn.disabled = count === 0;
-        }
-    }
-
-    // --- Initialize Settings Modal ---
-
-    function initSettingsModal() {
-        // Defensive checks for critical elements
-        const settingsBtn = document.getElementById('settingsBtn');
-        const settingsCloseBtn = document.getElementById('settingsCloseBtn');
-        const settingsModal = document.getElementById('settingsModal');
-
-        if (!settingsBtn || !settingsCloseBtn || !settingsModal) {
-            console.error('Settings modal elements not found in DOM');
-            return;
-        }
-
-        // Settings button click
-        settingsBtn.addEventListener('click', openSettingsModal);
-
-        // Close button click
-        settingsCloseBtn.addEventListener('click', closeSettingsModal);
-
-        // Click outside modal to close
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target.id === 'settingsModal') {
-                closeSettingsModal();
-            }
-        });
-
-        // ESC key handler now in consolidated keyboard handler in setupEventListeners()
-        // (Removed duplicate to prevent conflicts)
-
-        // Initialize color picker
-        initColorPicker();
-
-        // Initialize empty trash button
-        const emptyTrashBtn = document.getElementById('emptyTrashBtn');
-        if (emptyTrashBtn) {
-            emptyTrashBtn.addEventListener('click', emptyTrash);
-            updateTrashControls();
-        }
-
-        // Initialize export/import buttons in settings
-        const exportBtn = document.getElementById('exportDataBtnSettings');
-        const importBtn = document.getElementById('importDataBtnSettings');
-        const importInput = document.getElementById('importFileInputSettings');
-
-        if (exportBtn) {
-            exportBtn.addEventListener('click', exportYohooData);
-        }
-        if (importBtn && importInput) {
-            importBtn.addEventListener('click', () => importInput.click());
-            importInput.addEventListener('change', handleImportFile);
-        }
-
-        // Initialize reset to defaults button
-        const resetToDefaultsBtn = document.getElementById('resetToDefaultsBtn');
-        if (resetToDefaultsBtn) {
-            resetToDefaultsBtn.addEventListener('click', resetToDefaults);
-        }
-
-        // Initialize save as default button
-        const saveAsDefaultBtn = document.getElementById('saveAsDefaultBtn');
-        if (saveAsDefaultBtn) {
-            saveAsDefaultBtn.addEventListener('click', saveCurrentAsDefault);
-        }
-
-        // Initialize font slider in settings (sync with original)
-        const fontSliderSettings = document.getElementById('fontSliderSettings');
-        const fontSlider = document.getElementById('fontSlider');
-
-        if (fontSliderSettings && fontSlider) {
-            // Sync settings slider with main slider value on init
-            fontSliderSettings.value = fontSlider.value;
-
-            fontSliderSettings.addEventListener('input', (e) => {
-                const scale = parseFloat(e.target.value);
-                document.documentElement.style.setProperty('--font-scale', scale);
-                localStorage.setItem('yohoo_font_scale', scale);
-                // Sync with bottom controls slider
-                fontSlider.value = scale;
-            });
-        }
-
-        // Initialize debug toggle checkbox
-        const debugCheckbox = document.getElementById('debugToggleCheckbox');
-        const debugConsole = document.getElementById('debugConsole');
-
-        if (debugCheckbox && debugConsole) {
-            // Set initial state based on console visibility
-            debugCheckbox.checked = debugConsole.classList.contains('visible');
-
-            debugCheckbox.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    debugConsole.classList.add('visible');
-                    debugLog('Debug console enabled from settings');
-                } else {
-                    debugConsole.classList.remove('visible');
-                    debugLog('Debug console disabled from settings');
-                }
-            });
-        }
-    }
-
-    // Run - wrapped in DOMContentLoaded to ensure DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-    debugLog('Yohoo initialization started');
+    // Run
+    init();
+    debugLog('Yohoo initialized successfully');
 
 </script>
-
-<!-- Settings Modal -->
-<div id="settingsModal" class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
-    <div class="settings-modal-content">
-        <div class="settings-header">
-            <h2 id="settingsModalTitle">⚙️ Settings</h2>
-            <button class="settings-close-btn" id="settingsCloseBtn" aria-label="Close Settings">✕</button>
-        </div>
-        <div class="settings-body">
-
-            <!-- Section 1: Appearance -->
-            <div class="settings-section">
-                <div class="settings-section-title">🎨 Appearance</div>
-
-                <!-- Background Color Picker -->
-                <div class="settings-control">
-                    <label class="settings-control-label">
-                        Background Color
-                    </label>
-                    <div class="settings-control-description">
-                        Choose a preset background color.
-                    </div>
-                    <div class="color-preset-buttons">
-                        <button class="color-preset-btn" data-color="#FFEFCF" title="Light Cream (Default)" aria-label="Light Cream (Default)" style="background-color: #FFEFCF;"></button>
-                        <button class="color-preset-btn" data-color="#E8F4F8" title="Soft Blue" aria-label="Soft Blue" style="background-color: #E8F4F8;"></button>
-                        <button class="color-preset-btn" data-color="#F0F8E8" title="Mint Green" aria-label="Mint Green" style="background-color: #F0F8E8;"></button>
-                        <button class="color-preset-btn" data-color="#F8E8F0" title="Soft Pink" aria-label="Soft Pink" style="background-color: #F8E8F0;"></button>
-                        <button class="color-preset-btn" data-color="#1E1E2E" title="Dark Mode" aria-label="Dark Mode" style="background-color: #1E1E2E;"></button>
-                    </div>
-                </div>
-
-                <!-- Font Size Slider -->
-                <div class="settings-control">
-                    <label class="settings-control-label" for="fontSliderSettings">
-                        Font Size
-                    </label>
-                    <div class="settings-control-description">
-                        Adjust the overall font size of the page.
-                    </div>
-                    <div class="font-slider-container">
-                        <span class="font-slider-label">A-</span>
-                        <input type="range" id="fontSliderSettings" min="1.1" max="2.4" step="0.1" value="2.0" title="Adjust font size">
-                        <span class="font-slider-label">A+</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 2: Data Management -->
-            <div class="settings-section">
-                <div class="settings-section-title">💾 Data Management</div>
-
-                <div class="settings-control">
-                    <label class="settings-control-label">
-                        Export & Import
-                    </label>
-                    <div class="settings-control-description">
-                        Export your data to a JSON file or import from a previous backup. An automatic backup is created before importing.
-                    </div>
-                    <div class="settings-button-group">
-                        <button id="exportDataBtnSettings" class="secondary-btn" title="Export all data to JSON file">📥 Export Data</button>
-                        <label for="importFileInputSettings" style="margin: 0;">
-                            <button type="button" id="importDataBtnSettings" class="secondary-btn" title="Import data from JSON file">📤 Import Data</button>
-                        </label>
-                        <input type="file" id="importFileInputSettings" accept=".json" style="display: none;">
-                    </div>
-                </div>
-
-                <div class="settings-control">
-                    <label class="settings-control-label">
-                        Reset to Defaults
-                    </label>
-                    <div class="settings-control-description">
-                        Reset all links, sections, and layout to the default configuration from default-links.json.
-                        Your current data will be automatically backed up before resetting.
-                    </div>
-                    <button id="resetToDefaultsBtn" class="secondary-btn" title="Reset to default links">🔄 Reset to Defaults</button>
-                </div>
-
-                <div class="settings-control">
-                    <label class="settings-control-label">
-                        Save as Default Template
-                    </label>
-                    <div class="settings-control-description">
-                        Export your current link set in the default-links.json format.
-                        Save the downloaded file as "default-links.json" to make it the new default configuration.
-                    </div>
-                    <button id="saveAsDefaultBtn" class="secondary-btn" title="Export as default template">💾 Save Current as Default Template</button>
-                </div>
-            </div>
-
-            <!-- Section 3: Trash Management -->
-            <div class="settings-section">
-                <div class="settings-section-title">🗑️ Trash Management</div>
-
-                <div class="settings-control">
-                    <label class="settings-control-label">
-                        Empty Trash
-                    </label>
-                    <div class="settings-control-description">
-                        Permanently delete all items in the trash. This action cannot be undone.
-                    </div>
-                    <button id="emptyTrashBtn" class="secondary-btn">Empty Trash</button>
-                </div>
-            </div>
-
-            <!-- Section 4: Developer Tools -->
-            <div class="settings-section">
-                <div class="settings-section-title">🐛 Developer Tools</div>
-
-                <div class="settings-control">
-                    <label class="settings-control-label">
-                        <input type="checkbox" id="debugToggleCheckbox" style="margin-right: 0.5rem;">
-                        Show Debug Console
-                    </label>
-                    <div class="settings-control-description">
-                        Display the debug console for troubleshooting and monitoring application events.
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<!-- Link Edit Modal -->
-<div id="linkEditModal" class="link-edit-modal" role="dialog" aria-modal="true" aria-labelledby="linkEditModalTitle">
-    <div class="link-edit-modal-content">
-        <div class="link-edit-header">
-            <h3 id="linkEditModalTitle">✏️ Edit Link</h3>
-            <button class="link-edit-close-btn" id="linkEditCloseBtn" aria-label="Close">✕</button>
-        </div>
-        <div class="link-edit-body">
-            <div class="form-group">
-                <label for="linkEditTitle">Title</label>
-                <input type="text" id="linkEditTitle" placeholder="Link title" aria-required="true">
-                <div id="titleError" class="form-error" style="display: none;"></div>
-            </div>
-            <div class="form-group">
-                <label for="linkEditUrl">URL</label>
-                <input type="url" id="linkEditUrl" placeholder="https://example.com" aria-required="true">
-                <div id="urlError" class="form-error" style="display: none;"></div>
-            </div>
-        </div>
-        <div class="link-edit-footer">
-            <button class="secondary-btn" id="linkEditCancel">Cancel</button>
-            <button class="primary-btn" id="linkEditSave">Save</button>
-        </div>
-    </div>
-</div>
-
 </body>
 </html>

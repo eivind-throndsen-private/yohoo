@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yohoo!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            background: #2d1b3d;
+            color: #f0e6ff;
+            padding: 10px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #533d6b;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #c4a3ff;
+            margin-bottom: 3px;
+        }
+
+        .tagline {
+            font-size: 11px;
+            color: #a88bcc;
+        }
+
+        .time-display {
+            margin-top: 5px;
+            font-size: 10px;
+            color: #8e72b8;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-box {
+            width: 300px;
+            padding: 4px 8px;
+            font-size: 11px;
+            background: #3d2854;
+            border: 1px solid #533d6b;
+            border-radius: 3px;
+            color: #f0e6ff;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #9d7ee0;
+        }
+
+        .add-category-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            background: #6b4d8a;
+            border: 1px solid #533d6b;
+            border-radius: 3px;
+            color: #f0e6ff;
+            cursor: pointer;
+        }
+
+        .add-category-btn:hover {
+            background: #7d5fa0;
+        }
+
+        .search-hint {
+            margin-top: 3px;
+            font-size: 10px;
+            color: #8e72b8;
+            text-align: center;
+        }
+
+        .categories {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .category {
+            background: #3d2854;
+            border: 1px solid #533d6b;
+            border-radius: 4px;
+            padding: 12px;
+            cursor: move;
+        }
+
+        .category.hidden {
+            display: none;
+        }
+
+        .category.drag-over {
+            border-color: #c4a3ff;
+            background: #4a3361;
+        }
+
+        .category.dragging-category {
+            opacity: 0.4;
+            border-color: #9d7ee0;
+        }
+
+        .category-drop-zone {
+            height: 4px;
+            background: #c4a3ff;
+            margin: 5px 0;
+            display: none;
+            border-radius: 2px;
+        }
+
+        .category-drop-zone.active {
+            display: block;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #533d6b;
+            padding-bottom: 5px;
+        }
+
+        .category-icon {
+            font-size: 14px;
+        }
+
+        .category-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #c4a3ff;
+        }
+
+        .subcategories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .subcategory {
+            background: #2d1b3d;
+            border: 1px solid #3d2854;
+            border-radius: 3px;
+            padding: 8px;
+        }
+
+        .subcategory.drag-over {
+            border-color: #c4a3ff;
+            background: #3d2854;
+        }
+
+        .subcategory-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #9d7ee0;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #3d2854;
+            padding-bottom: 3px;
+        }
+
+        .links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-height: 20px;
+        }
+
+        .links-list.drag-over {
+            background: #4a3361;
+            border-radius: 3px;
+        }
+
+        .link-item {
+            color: #7dd3fc;
+            text-decoration: none;
+            font-size: 11px;
+            padding: 2px 4px 2px 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            overflow: hidden;
+            cursor: move;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .link-item:hover {
+            color: #a5f3fc;
+            text-decoration: underline;
+            background: #4a3361;
+        }
+
+        .link-item:hover .delete-icon {
+            opacity: 1;
+        }
+
+        .link-text {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .delete-icon {
+            opacity: 0;
+            cursor: pointer;
+            font-size: 10px;
+            padding: 2px;
+            color: #ff6b9d;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .delete-icon:hover {
+            color: #ffb3d1;
+            background: #533d6b;
+            border-radius: 2px;
+        }
+
+        .link-item.dragging {
+            opacity: 0.4;
+        }
+
+        .link-item.hidden {
+            display: none;
+        }
+
+        .link-item.deleted {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        /* Trash section */
+        .trash-section {
+            margin-top: 30px;
+            padding: 12px;
+            background: #1a0f26;
+            border: 1px solid #533d6b;
+            border-radius: 4px;
+        }
+
+        .trash-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .trash-header:hover {
+            background: #2d1b3d;
+        }
+
+        .trash-icon {
+            font-size: 14px;
+        }
+
+        .trash-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #ff6b9d;
+            flex: 1;
+        }
+
+        .trash-count {
+            font-size: 10px;
+            color: #a88bcc;
+        }
+
+        .trash-toggle {
+            font-size: 10px;
+            color: #8e72b8;
+        }
+
+        .trash-content {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .trash-content.expanded {
+            display: block;
+        }
+
+        .trash-links {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .trash-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            background: #2d1b3d;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .trash-item-link {
+            flex: 1;
+            color: #8e72b8;
+            text-decoration: line-through;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .undelete-btn {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: #6b4d8a;
+            border: 1px solid #533d6b;
+            border-radius: 2px;
+            color: #f0e6ff;
+            cursor: pointer;
+        }
+
+        .undelete-btn:hover {
+            background: #7d5fa0;
+        }
+
+        footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #533d6b;
+            text-align: center;
+            font-size: 10px;
+            color: #8e72b8;
+        }
+
+        /* Modal for adding categories */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #3d2854;
+            border: 2px solid #533d6b;
+            border-radius: 6px;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #c4a3ff;
+            margin-bottom: 15px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 11px;
+            background: #2d1b3d;
+            border: 1px solid #533d6b;
+            border-radius: 3px;
+            color: #f0e6ff;
+            margin-bottom: 10px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 5px 12px;
+            font-size: 11px;
+            border: 1px solid #533d6b;
+            border-radius: 3px;
+            cursor: pointer;
+            background: #6b4d8a;
+            color: #f0e6ff;
+        }
+
+        .modal-btn:hover {
+            background: #7d5fa0;
+        }
+
+        .modal-btn.cancel {
+            background: #533d6b;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #6b4d8a;
+        }
+
+        /* Debug panel */
+        .debug-panel {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 400px;
+            max-height: 300px;
+            background: #1a0f26;
+            border: 2px solid #533d6b;
+            border-radius: 6px 0 0 0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 10px;
+            color: #c4a3ff;
+            overflow-y: auto;
+            z-index: 9999;
+        }
+
+        .debug-panel h3 {
+            margin: 0 0 5px 0;
+            font-size: 11px;
+            color: #f0e6ff;
+            border-bottom: 1px solid #533d6b;
+            padding-bottom: 3px;
+        }
+
+        .debug-log {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .debug-entry {
+            margin: 2px 0;
+            padding: 2px;
+            border-left: 2px solid #6b4d8a;
+            padding-left: 5px;
+        }
+
+        .debug-entry.error {
+            border-left-color: #ff6b9d;
+            color: #ffb3d1;
+        }
+
+        .debug-entry.success {
+            border-left-color: #7dd3fc;
+            color: #a5f3fc;
+        }
+
+        .debug-storage {
+            font-size: 9px;
+            color: #a88bcc;
+        }
+
+        .debug-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background: #6b4d8a;
+            border: 1px solid #533d6b;
+            border-radius: 3px;
+            color: #f0e6ff;
+            cursor: pointer;
+            font-size: 10px;
+            z-index: 10000;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+
+            .subcategories {
+                grid-template-columns: 1fr;
+            }
+
+            .debug-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Yohoo!</div>
+            <div class="tagline">Your Personal Start Page</div>
+            <div class="time-display" id="currentTime"></div>
+        </header>
+
+        <div class="controls">
+            <input
+                type="text"
+                class="search-box"
+                id="searchBox"
+                placeholder="Search..."
+                autocomplete="off"
+            >
+            <button class="add-category-btn" id="addCategoryBtn">+ Add Category</button>
+        </div>
+        <div class="search-hint">Press "/" to search | Drag links to reorganize</div>
+
+        <div class="categories" id="categoriesContainer">
+
+            <!-- Work & Productivity -->
+            <div class="category" data-category="work">
+                <div class="category-header">
+                    <span class="category-icon">💼</span>
+                    <h2 class="category-title">Work & Productivity</h2>
+                </div>
+                <div class="subcategories">
+                <div class="subcategory" data-subcategory="work-bob">
+                    <h3 class="subcategory-title">Bob the Builder</h3>
+                    <div class="links-list">
+                        <a href="https://drive.google.com/drive/u/0/folders/12D-PMKrPpRTAz6_zNALZBHOybRvT_gQa" class="link-item" draggable="true" data-url="https://drive.google.com/drive/u/0/folders/12D-PMKrPpRTAz6_zNALZBHOybRvT_gQa" data-title="Project Bob the Builder - Department of AI - Google Drive" data-domain="drive.google.com">
+                            <span class="link-text">Project Bob the Builder - Department of AI - Google Drive</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/spreadsheets/d/181_3p9asZCRECuWTzaIiJG-H7QPFcI6nncr0arHV7Xk/edit?gid=1284805341#gid=1284805341" class="link-item" draggable="true" data-url="https://docs.google.com/spreadsheets/d/181_3p9asZCRECuWTzaIiJG-H7QPFcI6nncr0arHV7Xk/edit?gid=1284805341#gid=1284805341" data-title="Bob applications" data-domain="docs.google.com">
+                            <span class="link-text">Bob applications</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/spreadsheets/d/1m-Ta5YtFOYU_M0Gwap4l0llJ1d6DScKvtEbXNBg0xTs/edit?gid=2132750046#gid=2132750046" class="link-item" draggable="true" data-url="https://docs.google.com/spreadsheets/d/1m-Ta5YtFOYU_M0Gwap4l0llJ1d6DScKvtEbXNBg0xTs/edit?gid=2132750046#gid=2132750046" data-title="Bob T3 Backlog" data-domain="docs.google.com">
+                            <span class="link-text">Bob T3 Backlog</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/document/d/1n2ftVRIShcs3VO0K1huT-A5U4G3yeejDTzO8PfxAjsM/edit?tab=t.fu8b86w409js#heading=h.o4v40ckh5ukd" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/1n2ftVRIShcs3VO0K1huT-A5U4G3yeejDTzO8PfxAjsM/edit?tab=t.fu8b86w409js#heading=h.o4v40ckh5ukd" data-title="Bob T3 curriculum - Google Docs" data-domain="docs.google.com">
+                            <span class="link-text">Bob T3 curriculum - Google Docs</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/spreadsheets/d/1yiEmeVOfhPjgZDW_y-mJ_5wkmmkG5nDywhy6Glf_qEw/edit?gid=1333961440#gid=1333961440" class="link-item" draggable="true" data-url="https://docs.google.com/spreadsheets/d/1yiEmeVOfhPjgZDW_y-mJ_5wkmmkG5nDywhy6Glf_qEw/edit?gid=1333961440#gid=1333961440" data-title="Bob T3" data-domain="docs.google.com">
+                            <span class="link-text">Bob T3</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/u/0/folders/0ABgcZHVsZcfzUk9PVA" class="link-item" draggable="true" data-url="https://drive.google.com/drive/u/0/folders/0ABgcZHVsZcfzUk9PVA" data-title="Bob the Builder (2025) - Google Drive" data-domain="drive.google.com">
+                            <span class="link-text">Bob the Builder (2025) - Google Drive</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/document/d/12NXGgLxR-gBUPyRztpyVqmP6-pL1ndZnS5psz0lq09M/edit?tab=t.0#heading=h.ikomf73r3w9i" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/12NXGgLxR-gBUPyRztpyVqmP6-pL1ndZnS5psz0lq09M/edit?tab=t.0#heading=h.ikomf73r3w9i" data-title="Bob the Builder - training curriculum and plan T1 2025 - Google Docs" data-domain="docs.google.com">
+                            <span class="link-text">Bob the Builder - training curriculum and plan T1 2025 - Google Docs</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="subcategory" data-subcategory="work-dai">
+                    <h3 class="subcategory-title">Department of AI</h3>
+                    <div class="links-list">
+                        <a href="https://drive.google.com/drive/u/0/folders/0ANHlmkr_LyheUk9PVA" class="link-item" draggable="true" data-url="https://drive.google.com/drive/u/0/folders/0ANHlmkr_LyheUk9PVA" data-title="Department of AI - Google Drive" data-domain="drive.google.com">
+                            <span class="link-text">Department of AI - Google Drive</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/0ANHlmkr_LyheUk9PVA" class="link-item" draggable="true" data-url="https://drive.google.com/drive/folders/0ANHlmkr_LyheUk9PVA" data-title="Department of AI - Google Drive" data-domain="drive.google.com">
+                            <span class="link-text">Department of AI - Google Drive</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/17R2TFtPsS7xbnvP8a7Z1_oR5-VVTcI6j" class="link-item" draggable="true" data-url="https://drive.google.com/drive/folders/17R2TFtPsS7xbnvP8a7Z1_oR5-VVTcI6j" data-title="dAI Presentations" data-domain="drive.google.com">
+                            <span class="link-text">dAI Presentations</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/u/0/folders/0AIqHhKZgTGh9Uk9PVA" class="link-item" draggable="true" data-url="https://drive.google.com/drive/u/0/folders/0AIqHhKZgTGh9Uk9PVA" data-title="dAI Drive" data-domain="drive.google.com">
+                            <span class="link-text">dAI Drive</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="subcategory" data-subcategory="work-one-on-one">
+                    <h3 class="subcategory-title">1:1 Meetings</h3>
+                    <div class="links-list">
+                        <a href="https://docs.google.com/document/d/1x7ytEi-FQLaZ45jvZ9bgv5pf04IX61_mtYcRX8MpZIs/edit?tab=t.0" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/1x7ytEi-FQLaZ45jvZ9bgv5pf04IX61_mtYcRX8MpZIs/edit?tab=t.0" data-title="Ebba / Eivind 1:1 - Google Docs" data-domain="docs.google.com">
+                            <span class="link-text">Ebba / Eivind 1:1 - Google Docs</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/document/d/1N1RedwwjfH5aqtUc4_aNaFhKGNPVRdPC8WsY0K7Qnw8/edit?tab=t.0" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/1N1RedwwjfH5aqtUc4_aNaFhKGNPVRdPC8WsY0K7Qnw8/edit?tab=t.0" data-title="Ebba / Eivind 1:1 - Google Docs" data-domain="docs.google.com">
+                            <span class="link-text">Ebba / Eivind 1:1 - Google Docs</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/document/d/1N1RedwwjfH5aqtUc4_aNaFhKGNPVRdPC8WsY0K7Qnw8/edit?tab=t.0" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/1N1RedwwjfH5aqtUc4_aNaFhKGNPVRdPC8WsY0K7Qnw8/edit?tab=t.0" data-title="Ebba / Eivind 1:1 - Google Docs" data-domain="docs.google.com">
+                            <span class="link-text">Ebba / Eivind 1:1 - Google Docs</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="subcategory" data-subcategory="work-learning-labs">
+                    <h3 class="subcategory-title">Learning Labs</h3>
+                    <div class="links-list">
+                        <a href="https://drive.google.com/drive/folders/1OFDK6myZGFuWpRUFqDV4jnRgGXTIu0Xk" class="link-item" draggable="true" data-url="https://drive.google.com/drive/folders/1OFDK6myZGFuWpRUFqDV4jnRgGXTIu0Xk" data-title="AI Academy - Deep Learning spring course 2025 - Google Drive" data-domain="drive.google.com">
+                            <span class="link-text">AI Academy - Deep Learning spring course 2025 - Google Drive</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="subcategory" data-subcategory="work-ai-productivity">
+                    <h3 class="subcategory-title">Everyday AI / AI Productivity</h3>
+                    <div class="links-list">
+                        <a href="https://docs.google.com/forms/d/1ReUclXHg5z9_-LmwyQVPIgHthvDssrdskneOLfDZ2yg/edit#responses" class="link-item" draggable="true" data-url="https://docs.google.com/forms/d/1ReUclXHg5z9_-LmwyQVPIgHthvDssrdskneOLfDZ2yg/edit#responses" data-title="ChatGPT Usage Survey - Google Forms" data-domain="docs.google.com">
+                            <span class="link-text">ChatGPT Usage Survey - Google Forms</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/spreadsheets/d/15GuR8MoqMbLL85wiN7nquFGHcVpCunTM3v0HdoQSjjo/edit?gid=1593267811#gid=1593267811" class="link-item" draggable="true" data-url="https://docs.google.com/spreadsheets/d/15GuR8MoqMbLL85wiN7nquFGHcVpCunTM3v0HdoQSjjo/edit?gid=1593267811#gid=1593267811" data-title="AI Productivity Platforms T3 Deliveries Timeline - Google Sheets" data-domain="docs.google.com">
+                            <span class="link-text">AI Productivity Platforms T3 Deliveries Timeline - Google Sheets</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/1Gb7a02BjU1eFKGEyZIlHHtMagCTTMsqX" class="link-item" draggable="true" data-url="https://drive.google.com/drive/folders/1Gb7a02BjU1eFKGEyZIlHHtMagCTTMsqX" data-title="AI HR Assistant - Google Drive" data-domain="drive.google.com">
+                            <span class="link-text">AI HR Assistant - Google Drive</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/spreadsheets/d/19U-1UB90KGuPfvWOpRfUPMo458eZ35JqhS_RxHWs0rE/edit?gid=422215140#gid=422215140" class="link-item" draggable="true" data-url="https://docs.google.com/spreadsheets/d/19U-1UB90KGuPfvWOpRfUPMo458eZ35JqhS_RxHWs0rE/edit?gid=422215140#gid=422215140" data-title="ChatGPT Usage Survey (Responses) - Google Sheets" data-domain="docs.google.com">
+                            <span class="link-text">ChatGPT Usage Survey (Responses) - Google Sheets</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="subcategory" data-subcategory="work-pm-days">
+                    <h3 class="subcategory-title">PM Days</h3>
+                    <div class="links-list">
+                        <a href="https://docs.google.com/presentation/d/15qIzVVc_BC0n9_x4OMVvDOq_c3LZ0xQBxXWJ16lFj-g/edit?slide=id.g3376bf17c91_0_0#slide=id.g3376bf17c91_0_0" class="link-item" draggable="true" data-url="https://docs.google.com/presentation/d/15qIzVVc_BC0n9_x4OMVvDOq_c3LZ0xQBxXWJ16lFj-g/edit?slide=id.g3376bf17c91_0_0#slide=id.g3376bf17c91_0_0" data-title="Golden Loop & Ticket: Steerco - Google Slides" data-domain="docs.google.com">
+                            <span class="link-text">Golden Loop & Ticket: Steerco - Google Slides</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/presentation/d/1pU0V1aAFqsgJ1j8tvArvZ66WAlg46zo78f79n8zwA5o/edit?slide=id.g337714a28ea_0_31#slide=id.g337714a28ea_0_31" class="link-item" draggable="true" data-url="https://docs.google.com/presentation/d/1pU0V1aAFqsgJ1j8tvArvZ66WAlg46zo78f79n8zwA5o/edit?slide=id.g337714a28ea_0_31#slide=id.g337714a28ea_0_31" data-title="Golden Ticket Vision Workshop 2025-04-23 - Google Slides" data-domain="docs.google.com">
+                            <span class="link-text">Golden Ticket Vision Workshop 2025-04-23 - Google Slides</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="subcategory" data-subcategory="work-other">
+                    <h3 class="subcategory-title">Other Work</h3>
+                    <div class="links-list">
+                        <a href="https://docs.google.com/document/d/16lD24DRAaRKzZ1HvsSqaN6JPYwDnjXxc7TnzvKAXXFg/edit?tab=t.0" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/16lD24DRAaRKzZ1HvsSqaN6JPYwDnjXxc7TnzvKAXXFg/edit?tab=t.0" data-title="Bookmark treasuretrove - Google Docs" data-domain="docs.google.com">
+                            <span class="link-text">Bookmark treasuretrove - Google Docs</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQDgCUfS2TzOvBAoExiArFM0NnckyZEwMMdCNJwPWQoblQJc27IB0mvXRwgxBNp85gZCIC2j108fi8k/pubchart?oid=1817809534&format=image" class="link-item" draggable="true" data-url="https://docs.google.com/spreadsheets/d/e/2PACX-1vQDgCUfS2TzOvBAoExiArFM0NnckyZEwMMdCNJwPWQoblQJc27IB0mvXRwgxBNp85gZCIC2j108fi8k/pubchart?oid=1817809534&format=image" data-title="Kurs progress" data-domain="docs.google.com">
+                            <span class="link-text">Kurs progress</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/spreadsheets/d/1CI34WYiQhUX9lFmnDKF9Uei2GtqZRht4JnX3fVcEwko/edit?gid=1493352172#gid=1493352172" class="link-item" draggable="true" data-url="https://docs.google.com/spreadsheets/d/1CI34WYiQhUX9lFmnDKF9Uei2GtqZRht4JnX3fVcEwko/edit?gid=1493352172#gid=1493352172" data-title="Min backlog" data-domain="docs.google.com">
+                            <span class="link-text">Min backlog</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQDgCUfS2TzOvBAoExiArFM0NnckyZEwMMdCNJwPWQoblQJc27IB0mvXRwgxBNp85gZCIC2j108fi8k/pubchart?oid=1817809534&format=image" class="link-item" draggable="true" data-url="https://docs.google.com/spreadsheets/d/e/2PACX-1vQDgCUfS2TzOvBAoExiArFM0NnckyZEwMMdCNJwPWQoblQJc27IB0mvXRwgxBNp85gZCIC2j108fi8k/pubchart?oid=1817809534&format=image" data-title="pubchart (1620×1002)" data-domain="docs.google.com">
+                            <span class="link-text">pubchart (1620×1002)</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://trello.com/b/3u5NaDni/eivinds-gtd-bord" class="link-item" draggable="true" data-url="https://trello.com/b/3u5NaDni/eivinds-gtd-bord" data-title="GTD" data-domain="trello.com">
+                            <span class="link-text">GTD</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/document/d/10rOXXPXKa598u3MT025w_rfx1gg-VUbwawPbI5l9XmQ/edit?tab=t.0" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/10rOXXPXKa598u3MT025w_rfx1gg-VUbwawPbI5l9XmQ/edit?tab=t.0" data-title="ET Scratchpad" data-domain="docs.google.com">
+                            <span class="link-text">ET Scratchpad</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/presentation/d/1olIfBhA7kNbGhkVCGbPeDCpJOy5uoOSENdbdWP3lXVM/edit#slide=id.g28c45093ffa_7_78" class="link-item" draggable="true" data-url="https://docs.google.com/presentation/d/1olIfBhA7kNbGhkVCGbPeDCpJOy5uoOSENdbdWP3lXVM/edit#slide=id.g28c45093ffa_7_78" data-title="Foundation" data-domain="docs.google.com">
+                            <span class="link-text">Foundation</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/1nAfzD50w_YM7oDi-L8ZX-DWfotqSz7Mc" class="link-item" draggable="true" data-url="https://drive.google.com/drive/folders/1nAfzD50w_YM7oDi-L8ZX-DWfotqSz7Mc" data-title="Contact reduction data" data-domain="drive.google.com">
+                            <span class="link-text">Contact reduction data</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/document/d/1CH6IreG7Wk9sBjRufQh49JRSD7V23LK6pQnlWbm4oA8/edit?tab=t.0" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/1CH6IreG7Wk9sBjRufQh49JRSD7V23LK6pQnlWbm4oA8/edit?tab=t.0" data-title="Innovation week - environment - Google Docs" data-domain="docs.google.com">
+                            <span class="link-text">Innovation week - environment - Google Docs</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/1a7HoU8FLJfXVoWVMiljTWsjkpsuBwU3r" class="link-item" draggable="true" data-url="https://drive.google.com/drive/folders/1a7HoU8FLJfXVoWVMiljTWsjkpsuBwU3r" data-title="Snowflake files - Google Drive" data-domain="drive.google.com">
+                            <span class="link-text">Snowflake files - Google Drive</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/document/d/1sOr8BKpBlAS_sTJ_dSopE04yBfmsc46JB8GdBv2g4jU/edit?tab=t.0" class="link-item" draggable="true" data-url="https://docs.google.com/document/d/1sOr8BKpBlAS_sTJ_dSopE04yBfmsc46JB8GdBv2g4jU/edit?tab=t.0" data-title="" data-domain="docs.google.com">
+                            <span class="link-text"></span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/presentation/d/1PPzjNcHnxG2ZMvQgQEXdl8tIQ4x-EAOekpxTQ1KZF5I/edit#slide=id.g31dca4b1425_1_15" class="link-item" draggable="true" data-url="https://docs.google.com/presentation/d/1PPzjNcHnxG2ZMvQgQEXdl8tIQ4x-EAOekpxTQ1KZF5I/edit#slide=id.g31dca4b1425_1_15" data-title="AI Inspirasjon NTNU - 2025-01-08 - Google Slides" data-domain="docs.google.com">
+                            <span class="link-text">AI Inspirasjon NTNU - 2025-01-08 - Google Slides</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/presentation/d/1G_mCaCBZKYx6G7GptoH5I_e6xOUdFV4ag6xkC6YDU9g/edit?slide=id.g3376fed6792_0_549#slide=id.g3376fed6792_0_549" class="link-item" draggable="true" data-url="https://docs.google.com/presentation/d/1G_mCaCBZKYx6G7GptoH5I_e6xOUdFV4ag6xkC6YDU9g/edit?slide=id.g3376fed6792_0_549#slide=id.g3376fed6792_0_549" data-title="1.Presentation template SMP - Google Slides" data-domain="docs.google.com">
+                            <span class="link-text">1.Presentation template SMP - Google Slides</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/presentation/d/1zKI88LgTP7GsIg4Nsb8V-OeuHzBunFJkvrTnE8MTUSc/edit?slide=id.p8#slide=id.p8" class="link-item" draggable="true" data-url="https://docs.google.com/presentation/d/1zKI88LgTP7GsIg4Nsb8V-OeuHzBunFJkvrTnE8MTUSc/edit?slide=id.p8#slide=id.p8" data-title="Vend Presentation Template 1.0 - Google Slides" data-domain="docs.google.com">
+                            <span class="link-text">Vend Presentation Template 1.0 - Google Slides</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/presentation/d/1w1Pl6cZvo35WEuvR2IqDN_Y_DuqVgPYWyl-AMxvy8Ok/edit?slide=id.g36e190ed4e3_0_26#slide=id.g36e190ed4e3_0_26" class="link-item" draggable="true" data-url="https://docs.google.com/presentation/d/1w1Pl6cZvo35WEuvR2IqDN_Y_DuqVgPYWyl-AMxvy8Ok/edit?slide=id.g36e190ed4e3_0_26#slide=id.g36e190ed4e3_0_26" data-title="2025.08.07 - Mobility Insights and Analytics - Vend Assistant for mobility - Goo" data-domain="docs.google.com">
+                            <span class="link-text">2025.08.07 - Mobility Insights and Analytics - Vend Assistant for mobility - Goo</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://docs.google.com/presentation/d/1sArl3S3uzCkDxh0NhE0WBOxcbCjjSbi3UtEO9rfJ7F8/edit?slide=id.g3a64fdb5c3a_0_41#slide=id.g3a64fdb5c3a_0_41" class="link-item" draggable="true" data-url="https://docs.google.com/presentation/d/1sArl3S3uzCkDxh0NhE0WBOxcbCjjSbi3UtEO9rfJ7F8/edit?slide=id.g3a64fdb5c3a_0_41#slide=id.g3a64fdb5c3a_0_41" data-title="2025-11-19 Vibe Coding Pitfalls - Eivind - Google Slides" data-domain="docs.google.com">
+                            <span class="link-text">2025-11-19 Vibe Coding Pitfalls - Eivind - Google Slides</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Development -->
+            <div class="category" data-category="development">
+                <div class="category-header">
+                    <span class="category-icon">⚡</span>
+                    <h2 class="category-title">Development</h2>
+                </div>
+                <div class="links-list">
+                        <a href="https://pages.github.schibsted.io/eivind-throndsen/paralell-reader/reader/" class="link-item" draggable="true" data-url="https://pages.github.schibsted.io/eivind-throndsen/paralell-reader/reader/" data-title="PR @ GH Pages" data-domain="pages.github.schibsted.io">
+                            <span class="link-text">PR @ GH Pages</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                </div>
+            </div>
+
+            <!-- Communication -->
+            <div class="category" data-category="communication">
+                <div class="category-header">
+                    <span class="category-icon">💬</span>
+                    <h2 class="category-title">Communication</h2>
+                </div>
+                <div class="links-list">
+                        <a href="file:///Users/eivind.throndsen@m10s.io/Documents/scripts/kolbotn.html?zoom=2" class="link-item" draggable="true" data-url="file:///Users/eivind.throndsen@m10s.io/Documents/scripts/kolbotn.html?zoom=2" data-title="Kolbotn vær" data-domain="">
+                            <span class="link-text">Kolbotn vær</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                </div>
+            </div>
+
+            <!-- Media & Entertainment -->
+            <div class="category" data-category="media">
+                <div class="category-header">
+                    <span class="category-icon">🎬</span>
+                    <h2 class="category-title">Media & Entertainment</h2>
+                </div>
+                <div class="links-list">
+                        <a href="https://www.youtube.com/watch?v=q98foLaAfX8" class="link-item" draggable="true" data-url="https://www.youtube.com/watch?v=q98foLaAfX8" data-title="Keynote by Mr. Thomas Dullien - CyCon 2018 - YouTube" data-domain="www.youtube.com">
+                            <span class="link-text">Keynote by Mr. Thomas Dullien - CyCon 2018 - YouTube</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                </div>
+            </div>
+
+            <!-- Tools & Utilities -->
+            <div class="category" data-category="tools">
+                <div class="category-header">
+                    <span class="category-icon">🔧</span>
+                    <h2 class="category-title">Tools & Utilities</h2>
+                </div>
+                <div class="links-list">
+                        <a href="https://miro.com/app/board/uXjVNOPu5RE=/" class="link-item" draggable="true" data-url="https://miro.com/app/board/uXjVNOPu5RE=/" data-title="PM Days Plan" data-domain="miro.com">
+                            <span class="link-text">PM Days Plan</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://chatgpt.com/g/g-67d1aac3c3ac8191bf7118704b96b36f-declinosaurus-your-friendly-calendar-coach" class="link-item" draggable="true" data-url="https://chatgpt.com/g/g-67d1aac3c3ac8191bf7118704b96b36f-declinosaurus-your-friendly-calendar-coach" data-title="Declinosaurus" data-domain="chatgpt.com">
+                            <span class="link-text">Declinosaurus</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://app.genially.com/teams/6336a606d1c2580011c211de/analytics/67594456cbeca466277de02b?analytic_tab=genially_analytics" class="link-item" draggable="true" data-url="https://app.genially.com/teams/6336a606d1c2580011c211de/analytics/67594456cbeca466277de02b?analytic_tab=genially_analytics" data-title="Genially" data-domain="app.genially.com">
+                            <span class="link-text">Genially</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://chatgpt.com/c/67a3345d-7bc8-800f-a71c-1390a01b08b7" class="link-item" draggable="true" data-url="https://chatgpt.com/c/67a3345d-7bc8-800f-a71c-1390a01b08b7" data-title="LaunchAgent troubleshooting tips" data-domain="chatgpt.com">
+                            <span class="link-text">LaunchAgent troubleshooting tips</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://miro.com/app/board/uXjVIdp72Rs=/" class="link-item" draggable="true" data-url="https://miro.com/app/board/uXjVIdp72Rs=/" data-title="Untitled - Miro" data-domain="miro.com">
+                            <span class="link-text">Untitled - Miro</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://miro.com/app/board/uXjVI6U8PR4=/" class="link-item" draggable="true" data-url="https://miro.com/app/board/uXjVI6U8PR4=/" data-title="AI ethics - Deep Learning 2025-05 - Miro" data-domain="miro.com">
+                            <span class="link-text">AI ethics - Deep Learning 2025-05 - Miro</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://miro.com/app/board/uXjVJDPV_rg=/" class="link-item" draggable="true" data-url="https://miro.com/app/board/uXjVJDPV_rg=/" data-title="AI Academy skills model - 2025-09 - Miro" data-domain="miro.com">
+                            <span class="link-text">AI Academy skills model - 2025-09 - Miro</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://miro.com/app/board/uXjVJ5OL3CQ=/" class="link-item" draggable="true" data-url="https://miro.com/app/board/uXjVJ5OL3CQ=/" data-title="DAI Retro - Fall 2025 - Miro" data-domain="miro.com">
+                            <span class="link-text">DAI Retro - Fall 2025 - Miro</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                </div>
+            </div>
+
+            <!-- Misc -->
+            <div class="category" data-category="misc">
+                <div class="category-header">
+                    <span class="category-icon">📌</span>
+                    <h2 class="category-title">Misc</h2>
+                </div>
+                <div class="links-list">
+                        <a href="https://kagi.com/?focus=1" class="link-item" draggable="true" data-url="https://kagi.com/?focus=1" data-title="Kagi Search" data-domain="kagi.com">
+                            <span class="link-text">Kagi Search</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="file:///Users/eivind.throndsen@m10s.io/1-Projects/paralell-reader/reader/index.html" class="link-item" draggable="true" data-url="file:///Users/eivind.throndsen@m10s.io/1-Projects/paralell-reader/reader/index.html" data-title="PR local" data-domain="">
+                            <span class="link-text">PR local</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://mon.ruter.no/departures/59.910357-10.753051/N4Igrgzgpgwg9gGzAWwHYBkCGBPOYAuIAXAGaYLQA0IARnJgE4AmExA2qE1AjlEwMr5G+ACoBLZFGIAGagAsxTLhjGoorIsAC+1VChpQGAeRIARKAAdhYBuuIBOavjH4EUoiCMQEcAAT8QaiYxCEwaNyYRBkxUCAs4BnwAWTguDTZaSBAAXWooVDCI4nwGMCh5RSgozABjAGt4JDRiMgpykAh8OAsABR4aqABJFnYQADl+ACUiQW6+2qgiAFZ7ADYAZgB2HJ1Obl4BIUTxSRkKpXz0VTtNHRA9ZANjM0trWw1HEGdXdxARTAAbm5fAR8r5vvhuIEQMFQuE+NVYvFEik0uxciB8oU+MVSu0FFxqvVGihUC1yFQOl1ev0hiMiGxsloMQDDBAxHAyUQAEznKAAQVQEkwzk5GlalIJUH4LjAIo5sXJbS0QA" class="link-item" draggable="true" data-url="https://mon.ruter.no/departures/59.910357-10.753051/N4Igrgzgpgwg9gGzAWwHYBkCGBPOYAuIAXAGaYLQA0IARnJgE4AmExA2qE1AjlEwMr5G+ACoBLZFGIAGagAsxTLhjGoorIsAC+1VChpQGAeRIARKAAdhYBuuIBOavjH4EUoiCMQEcAAT8QaiYxCEwaNyYRBkxUCAs4BnwAWTguDTZaSBAAXWooVDCI4nwGMCh5RSgozABjAGt4JDRiMgpykAh8OAsABR4aqABJFnYQADl+ACUiQW6+2qgiAFZ7ADYAZgB2HJ1Obl4BIUTxSRkKpXz0VTtNHRA9ZANjM0trWw1HEGdXdxARTAAbm5fAR8r5vvhuIEQMFQuE+NVYvFEik0uxciB8oU+MVSu0FFxqvVGihUC1yFQOl1ev0hiMiGxsloMQDDBAxHAyUQAEznKAAQVQEkwzk5GlalIJUH4LjAIo5sXJbS0QA" data-title="TET Kollektivskjerm - Avganger" data-domain="mon.ruter.no">
+                            <span class="link-text">TET Kollektivskjerm - Avganger</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://document-lookup.m10s.io/" class="link-item" draggable="true" data-url="https://document-lookup.m10s.io/" data-title="Lookup tool" data-domain="document-lookup.m10s.io">
+                            <span class="link-text">Lookup tool</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://gemini.google.com/app" class="link-item" draggable="true" data-url="https://gemini.google.com/app" data-title="Gemini" data-domain="gemini.google.com">
+                            <span class="link-text">Gemini</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://m10s.okta.com/app/UserHome?session_hint=AUTHENTICATED" class="link-item" draggable="true" data-url="https://m10s.okta.com/app/UserHome?session_hint=AUTHENTICATED" data-title="m10s Okta" data-domain="m10s.okta.com">
+                            <span class="link-text">m10s Okta</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://vibe.vend.com/home/" class="link-item" draggable="true" data-url="https://vibe.vend.com/home/" data-title="Vibe" data-domain="vibe.vend.com">
+                            <span class="link-text">Vibe</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://document-lookup.m10s.io/" class="link-item" draggable="true" data-url="https://document-lookup.m10s.io/" data-title="Lookup Tool" data-domain="document-lookup.m10s.io">
+                            <span class="link-text">Lookup Tool</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://notebooklm.google.com/?pli=1" class="link-item" draggable="true" data-url="https://notebooklm.google.com/?pli=1" data-title="NotebookLM" data-domain="notebooklm.google.com">
+                            <span class="link-text">NotebookLM</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://n8n.dept-of-ai.com/workflow/nqat0BHBjDlJTkYI" class="link-item" draggable="true" data-url="https://n8n.dept-of-ai.com/workflow/nqat0BHBjDlJTkYI" data-title="▶️ n8n ELT+1" data-domain="n8n.dept-of-ai.com">
+                            <span class="link-text">▶️ n8n ELT+1</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://notebooklm.google.com/" class="link-item" draggable="true" data-url="https://notebooklm.google.com/" data-title="NotebookLM" data-domain="notebooklm.google.com">
+                            <span class="link-text">NotebookLM</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://telepromptermirror.com/telepromptersoftware.htm" class="link-item" draggable="true" data-url="https://telepromptermirror.com/telepromptersoftware.htm" data-title="Free Teleprompter Software [Voice Activated] Updated 2024" data-domain="telepromptermirror.com">
+                            <span class="link-text">Free Teleprompter Software [Voice Activated] Updated 2024</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://m10s-customer-operations.zendesk.com/explore/studio#/dashboards/4FE42A117B9C2DC4968D2F0FAB4ED05105AE3D51F59C180BC5C3C422E150EC85" class="link-item" draggable="true" data-url="https://m10s-customer-operations.zendesk.com/explore/studio#/dashboards/4FE42A117B9C2DC4968D2F0FAB4ED05105AE3D51F59C180BC5C3C422E150EC85" data-title="Zendesk" data-domain="m10s-customer-operations.zendesk.com">
+                            <span class="link-text">Zendesk</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://m10s.okta.com/app/UserHome?session_hint=AUTHENTICATED" class="link-item" draggable="true" data-url="https://m10s.okta.com/app/UserHome?session_hint=AUTHENTICATED" data-title="m10s Okta" data-domain="m10s.okta.com">
+                            <span class="link-text">m10s Okta</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://m10s.okta.com/app/m10s_sana_1/exklu0vsawvAip3Ar417/sso/saml?RelayState=eyJwYXRoIjoiLyJ9&SAMLRequest=lZJPT%2BMwEMW%2FSuR74rg0gVptpSwVohK7W9HCYS%2FVJJmChf9kPU4p3x43ZbVwAAnJB%2Bt53vj97JkSGN3Jqg%2BP9hb%2F9kghORhtSQ4HM9Z7Kx2QImnBIMnQyHX180aOslx23gXXOM3eWb52ABH6oJxlyXIxY9uymJR5UV6kTbnL0%2FHuok1raOsU6rqYQHsmzicFS%2B7RU%2FTMWGwRjUQ9Li0FsCFK%2BahI83FcGyHkqJQj8Ycli8ihLITB9RhCR5JzI3LK3FOArHGGQ9cNypbAwlZwPDzpPt8TPO8r1Z1VfizOOZHjRyqWrN5YfyjbKvvwNWZ9KiJ5vdms0tXv9YYl1T%2F0S2epN%2BjX6Peqwbvbm%2F8RNYK30amhzo65MlD8kHoEHZRBDvGbhjwcGmLz6XErh%2Ffw82%2B3MBighQBT%2Fr7N9DQQvyLTcrFyWjUvyZXzBsLnyCITg6LadDeUyt5Sh43aKWwjudbu%2BTImCDhjwffIEj4%2F3fpx8uav" class="link-item" draggable="true" data-url="https://m10s.okta.com/app/m10s_sana_1/exklu0vsawvAip3Ar417/sso/saml?RelayState=eyJwYXRoIjoiLyJ9&SAMLRequest=lZJPT%2BMwEMW%2FSuR74rg0gVptpSwVohK7W9HCYS%2FVJJmChf9kPU4p3x43ZbVwAAnJB%2Bt53vj97JkSGN3Jqg%2BP9hb%2F9kghORhtSQ4HM9Z7Kx2QImnBIMnQyHX180aOslx23gXXOM3eWb52ABH6oJxlyXIxY9uymJR5UV6kTbnL0%2FHuok1raOsU6rqYQHsmzicFS%2B7RU%2FTMWGwRjUQ9Li0FsCFK%2BahI83FcGyHkqJQj8Ycli8ihLITB9RhCR5JzI3LK3FOArHGGQ9cNypbAwlZwPDzpPt8TPO8r1Z1VfizOOZHjRyqWrN5YfyjbKvvwNWZ9KiJ5vdms0tXv9YYl1T%2F0S2epN%2BjX6Peqwbvbm%2F8RNYK30amhzo65MlD8kHoEHZRBDvGbhjwcGmLz6XErh%2Ffw82%2B3MBighQBT%2Fr7N9DQQvyLTcrFyWjUvyZXzBsLnyCITg6LadDeUyt5Sh43aKWwjudbu%2BTImCDhjwffIEj4%2F3fpx8uav" data-title="m10s - Logg inn" data-domain="m10s.okta.com">
+                            <span class="link-text">m10s - Logg inn</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://app.tana.inc/welcome/app?ampDeviceId=b3a9c278-4177-4444-968a-345e3f6d3744&wsid=bkVkyeGImOC-" class="link-item" draggable="true" data-url="https://app.tana.inc/welcome/app?ampDeviceId=b3a9c278-4177-4444-968a-345e3f6d3744&wsid=bkVkyeGImOC-" data-title="Tana" data-domain="app.tana.inc">
+                            <span class="link-text">Tana</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="http://localhost:8888/tree" class="link-item" draggable="true" data-url="http://localhost:8888/tree" data-title="Jupyter" data-domain="localhost:8888">
+                            <span class="link-text">Jupyter</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://vannman.app.n8n.cloud/home/workflows" class="link-item" draggable="true" data-url="https://vannman.app.n8n.cloud/home/workflows" data-title="n8n" data-domain="vannman.app.n8n.cloud">
+                            <span class="link-text">n8n</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://schibsted.sana.ai/" class="link-item" draggable="true" data-url="https://schibsted.sana.ai/" data-title="Learning Lab" data-domain="schibsted.sana.ai">
+                            <span class="link-text">Learning Lab</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://app.nimway.com/maps" class="link-item" draggable="true" data-url="https://app.nimway.com/maps" data-title="Nimway Maps" data-domain="app.nimway.com">
+                            <span class="link-text">Nimway Maps</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://cdw.schibsted.io/#/view/schibsted-account-kpis/schibsted%20account%20kpis" class="link-item" draggable="true" data-url="https://cdw.schibsted.io/#/view/schibsted-account-kpis/schibsted%20account%20kpis" data-title="Viewfinder" data-domain="cdw.schibsted.io">
+                            <span class="link-text">Viewfinder</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://you.com/" class="link-item" draggable="true" data-url="https://you.com/" data-title="You.com | AI for workplace productivity" data-domain="you.com">
+                            <span class="link-text">You.com | AI for workplace productivity</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://planetpixelemporium.com/earth8081.html?PayerID=87TSXRRZTSQS4" class="link-item" draggable="true" data-url="https://planetpixelemporium.com/earth8081.html?PayerID=87TSXRRZTSQS4" data-title="Planet Earth Texture Maps - High Resolution" data-domain="planetpixelemporium.com">
+                            <span class="link-text">Planet Earth Texture Maps - High Resolution</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://www.xericdesign.com/purchase-checkout.php" class="link-item" draggable="true" data-url="https://www.xericdesign.com/purchase-checkout.php" data-title="Xeric Design, Ltd. | Purchase" data-domain="www.xericdesign.com">
+                            <span class="link-text">Xeric Design, Ltd. | Purchase</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://www.welcometothejungle.com/en/articles/modern-management-link-to-slavery" class="link-item" draggable="true" data-url="https://www.welcometothejungle.com/en/articles/modern-management-link-to-slavery" data-title="The link between modern management and slavery" data-domain="www.welcometothejungle.com">
+                            <span class="link-text">The link between modern management and slavery</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://graceavery.com/word2vec-fish-music-bass/" class="link-item" draggable="true" data-url="https://graceavery.com/word2vec-fish-music-bass/" data-title="Word2vec: fish + music = bass | graceavery" data-domain="graceavery.com">
+                            <span class="link-text">Word2vec: fish + music = bass | graceavery</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://learninglab.sana.ai/create/s/uQXoohNzKhc3/file:CDyuArqBiDaW" class="link-item" draggable="true" data-url="https://learninglab.sana.ai/create/s/uQXoohNzKhc3/file:CDyuArqBiDaW" data-title="New course | Learning Lab" data-domain="learninglab.sana.ai">
+                            <span class="link-text">New course | Learning Lab</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://learninglab.sana.ai/create/s/uQXoohNzKhc3/file:Bd1uyxv8q8Zk" class="link-item" draggable="true" data-url="https://learninglab.sana.ai/create/s/uQXoohNzKhc3/file:Bd1uyxv8q8Zk" data-title="New course | Learning Lab" data-domain="learninglab.sana.ai">
+                            <span class="link-text">New course | Learning Lab</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://www.radetfordyreetikk.no/reindrift-2/" class="link-item" draggable="true" data-url="https://www.radetfordyreetikk.no/reindrift-2/" data-title="Reindrift - Rådet for dyreetikk" data-domain="www.radetfordyreetikk.no">
+                            <span class="link-text">Reindrift - Rådet for dyreetikk</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://huggingface.co/spaces/ibm-granite/granite-docling-258M-WebGPU" class="link-item" draggable="true" data-url="https://huggingface.co/spaces/ibm-granite/granite-docling-258M-WebGPU" data-title="Granite Docling 258M WebGPU - a Hugging Face Space by ibm-granite" data-domain="huggingface.co">
+                            <span class="link-text">Granite Docling 258M WebGPU - a Hugging Face Space by ibm-granite</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://visualframeworks.com/portfolio/journey-of-a-thousand-miles/" class="link-item" draggable="true" data-url="https://visualframeworks.com/portfolio/journey-of-a-thousand-miles/" data-title="Journey of a thousand miles – visual frameworks" data-domain="visualframeworks.com">
+                            <span class="link-text">Journey of a thousand miles – visual frameworks</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://learninglab.sana.ai/create/s/zk4NELCDLoVs/file:B1bRiudonGjH" class="link-item" draggable="true" data-url="https://learninglab.sana.ai/create/s/zk4NELCDLoVs/file:B1bRiudonGjH" data-title="New course | Learning Lab" data-domain="learninglab.sana.ai">
+                            <span class="link-text">New course | Learning Lab</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://learninglab.sana.ai/create/s/b2otqVt6GZwL/file:g2uRnQ1V4uYr" class="link-item" draggable="true" data-url="https://learninglab.sana.ai/create/s/b2otqVt6GZwL/file:g2uRnQ1V4uYr" data-title="New course | Learning Lab" data-domain="learninglab.sana.ai">
+                            <span class="link-text">New course | Learning Lab</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://learninglab.sana.ai/create/s/b2otqVt6GZwL/file:ZB7xNtowbrRk" class="link-item" draggable="true" data-url="https://learninglab.sana.ai/create/s/b2otqVt6GZwL/file:ZB7xNtowbrRk" data-title="New course | Learning Lab" data-domain="learninglab.sana.ai">
+                            <span class="link-text">New course | Learning Lab</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://handbooks.simployer.com/?sasId=225f6505-b01d-4a25-b212-e4d91f073400" class="link-item" draggable="true" data-url="https://handbooks.simployer.com/?sasId=225f6505-b01d-4a25-b212-e4d91f073400" data-title="Håndbokportal" data-domain="handbooks.simployer.com">
+                            <span class="link-text">Håndbokportal</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://learninglab.sana.ai/create/s/zwYY8R6S7Jp3/file:53yVqRFRrhYQ" class="link-item" draggable="true" data-url="https://learninglab.sana.ai/create/s/zwYY8R6S7Jp3/file:53yVqRFRrhYQ" data-title="New course | Learning Lab" data-domain="learninglab.sana.ai">
+                            <span class="link-text">New course | Learning Lab</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                        <a href="https://learninglab.sana.ai/create/s/EwfbW6R4aSpX/file:fUCjTMxnqqn5" class="link-item" draggable="true" data-url="https://learninglab.sana.ai/create/s/EwfbW6R4aSpX/file:fUCjTMxnqqn5" data-title="Bob the Builder Module 7 - Building safely with AI  | Learning Lab" data-domain="learninglab.sana.ai">
+                            <span class="link-text">Bob the Builder Module 7 - Building safely with AI  | Learning Lab</span>
+                            <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                        </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trash Section -->
+        <div class="trash-section">
+            <div class="trash-header" id="trashHeader">
+                <span class="trash-icon">🗑️</span>
+                <span class="trash-title">Trash</span>
+                <span class="trash-count" id="trashCount">(0)</span>
+                <span class="trash-toggle">▼</span>
+            </div>
+            <div class="trash-content" id="trashContent">
+                <div class="trash-links" id="trashLinks"></div>
+            </div>
+        </div>
+
+        <footer>
+            &copy; 2025 Yohoo
+        </footer>
+    </div>
+
+    <!-- Debug Panel -->
+    <button class="debug-toggle" id="debugToggle">Debug</button>
+    <div class="debug-panel" id="debugPanel" style="display: none;">
+        <h3>Debug Log</h3>
+        <div class="debug-log" id="debugLog"></div>
+        <h3>localStorage Data</h3>
+        <div class="debug-storage" id="debugStorage"></div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div class="modal" id="addCategoryModal">
+        <div class="modal-content">
+            <div class="modal-title">Add New Category</div>
+            <input type="text" class="modal-input" id="categoryNameInput" placeholder="Category name...">
+            <input type="text" class="modal-input" id="categoryIconInput" placeholder="Icon (emoji)..." value="📁">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="modalCancelBtn">Cancel</button>
+                <button class="modal-btn" id="modalAddBtn">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // localStorage key
+        const STORAGE_KEY = 'yohoo-custom-layout';
+
+        // State
+        let draggedElement = null;
+        let draggedCategory = null;
+        let customCategories = [];
+        let categoryOrder = [];
+        let deletedLinks = [];
+
+        // Debug logging
+        const debugLog = [];
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            debugLog.push({ message: entry, type });
+            console.log(entry);
+
+            // Update debug panel if visible
+            const debugLogEl = document.getElementById('debugLog');
+            if (debugLogEl && debugLogEl.parentElement.parentElement.style.display !== 'none') {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = `debug-entry ${type}`;
+                entryDiv.textContent = entry;
+                debugLogEl.appendChild(entryDiv);
+                debugLogEl.scrollTop = debugLogEl.scrollHeight;
+            }
+        }
+
+        function updateDebugStorage() {
+            const debugStorageEl = document.getElementById('debugStorage');
+            if (debugStorageEl) {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    try {
+                        const data = JSON.parse(stored);
+                        debugStorageEl.innerHTML = `
+                            <div>Categories: ${data.categories?.length || 0}</div>
+                            <div>Link Assignments: ${Object.keys(data.linkAssignments || {}).length}</div>
+                            <div>Custom Links: ${data.customLinks?.length || 0}</div>
+                            <details style="margin-top: 5px;">
+                                <summary>Raw Data</summary>
+                                <pre style="font-size: 8px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        `;
+                    } catch (e) {
+                        debugStorageEl.textContent = 'Error parsing: ' + e.message;
+                    }
+                } else {
+                    debugStorageEl.textContent = 'No data stored';
+                }
+            }
+        }
+
+        // Debug toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const debugToggle = document.getElementById('debugToggle');
+            const debugPanel = document.getElementById('debugPanel');
+
+            debugToggle.addEventListener('click', () => {
+                if (debugPanel.style.display === 'none') {
+                    debugPanel.style.display = 'block';
+                    updateDebugStorage();
+                } else {
+                    debugPanel.style.display = 'none';
+                }
+            });
+        });
+
+        // Load custom layout from localStorage
+        function loadCustomLayout() {
+            log('Loading custom layout from localStorage');
+
+            // Mark all original links
+            const originalCount = document.querySelectorAll('.link-item').length;
+            document.querySelectorAll('.link-item').forEach(link => {
+                link.setAttribute('data-original', 'true');
+            });
+            log(`Marked ${originalCount} original links`);
+
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    log(`Loaded data: ${Object.keys(data.linkAssignments || {}).length} assignments, ${data.customLinks?.length || 0} custom links, ${data.categoryOrder?.length || 0} category order, ${data.deletedLinks?.length || 0} deleted`);
+
+                    if (data.categories) {
+                        customCategories = data.categories;
+                        log(`Restoring ${data.categories.length} custom categories`);
+                        renderCustomCategories();
+                    }
+                    if (data.categoryOrder) {
+                        categoryOrder = data.categoryOrder;
+                    }
+                    if (data.deletedLinks) {
+                        deletedLinks = data.deletedLinks;
+                        log(`Restored ${deletedLinks.length} deleted links`);
+                        updateTrashDisplay();
+                    }
+                    if (data.customLinks) {
+                        log(`Restoring ${data.customLinks.length} custom links`);
+                        restoreCustomLinks(data.customLinks, data.linkAssignments);
+                    }
+                    if (data.linkAssignments) {
+                        log(`Applying ${Object.keys(data.linkAssignments).length} link assignments`);
+                        applyLinkAssignments(data.linkAssignments);
+                    }
+                    if (data.categoryOrder) {
+                        restoreCategoryOrder();
+                    }
+                    log('Custom layout loaded successfully', 'success');
+                } catch (e) {
+                    log('Error loading custom layout: ' + e.message, 'error');
+                    console.error('Error loading custom layout:', e);
+                }
+            } else {
+                log('No saved layout found');
+            }
+        }
+
+        // Restore custom-added links
+        function restoreCustomLinks(customLinks, assignments) {
+            customLinks.forEach(linkData => {
+                const newLink = document.createElement('a');
+                newLink.href = linkData.url;
+                newLink.className = 'link-item';
+                newLink.draggable = true;
+                newLink.dataset.url = linkData.url;
+                newLink.dataset.title = linkData.title;
+                newLink.dataset.domain = linkData.domain;
+                newLink.textContent = linkData.title;
+
+                // Add event listeners
+                newLink.addEventListener('dragstart', handleDragStart);
+                newLink.addEventListener('dragend', handleDragEnd);
+
+                // Find target container
+                const targetId = assignments[linkData.url];
+                if (targetId) {
+                    let targetContainer = document.querySelector(`[data-subcategory="${targetId}"] .links-list`);
+                    if (!targetContainer) {
+                        targetContainer = document.querySelector(`[data-category="${targetId}"] .links-list`);
+                    }
+                    if (targetContainer) {
+                        targetContainer.appendChild(newLink);
+                    }
+                }
+            });
+        }
+
+        // Save category order
+        function saveCategoryOrder() {
+            const order = [];
+            document.querySelectorAll('.category').forEach(cat => {
+                order.push(cat.dataset.category);
+            });
+            categoryOrder = order;
+            log(`Saved category order: ${order.join(', ')}`);
+            saveCustomLayout();
+        }
+
+        // Restore category order
+        function restoreCategoryOrder() {
+            if (!categoryOrder || categoryOrder.length === 0) return;
+
+            log(`Restoring category order: ${categoryOrder.join(', ')}`);
+
+            const container = document.getElementById('categoriesContainer');
+            const categories = Array.from(document.querySelectorAll('.category'));
+
+            // Reorder categories based on saved order
+            categoryOrder.forEach(catId => {
+                const category = categories.find(cat => cat.dataset.category === catId);
+                if (category) {
+                    container.appendChild(category);
+                }
+            });
+
+            log('Category order restored', 'success');
+        }
+
+        // Save custom layout to localStorage
+        function saveCustomLayout() {
+            log('Saving custom layout to localStorage');
+
+            const linkAssignments = {};
+            const customLinks = [];
+
+            // Save link positions and custom links
+            document.querySelectorAll('.link-item').forEach(link => {
+                const url = link.dataset.url;
+                const container = link.closest('.links-list');
+                const subcategory = link.closest('.subcategory');
+                const category = link.closest('.category');
+
+                // Save assignment
+                let assignment = null;
+                if (subcategory) {
+                    assignment = subcategory.dataset.subcategory;
+                    linkAssignments[url] = assignment;
+                } else if (category) {
+                    assignment = category.dataset.category;
+                    linkAssignments[url] = assignment;
+                }
+
+                // Check if this is a custom-added link (no original bookmark data)
+                if (!link.hasAttribute('data-original')) {
+                    customLinks.push({
+                        url: url,
+                        title: link.dataset.title || link.textContent,
+                        domain: link.dataset.domain || ''
+                    });
+                }
+            });
+
+            const data = {
+                categories: customCategories,
+                linkAssignments: linkAssignments,
+                customLinks: customLinks,
+                categoryOrder: categoryOrder,
+                deletedLinks: deletedLinks
+            };
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            log(`Saved: ${Object.keys(linkAssignments).length} assignments, ${customLinks.length} custom links, ${categoryOrder.length} category order, ${deletedLinks.length} deleted`, 'success');
+            updateDebugStorage();
+        }
+
+        // Apply saved link assignments
+        function applyLinkAssignments(assignments) {
+            let movedCount = 0;
+            let notFoundCount = 0;
+
+            Object.entries(assignments).forEach(([url, targetId]) => {
+                // Find link by URL (using attribute selector without escaping issues)
+                const links = document.querySelectorAll('.link-item');
+                const link = Array.from(links).find(l => l.dataset.url === url);
+
+                if (!link) {
+                    notFoundCount++;
+                    log(`Link not found for URL: ${url.substring(0, 50)}...`, 'error');
+                    return;
+                }
+
+                // Find target container
+                let targetContainer = document.querySelector(`[data-subcategory="${targetId}"] .links-list`);
+                if (!targetContainer) {
+                    targetContainer = document.querySelector(`[data-category="${targetId}"] .links-list`);
+                }
+
+                if (!targetContainer) {
+                    log(`Target container not found: ${targetId}`, 'error');
+                    return;
+                }
+
+                if (link.parentElement !== targetContainer) {
+                    const linkTitle = link.dataset.title || link.textContent;
+                    log(`Moving "${linkTitle.substring(0, 30)}" to ${targetId}`);
+                    targetContainer.appendChild(link);
+                    movedCount++;
+                }
+            });
+
+            log(`Applied assignments: ${movedCount} moved, ${notFoundCount} not found`, movedCount > 0 ? 'success' : 'info');
+        }
+
+        // Render custom categories
+        function renderCustomCategories() {
+            const container = document.getElementById('categoriesContainer');
+
+            customCategories.forEach(cat => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                categoryDiv.dataset.category = cat.id;
+
+                categoryDiv.innerHTML = `
+                    <div class="category-header">
+                        <span class="category-icon">${cat.icon}</span>
+                        <h2 class="category-title">${cat.title}</h2>
+                    </div>
+                    <div class="links-list"></div>
+                `;
+
+                container.appendChild(categoryDiv);
+                setupDragAndDrop();
+            });
+        }
+
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            const options = {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('currentTime').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // Search functionality
+        const searchBox = document.getElementById('searchBox');
+        const categories = document.querySelectorAll('.category');
+        const linkItems = document.querySelectorAll('.link-item');
+
+        searchBox.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+
+            if (searchTerm === '') {
+                document.querySelectorAll('.category').forEach(cat => cat.classList.remove('hidden'));
+                document.querySelectorAll('.link-item').forEach(link => link.classList.remove('hidden'));
+                return;
+            }
+
+            // Filter links
+            document.querySelectorAll('.link-item').forEach(link => {
+                const text = link.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    link.classList.remove('hidden');
+                } else {
+                    link.classList.add('hidden');
+                }
+            });
+
+            // Hide categories with no visible links
+            document.querySelectorAll('.category').forEach(category => {
+                const visibleLinks = category.querySelectorAll('.link-item:not(.hidden)');
+                if (visibleLinks.length === 0) {
+                    category.classList.add('hidden');
+                } else {
+                    category.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchBox) {
+                e.preventDefault();
+                searchBox.focus();
+            }
+
+            if (e.key === 'Escape') {
+                if (document.activeElement === searchBox) {
+                    searchBox.value = '';
+                    searchBox.dispatchEvent(new Event('input'));
+                    searchBox.blur();
+                }
+                // Close modal
+                document.getElementById('addCategoryModal').classList.remove('show');
+            }
+        });
+
+        // Drag and Drop functionality
+        let isDragging = false;
+        let dragStartPos = null;
+
+        function setupDragAndDrop() {
+            // Make all link items draggable
+            document.querySelectorAll('.link-item').forEach(link => {
+                link.addEventListener('mousedown', handleMouseDown);
+                link.addEventListener('dragstart', handleDragStart);
+                link.addEventListener('dragend', handleDragEnd);
+                link.addEventListener('click', handleLinkClick);
+            });
+
+            // Make all link containers drop targets
+            document.querySelectorAll('.links-list').forEach(container => {
+                container.addEventListener('dragover', handleDragOver);
+                container.addEventListener('drop', handleDrop);
+                container.addEventListener('dragleave', handleDragLeave);
+            });
+
+            // Make categories draggable
+            setupCategoryDragAndDrop();
+        }
+
+        function setupCategoryDragAndDrop() {
+            document.querySelectorAll('.category').forEach(category => {
+                category.setAttribute('draggable', 'true');
+                category.addEventListener('dragstart', handleCategoryDragStart);
+                category.addEventListener('dragend', handleCategoryDragEnd);
+                category.addEventListener('dragover', handleCategoryDragOver);
+                category.addEventListener('drop', handleCategoryDrop);
+            });
+        }
+
+        function handleCategoryDragStart(e) {
+            // Only drag if we're dragging from the header, not a link
+            if (e.target.classList.contains('link-item')) {
+                e.preventDefault();
+                return;
+            }
+
+            draggedCategory = this;
+            this.classList.add('dragging-category');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/x-yohoo-category', this.dataset.category);
+            log(`CATEGORY DRAG START: ${this.querySelector('.category-title').textContent}`);
+        }
+
+        function handleCategoryDragEnd(e) {
+            this.classList.remove('dragging-category');
+            document.querySelectorAll('.category-drop-zone').forEach(zone => {
+                zone.classList.remove('active');
+            });
+            draggedCategory = null;
+        }
+
+        function handleCategoryDragOver(e) {
+            // Only handle category drags
+            if (!draggedCategory || draggedCategory === this) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Determine if we should insert before or after
+            const rect = this.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            const insertBefore = e.clientY < midpoint;
+
+            // Show visual indicator
+            this.style.borderTop = insertBefore ? '3px solid #c4a3ff' : '';
+            this.style.borderBottom = !insertBefore ? '3px solid #c4a3ff' : '';
+
+            return false;
+        }
+
+        function handleCategoryDrop(e) {
+            if (!draggedCategory || draggedCategory === this) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Clear visual indicators
+            this.style.borderTop = '';
+            this.style.borderBottom = '';
+
+            // Determine insertion point
+            const rect = this.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            const insertBefore = e.clientY < midpoint;
+
+            const container = this.parentElement;
+            if (insertBefore) {
+                container.insertBefore(draggedCategory, this);
+            } else {
+                container.insertBefore(draggedCategory, this.nextSibling);
+            }
+
+            log(`CATEGORY MOVED: ${draggedCategory.querySelector('.category-title').textContent} ${insertBefore ? 'before' : 'after'} ${this.querySelector('.category-title').textContent}`);
+
+            // Save the new order
+            saveCategoryOrder();
+        }
+
+        function handleMouseDown(e) {
+            dragStartPos = { x: e.clientX, y: e.clientY };
+            isDragging = false;
+        }
+
+        function handleLinkClick(e) {
+            // If we were dragging, prevent navigation
+            if (isDragging) {
+                e.preventDefault();
+                isDragging = false;
+            }
+        }
+
+        function handleDragStart(e) {
+            isDragging = true;
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            // Use a custom data type for internal drags
+            e.dataTransfer.setData('text/x-yohoo-link', this.dataset.url);
+
+            // Prevent navigation during drag
+            e.stopPropagation();
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+
+            // Remove all drag-over classes
+            document.querySelectorAll('.drag-over').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+
+            // Reset dragged element
+            draggedElement = null;
+            isDragging = false;
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+
+            this.classList.add('drag-over');
+            const parent = this.closest('.category, .subcategory');
+            if (parent) {
+                parent.classList.add('drag-over');
+            }
+
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            if (e.target === this) {
+                this.classList.remove('drag-over');
+                const parent = this.closest('.category, .subcategory');
+                if (parent) {
+                    parent.classList.remove('drag-over');
+                }
+            }
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+
+            this.classList.remove('drag-over');
+            const parent = this.closest('.category, .subcategory');
+            if (parent) {
+                parent.classList.remove('drag-over');
+            }
+
+            // Check if this is an internal drag (we have draggedElement)
+            if (draggedElement) {
+                // Internal drag - just move the element
+                if (draggedElement.parentElement !== this) {
+                    const linkTitle = draggedElement.dataset.title || draggedElement.textContent;
+                    const targetSubcat = this.closest('.subcategory');
+                    const targetCat = this.closest('.category');
+                    const targetName = targetSubcat?.dataset.subcategory || targetCat?.dataset.category || 'unknown';
+
+                    log(`DROP: Moving "${linkTitle.substring(0, 30)}" to ${targetName}`);
+                    this.appendChild(draggedElement);
+                    saveCustomLayout();
+                }
+            } else {
+                // External drag from URL bar
+                const urlData = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+
+                if (urlData && urlData.startsWith('http')) {
+                    // Create new link from dropped URL
+                    const newLink = document.createElement('a');
+                    newLink.href = urlData;
+                    newLink.className = 'link-item';
+                    newLink.draggable = true;
+                    newLink.dataset.url = urlData;
+
+                    // Try to extract domain for title
+                    try {
+                        const url = new URL(urlData);
+                        newLink.dataset.domain = url.hostname;
+                        newLink.dataset.title = url.hostname;
+                        newLink.textContent = url.hostname;
+                    } catch (err) {
+                        newLink.dataset.title = urlData;
+                        newLink.textContent = urlData;
+                    }
+
+                    // Add event listeners
+                    newLink.addEventListener('mousedown', handleMouseDown);
+                    newLink.addEventListener('dragstart', handleDragStart);
+                    newLink.addEventListener('dragend', handleDragEnd);
+                    newLink.addEventListener('click', handleLinkClick);
+
+                    this.appendChild(newLink);
+                    saveCustomLayout();
+                }
+            }
+
+            return false;
+        }
+
+        // Add Category functionality
+        const addCategoryBtn = document.getElementById('addCategoryBtn');
+        const modal = document.getElementById('addCategoryModal');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const modalAddBtn = document.getElementById('modalAddBtn');
+        const categoryNameInput = document.getElementById('categoryNameInput');
+        const categoryIconInput = document.getElementById('categoryIconInput');
+
+        addCategoryBtn.addEventListener('click', () => {
+            modal.classList.add('show');
+            categoryNameInput.focus();
+        });
+
+        modalCancelBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+            categoryNameInput.value = '';
+            categoryIconInput.value = '📁';
+        });
+
+        modalAddBtn.addEventListener('click', () => {
+            const name = categoryNameInput.value.trim();
+            const icon = categoryIconInput.value.trim() || '📁';
+
+            if (name) {
+                const id = 'custom-' + Date.now();
+                const newCategory = {
+                    id: id,
+                    title: name,
+                    icon: icon
+                };
+
+                customCategories.push(newCategory);
+
+                // Create category element
+                const container = document.getElementById('categoriesContainer');
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                categoryDiv.dataset.category = id;
+
+                categoryDiv.innerHTML = `
+                    <div class="category-header">
+                        <span class="category-icon">${icon}</span>
+                        <h2 class="category-title">${name}</h2>
+                    </div>
+                    <div class="links-list"></div>
+                `;
+
+                container.appendChild(categoryDiv);
+
+                // Setup drag and drop for new category
+                setupDragAndDrop();
+
+                // Save to localStorage
+                saveCustomLayout();
+
+                // Reset and close modal
+                modal.classList.remove('show');
+                categoryNameInput.value = '';
+                categoryIconInput.value = '📁';
+            }
+        });
+
+        // Enter key in modal inputs
+        categoryNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                modalAddBtn.click();
+            }
+        });
+
+        categoryIconInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                modalAddBtn.click();
+            }
+        });
+
+        // Delete/Undelete functionality
+        function deleteLink(linkElement) {
+            const url = linkElement.dataset.url;
+            const title = linkElement.dataset.title || linkElement.querySelector('.link-text')?.textContent || 'Unknown';
+            const domain = linkElement.dataset.domain || '';
+
+            // Find which category it's in
+            const subcategory = linkElement.closest('.subcategory');
+            const category = linkElement.closest('.category');
+            const categoryId = subcategory?.dataset.subcategory || category?.dataset.category;
+
+            log(`DELETE: "${title.substring(0, 30)}" from ${categoryId}`);
+
+            // Store deleted link info
+            deletedLinks.push({
+                url: url,
+                title: title,
+                domain: domain,
+                categoryId: categoryId,
+                href: linkElement.href,
+                isOriginal: linkElement.hasAttribute('data-original')
+            });
+
+            // Remove from DOM
+            linkElement.remove();
+
+            // Update trash
+            updateTrashDisplay();
+
+            // Save
+            saveCustomLayout();
+        }
+
+        function undeleteLink(index) {
+            const linkData = deletedLinks[index];
+            if (!linkData) return;
+
+            log(`UNDELETE: "${linkData.title.substring(0, 30)}" to ${linkData.categoryId}`);
+
+            // Find target container
+            let targetContainer = document.querySelector(`[data-subcategory="${linkData.categoryId}"] .links-list`);
+            if (!targetContainer) {
+                targetContainer = document.querySelector(`[data-category="${linkData.categoryId}"] .links-list`);
+            }
+
+            if (!targetContainer) {
+                log(`Could not find category ${linkData.categoryId}, placing in Misc`, 'error');
+                targetContainer = document.querySelector(`[data-category="misc"] .links-list`);
+            }
+
+            if (targetContainer) {
+                // Create new link element
+                const newLink = document.createElement('a');
+                newLink.href = linkData.href;
+                newLink.className = 'link-item';
+                newLink.draggable = true;
+                newLink.dataset.url = linkData.url;
+                newLink.dataset.title = linkData.title;
+                newLink.dataset.domain = linkData.domain;
+                if (linkData.isOriginal) {
+                    newLink.setAttribute('data-original', 'true');
+                }
+
+                newLink.innerHTML = `
+                    <span class="link-text">${linkData.title}</span>
+                    <span class="delete-icon" onclick="event.preventDefault(); deleteLink(this.parentElement);">🗑️</span>
+                `;
+
+                // Add event listeners
+                newLink.addEventListener('mousedown', handleMouseDown);
+                newLink.addEventListener('dragstart', handleDragStart);
+                newLink.addEventListener('dragend', handleDragEnd);
+                newLink.addEventListener('click', handleLinkClick);
+
+                targetContainer.appendChild(newLink);
+            }
+
+            // Remove from deleted list
+            deletedLinks.splice(index, 1);
+
+            // Update trash
+            updateTrashDisplay();
+
+            // Save
+            saveCustomLayout();
+        }
+
+        function updateTrashDisplay() {
+            const trashLinks = document.getElementById('trashLinks');
+            const trashCount = document.getElementById('trashCount');
+
+            trashCount.textContent = `(${deletedLinks.length})`;
+
+            if (deletedLinks.length === 0) {
+                trashLinks.innerHTML = '<div style="color: #8e72b8; font-size: 11px; padding: 8px;">No deleted links</div>';
+            } else {
+                trashLinks.innerHTML = deletedLinks.map((link, index) => `
+                    <div class="trash-item">
+                        <span class="trash-item-link">${link.title}</span>
+                        <button class="undelete-btn" onclick="undeleteLink(${index})">Restore</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Trash toggle
+        document.getElementById('trashHeader').addEventListener('click', () => {
+            const content = document.getElementById('trashContent');
+            const toggle = document.querySelector('.trash-toggle');
+            content.classList.toggle('expanded');
+            toggle.textContent = content.classList.contains('expanded') ? '▲' : '▼';
+        });
+
+        // Initialize
+        loadCustomLayout();
+        setupDragAndDrop();
+        updateTrashDisplay();
+    </script>
+</body>
+</html>

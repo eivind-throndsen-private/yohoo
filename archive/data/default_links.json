@@ -1,0 +1,282 @@
+{
+  "sections": [
+    {
+      "id": "norway-essentials",
+      "name": "Norway Essentials",
+      "emoji": "🇳🇴",
+      "category": "norway",
+      "links": [
+        {"title": "Yr (Weather)", "url": "https://www.yr.no/en", "domain": "yr.no"},
+        {"title": "Finn.no", "url": "https://www.finn.no", "domain": "finn.no"},
+        {"title": "1881", "url": "https://www.1881.no", "domain": "1881.no"},
+        {"title": "Gulesider", "url": "https://www.gulesider.no", "domain": "gulesider.no"},
+        {"title": "Posten", "url": "https://www.posten.no", "domain": "posten.no"},
+        {"title": "Vinmonopolet", "url": "https://www.vinmonopolet.no", "domain": "vinmonopolet.no"}
+      ]
+    },
+    {
+      "id": "transport",
+      "name": "Transport & Travel",
+      "emoji": "🚇",
+      "category": "norway",
+      "links": [
+        {"title": "Entur", "url": "https://www.entur.no", "domain": "entur.no"},
+        {"title": "Vy", "url": "https://www.vy.no", "domain": "vy.no"},
+        {"title": "Ruter", "url": "https://ruter.no", "domain": "ruter.no"},
+        {"title": "Avinor", "url": "https://avinor.no", "domain": "avinor.no"},
+        {"title": "Norwegian", "url": "https://www.norwegian.com", "domain": "norwegian.com"},
+        {"title": "SAS", "url": "https://www.sas.no", "domain": "sas.no"}
+      ]
+    },
+    {
+      "id": "norwegian-news",
+      "name": "Norwegian News",
+      "emoji": "📰",
+      "category": "news",
+      "links": [
+        {"title": "NRK", "url": "https://www.nrk.no", "domain": "nrk.no"},
+        {"title": "VG", "url": "https://www.vg.no", "domain": "vg.no"},
+        {"title": "Aftenposten", "url": "https://www.aftenposten.no", "domain": "aftenposten.no"},
+        {"title": "Dagbladet", "url": "https://www.dagbladet.no", "domain": "dagbladet.no"},
+        {"title": "TV2", "url": "https://www.tv2.no", "domain": "tv2.no"},
+        {"title": "E24", "url": "https://e24.no", "domain": "e24.no"},
+        {"title": "Digi.no", "url": "https://www.digi.no", "domain": "digi.no"},
+        {"title": "News in English", "url": "https://www.newsinenglish.no", "domain": "newsinenglish.no"}
+      ]
+    },
+    {
+      "id": "international-news",
+      "name": "International News",
+      "emoji": "🌍",
+      "category": "news",
+      "links": [
+        {"title": "BBC News", "url": "https://www.bbc.com/news", "domain": "bbc.com"},
+        {"title": "The Guardian", "url": "https://www.theguardian.com", "domain": "theguardian.com"},
+        {"title": "Reuters", "url": "https://www.reuters.com", "domain": "reuters.com"},
+        {"title": "AP News", "url": "https://apnews.com", "domain": "apnews.com"},
+        {"title": "The New York Times", "url": "https://www.nytimes.com", "domain": "nytimes.com"},
+        {"title": "Ars Technica", "url": "https://arstechnica.com", "domain": "arstechnica.com"},
+        {"title": "The Economist", "url": "https://www.economist.com", "domain": "economist.com"}
+      ]
+    },
+    {
+      "id": "norwegian-streaming",
+      "name": "Norwegian Streaming",
+      "emoji": "📺",
+      "category": "entertainment",
+      "links": [
+        {"title": "NRK TV", "url": "https://tv.nrk.no", "domain": "tv.nrk.no"},
+        {"title": "TV2 Play", "url": "https://play.tv2.no", "domain": "play.tv2.no"},
+        {"title": "Viaplay", "url": "https://viaplay.no", "domain": "viaplay.no"},
+        {"title": "Discovery+", "url": "https://www.discoveryplus.com/no", "domain": "discoveryplus.com"}
+      ]
+    },
+    {
+      "id": "international-streaming",
+      "name": "International Streaming",
+      "emoji": "🎬",
+      "category": "entertainment",
+      "links": [
+        {"title": "Netflix", "url": "https://www.netflix.com", "domain": "netflix.com"},
+        {"title": "Disney+", "url": "https://www.disneyplus.com", "domain": "disneyplus.com"},
+        {"title": "HBO Max", "url": "https://www.max.com", "domain": "max.com"},
+        {"title": "YouTube", "url": "https://www.youtube.com", "domain": "youtube.com"},
+        {"title": "Spotify", "url": "https://open.spotify.com", "domain": "spotify.com"},
+        {"title": "Apple Music", "url": "https://music.apple.com", "domain": "music.apple.com"}
+      ]
+    },
+    {
+      "id": "events-culture",
+      "name": "Events & Culture",
+      "emoji": "🎫",
+      "category": "entertainment",
+      "links": [
+        {"title": "Ticketmaster Norway", "url": "https://www.ticketmaster.no", "domain": "ticketmaster.no"},
+        {"title": "Billettservice", "url": "https://www.billettservice.no", "domain": "billettservice.no"},
+        {"title": "VisitOslo Events", "url": "https://www.visitoslo.com/en/whats-on/", "domain": "visitoslo.com"},
+        {"title": "Nasjonalmuseet", "url": "https://www.nasjonalmuseet.no", "domain": "nasjonalmuseet.no"},
+        {"title": "Munchmuseet", "url": "https://www.munchmuseet.no", "domain": "munchmuseet.no"},
+        {"title": "Cinemateket", "url": "https://www.cinemateket.no", "domain": "cinemateket.no"},
+        {"title": "Den Norske Opera", "url": "https://operaen.no", "domain": "operaen.no"}
+      ]
+    },
+    {
+      "id": "public-services",
+      "name": "Public Services",
+      "emoji": "🏛️",
+      "category": "government",
+      "links": [
+        {"title": "Altinn", "url": "https://www.altinn.no", "domain": "altinn.no"},
+        {"title": "Skatteetaten", "url": "https://www.skatteetaten.no", "domain": "skatteetaten.no"},
+        {"title": "NAV", "url": "https://www.nav.no", "domain": "nav.no"},
+        {"title": "UDI", "url": "https://www.udi.no", "domain": "udi.no"},
+        {"title": "Helsenorge", "url": "https://www.helsenorge.no", "domain": "helsenorge.no"},
+        {"title": "Lånekassen", "url": "https://lanekassen.no", "domain": "lanekassen.no"},
+        {"title": "Folkeregisteret", "url": "https://www.skatteetaten.no/person/folkeregister/", "domain": "skatteetaten.no"}
+      ]
+    },
+    {
+      "id": "banking",
+      "name": "Banking & Finance",
+      "emoji": "🏦",
+      "category": "government",
+      "links": [
+        {"title": "DNB", "url": "https://www.dnb.no", "domain": "dnb.no"},
+        {"title": "Nordea", "url": "https://www.nordea.no", "domain": "nordea.no"},
+        {"title": "Sbanken", "url": "https://www.sbanken.no", "domain": "sbanken.no"},
+        {"title": "Vipps", "url": "https://www.vipps.no", "domain": "vipps.no"}
+      ]
+    },
+    {
+      "id": "developer-tools",
+      "name": "Development & Docs",
+      "emoji": "💻",
+      "category": "development",
+      "links": [
+        {"title": "GitHub", "url": "https://github.com", "domain": "github.com"},
+        {"title": "Stack Overflow", "url": "https://stackoverflow.com", "domain": "stackoverflow.com"},
+        {"title": "MDN Web Docs", "url": "https://developer.mozilla.org", "domain": "developer.mozilla.org"},
+        {"title": "Can I Use", "url": "https://caniuse.com", "domain": "caniuse.com"},
+        {"title": "DevDocs", "url": "https://devdocs.io", "domain": "devdocs.io"},
+        {"title": "Hacker News", "url": "https://news.ycombinator.com", "domain": "news.ycombinator.com"},
+        {"title": "Dev.to", "url": "https://dev.to", "domain": "dev.to"}
+      ]
+    },
+    {
+      "id": "productivity",
+      "name": "Productivity & Tools",
+      "emoji": "🛠️",
+      "category": "tools",
+      "links": [
+        {"title": "Notion", "url": "https://www.notion.so", "domain": "notion.so"},
+        {"title": "Figma", "url": "https://www.figma.com", "domain": "figma.com"},
+        {"title": "Miro", "url": "https://miro.com", "domain": "miro.com"},
+        {"title": "Canva", "url": "https://www.canva.com", "domain": "canva.com"},
+        {"title": "Excalidraw", "url": "https://excalidraw.com", "domain": "excalidraw.com"},
+        {"title": "Carbon", "url": "https://carbon.now.sh", "domain": "carbon.now.sh"},
+        {"title": "Regex101", "url": "https://regex101.com", "domain": "regex101.com"}
+      ]
+    },
+    {
+      "id": "ai-research",
+      "name": "AI & Research",
+      "emoji": "🤖",
+      "category": "tools",
+      "links": [
+        {"title": "Claude", "url": "https://claude.ai", "domain": "claude.ai"},
+        {"title": "ChatGPT", "url": "https://chat.openai.com", "domain": "chat.openai.com"},
+        {"title": "Perplexity", "url": "https://www.perplexity.ai", "domain": "perplexity.ai"},
+        {"title": "Wolfram Alpha", "url": "https://www.wolframalpha.com", "domain": "wolframalpha.com"},
+        {"title": "Google Scholar", "url": "https://scholar.google.com", "domain": "scholar.google.com"}
+      ]
+    },
+    {
+      "id": "norwegian-language",
+      "name": "Norwegian Language",
+      "emoji": "📚",
+      "category": "learning",
+      "links": [
+        {"title": "Duolingo Norwegian", "url": "https://www.duolingo.com/course/no-BO/en", "domain": "duolingo.com"},
+        {"title": "LearnNoW (NTNU)", "url": "https://www.ntnu.edu/learnnow", "domain": "ntnu.edu"},
+        {"title": "NorwegianClass101", "url": "https://www.norwegianclass101.com", "domain": "norwegianclass101.com"},
+        {"title": "Ordbøkene", "url": "https://ordbokene.no", "domain": "ordbokene.no"}
+      ]
+    },
+    {
+      "id": "online-learning",
+      "name": "Online Learning",
+      "emoji": "🎓",
+      "category": "learning",
+      "links": [
+        {"title": "Coursera", "url": "https://www.coursera.org", "domain": "coursera.org"},
+        {"title": "edX", "url": "https://www.edx.org", "domain": "edx.org"},
+        {"title": "Khan Academy", "url": "https://www.khanacademy.org", "domain": "khanacademy.org"},
+        {"title": "Udemy", "url": "https://www.udemy.com", "domain": "udemy.com"},
+        {"title": "Brilliant", "url": "https://brilliant.org", "domain": "brilliant.org"}
+      ]
+    },
+    {
+      "id": "outdoors",
+      "name": "Outdoors & Nature",
+      "emoji": "🏔️",
+      "category": "lifestyle",
+      "links": [
+        {"title": "UT.no", "url": "https://ut.no", "domain": "ut.no"},
+        {"title": "Inatur", "url": "https://www.inatur.no", "domain": "inatur.no"},
+        {"title": "DNT", "url": "https://www.dnt.no", "domain": "dnt.no"},
+        {"title": "Skisporet", "url": "https://skisporet.no", "domain": "skisporet.no"},
+        {"title": "Surf Forecast", "url": "https://www.surf-forecast.com", "domain": "surf-forecast.com"}
+      ]
+    },
+    {
+      "id": "food",
+      "name": "Food & Recipes",
+      "emoji": "🍳",
+      "category": "lifestyle",
+      "links": [
+        {"title": "MatPrat", "url": "https://www.matprat.no", "domain": "matprat.no"},
+        {"title": "Tine Oppskrifter", "url": "https://www.tine.no/oppskrifter", "domain": "tine.no"},
+        {"title": "Serious Eats", "url": "https://www.seriouseats.com", "domain": "seriouseats.com"},
+        {"title": "Colonyal", "url": "https://colonyal.no", "domain": "colonyal.no"},
+        {"title": "Oda", "url": "https://oda.com", "domain": "oda.com"}
+      ]
+    },
+    {
+      "id": "curiosity",
+      "name": "Curiosity & Fun",
+      "emoji": "🎲",
+      "category": "lifestyle",
+      "links": [
+        {"title": "Wikipedia", "url": "https://www.wikipedia.org", "domain": "wikipedia.org"},
+        {"title": "Reddit", "url": "https://www.reddit.com", "domain": "reddit.com"},
+        {"title": "r/Norway", "url": "https://www.reddit.com/r/norway", "domain": "reddit.com"},
+        {"title": "Kvasir", "url": "https://www.kvasir.no", "domain": "kvasir.no"},
+        {"title": "The Pudding", "url": "https://pudding.cool", "domain": "pudding.cool"},
+        {"title": "Atlas Obscura", "url": "https://www.atlasobscura.com", "domain": "atlasobscura.com"},
+        {"title": "Wait But Why", "url": "https://waitbutwhy.com", "domain": "waitbutwhy.com"}
+      ]
+    }
+  ],
+  "userSections": [
+    {
+      "id": "my-work",
+      "name": "My Work",
+      "emoji": "🏢",
+      "category": "user",
+      "placeholder": "Add your company intranet, project boards, and work tools here",
+      "links": []
+    },
+    {
+      "id": "my-projects",
+      "name": "My Projects",
+      "emoji": "💼",
+      "category": "user",
+      "placeholder": "Your current side projects, repos, and builds",
+      "links": []
+    },
+    {
+      "id": "reading-list",
+      "name": "Reading List",
+      "emoji": "📖",
+      "category": "user",
+      "placeholder": "Articles and sites you want to revisit",
+      "links": []
+    },
+    {
+      "id": "personal",
+      "name": "Personal",
+      "emoji": "🏠",
+      "category": "user",
+      "placeholder": "Banking, utilities, subscriptions - your private links",
+      "links": []
+    },
+    {
+      "id": "favorites",
+      "name": "Favorites",
+      "emoji": "⭐",
+      "category": "user",
+      "placeholder": "Your most-used links - drag anything here",
+      "links": []
+    }
+  ]
+}
