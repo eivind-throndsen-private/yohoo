@@ -88,16 +88,44 @@
             font-weight: 700;
         }
 
-        .controls {
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            align-items: start;
+            width: 100%;
+        }
+
+        .controls-left {
             display: flex;
-            gap: 0.5rem;
-            align-items: center;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .controls-center {
+            display: flex;
+            justify-content: center;
+        }
+
+        .controls-right {
+            display: flex;
+            justify-content: flex-end;
         }
 
         .search-container {
-            flex-grow: 1;
-            max-width: 300px;
+            width: 100%;
+            max-width: 100%;
             position: relative;
+        }
+
+        .header-hint {
+            font-size: 0.45rem;
+            color: var(--text-muted);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.4rem;
         }
 
         input[type="text"] {
@@ -131,17 +159,23 @@
         button {
             padding: 0.375rem 0.75rem;
             border-radius: var(--radius);
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             background-color: var(--header-color);
             color: var(--bg-color);
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
             font-size: calc(0.5rem * var(--font-scale));
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18), 0 2px 6px rgba(0, 0, 0, 0.18);
         }
 
         button:hover {
             opacity: 0.9;
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 0 rgba(255, 255, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.24);
         }
 
         /* Font Size Slider - Bottom Controls */
@@ -424,18 +458,18 @@
             font-size: calc(0.5rem * var(--font-scale));
         }
 
-        .delete-btn, .edit-btn, .fetch-btn {
+        .delete-btn, .edit-btn {
             background: none;
             color: var(--text-muted);
             padding: 2px;
             opacity: 0;
             pointer-events: none;
             font-size: calc(0.5rem * var(--font-scale));
+            box-shadow: none;
         }
 
         .link-item:hover .delete-btn,
-        .link-item:hover .edit-btn,
-        .link-item:hover .fetch-btn {
+        .link-item:hover .edit-btn {
             opacity: 1;
             pointer-events: auto;
         }
@@ -446,15 +480,6 @@
 
         .edit-btn:hover {
             color: var(--link-color);
-        }
-
-        .fetch-btn:hover {
-            color: var(--link-color);
-        }
-
-        .fetch-btn.fetching {
-            opacity: 0.5;
-            cursor: wait;
         }
 
         .link-actions {
@@ -472,15 +497,20 @@
 
         /* Bottom Controls */
         .bottom-controls {
-            display: flex;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
             align-items: center;
-            gap: 1rem;
             margin-top: 1.5rem;
             margin-bottom: 1rem;
             padding: 0.75rem;
             border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
+        }
+
+        .bottom-controls-center {
+            display: flex;
+            justify-content: center;
         }
 
         /* Trash */
@@ -589,16 +619,25 @@
                 align-items: flex-start;
                 gap: 0.5rem;
             }
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
+            .controls-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            .controls-left,
+            .controls-center,
+            .controls-right {
+                justify-content: flex-start;
             }
             .shortcut-hint {
                 display: none;
             }
             .bottom-controls {
-                flex-direction: column;
+                grid-template-columns: 1fr;
                 gap: 0.75rem;
+                justify-items: start;
+            }
+            .bottom-controls-center {
+                justify-content: flex-start;
             }
         }
 
@@ -933,15 +972,25 @@
 
 <div class="container">
     <header>
-        <div class="controls">
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search links..." autocomplete="off">
-                <span class="shortcut-hint">/</span>
+        <div class="controls-grid">
+            <div class="controls-left">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search links..." autocomplete="off">
+                    <span class="shortcut-hint">/</span>
+                </div>
+                <div class="header-hint">
+                    Drag links to organize | Drop URLs from browser bar
+                </div>
             </div>
-            <button id="settingsBtn" class="settings-trigger-btn" title="Open Settings" style="margin-left: auto;">⚙️ Settings</button>
-        </div>
-        <div style="margin-top: 0.25rem; font-size: 0.45rem; color: var(--text-muted);">
-            Drag links to organize | Drop URLs from browser bar
+            <div class="controls-center">
+                <div class="button-group">
+                    <button id="addUrlBtnTop">+ Add URL</button>
+                    <button id="addSectionBtnTop">+ Add Section</button>
+                </div>
+            </div>
+            <div class="controls-right">
+                <button id="settingsBtn" class="settings-trigger-btn" title="Open Settings">⚙️ Settings</button>
+            </div>
         </div>
     </header>
 
@@ -962,17 +1011,20 @@
             <input type="range" id="fontSlider" min="1.1" max="2.4" step="0.1" value="2.0" title="Adjust font size">
             <span class="font-slider-label">A+</span>
         </div>
-        <div style="display: flex; gap: 0.5rem;">
-            <button id="addUrlBtn">+ Add URL</button>
-            <button id="addSectionBtn">+ Add Section</button>
+        <div class="bottom-controls-center">
+            <div class="button-group">
+                <button id="addUrlBtn">+ Add URL</button>
+                <button id="addSectionBtn">+ Add Section</button>
+            </div>
         </div>
+        <div></div>
     </div>
 
     <footer>
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-26 15:10 - "Improve settings swatches and dark theme"
+            Last commit: 2026-01-26 16:16 - "Simplify color presets and archive repo"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -1693,18 +1745,10 @@
                         <span class="link-title" title="${link.title}">${displayTitle}</span>
                     </a>
                     <div class="link-actions">
-                        <button class="fetch-btn" title="Fetch page title">🔄</button>
                         <button class="edit-btn" title="Edit">✏️</button>
                         <button class="delete-btn" title="Delete">🗑</button>
                     </div>
                 `;
-
-                // Fetch Title Event
-                li.querySelector('.fetch-btn').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    fetchTitle(link.id, link.url, section.id, e.target);
-                });
 
                 // Edit Event
                 li.querySelector('.edit-btn').addEventListener('click', (e) => {
@@ -2524,50 +2568,32 @@
             }
         });
 
-        // Add URL
-        document.getElementById('addUrlBtn').addEventListener('click', () => {
-            let url = prompt("Enter URL (e.g., vg.no or https://example.com):");
-            if (!url) return;
+        const handleAddUrl = () => {
+            const targetSection = appState.sections.find(s => s.id === 'misc') || appState.sections[0];
+            const draftLink = {
+                id: 'link_' + Date.now() + Math.random().toString(36).substr(2, 9),
+                title: '',
+                url: '',
+                sectionId: targetSection.id,
+                date: Date.now()
+            };
 
-            // Clean up input
-            url = url.trim();
+            // Browsers block cross-origin HTML access without a server proxy, so we ask for titles manually.
+            openLinkEditModal(draftLink, targetSection.id, true);
+        };
 
-            // Auto-add https:// if no protocol specified
-            if (!url.startsWith('http://') &&
-                !url.startsWith('https://') &&
-                !url.startsWith('file://')) {
-                // If it starts with www., add https://
-                // Otherwise, just add https:// to whatever was entered
-                url = 'https://' + url;
-                debugLog('Auto-added https:// to URL', { url });
-            }
-
-            // Validate the final URL
-            if (!isValidURL(url)) {
-                alert("Invalid URL format. Please try again.");
-                return;
-            }
-
-            // Prompt for title
-            const title = prompt("Enter title (leave empty to use URL):", url);
-
-            // Automatically add to Misc section
-            const miscSection = appState.sections.find(s => s.id === 'misc');
-            if (miscSection) {
-                createLink(title || url, url, miscSection.id);
-                debugLog('Added link to Misc section', { url, title: title || url });
-            } else {
-                // Fallback to first section if Misc doesn't exist
-                createLink(title || url, url, appState.sections[0].id);
-                debugLog('Misc section not found, added to first section', { url });
-            }
-        });
-
-        // Add Section
-        document.getElementById('addSectionBtn').addEventListener('click', () => {
+        const handleAddSection = () => {
             const title = prompt("Enter new section name:");
             if (title) addSection(title);
-        });
+        };
+
+        // Add URL
+        document.getElementById('addUrlBtn').addEventListener('click', handleAddUrl);
+        document.getElementById('addUrlBtnTop').addEventListener('click', handleAddUrl);
+
+        // Add Section
+        document.getElementById('addSectionBtn').addEventListener('click', handleAddSection);
+        document.getElementById('addSectionBtnTop').addEventListener('click', handleAddSection);
 
         // Trash Toggle
         document.getElementById('trashToggle').addEventListener('click', () => {
@@ -2754,56 +2780,6 @@
         });
     }
 
-    // --- Fetch Title ---
-
-    async function fetchTitle(linkId, url, sectionId, buttonElement) {
-        const PROXY_URL = 'http://localhost:3001/fetch-title';
-        
-        // Add fetching state
-        buttonElement.classList.add('fetching');
-        buttonElement.disabled = true;
-        
-        debugLog('Fetching title for URL', { linkId, url });
-        
-        try {
-            // Call proxy server
-            const response = await fetch(
-                `${PROXY_URL}?url=${encodeURIComponent(url)}`
-            );
-            const data = await response.json();
-            
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            // Update the link in appState
-            const section = appState.sections.find(s => s.id === sectionId);
-            const link = section.links.find(l => l.id === linkId);
-            
-            if (link) {
-                const oldTitle = link.title;
-                link.title = data.title;
-                saveState();
-                render();
-                debugLog(`Fetched title successfully: "${oldTitle}" → "${data.title}"`);
-            }
-            
-        } catch (error) {
-            debugLog('Fetch title error', { error: error.message });
-            
-            // Check if proxy is unreachable
-            if (error.message === 'Failed to fetch') {
-                alert('Proxy server not running.\n\nStart it with:\n  make proxy\n\nOr use the edit button (✏️) to set title manually.');
-            } else {
-                alert(`Could not fetch title:\n${error.message}\n\nUse the edit button (✏️) to set title manually.`);
-            }
-        } finally {
-            // Remove fetching state
-            buttonElement.classList.remove('fetching');
-            buttonElement.disabled = false;
-        }
-    }
-
     // --- Edit Mode ---
 
     // --- Debug Console ---
@@ -2885,8 +2861,9 @@
 
     let currentEditingLink = null;  // Store reference to link being edited
     let currentEditingSectionId = null;
+    let currentEditingIsNew = false;
 
-    function openLinkEditModal(link, sectionId) {
+    function openLinkEditModal(link, sectionId, isNew = false) {
         const modal = document.getElementById('linkEditModal');
         if (!modal) {
             console.error('Link edit modal not found');
@@ -2896,6 +2873,12 @@
         // Store reference to link being edited
         currentEditingLink = link;
         currentEditingSectionId = sectionId;
+        currentEditingIsNew = isNew;
+
+        const modalTitle = document.getElementById('linkEditModalTitle');
+        if (modalTitle) {
+            modalTitle.textContent = isNew ? '➕ Add Link' : '✏️ Edit Link';
+        }
 
         // Populate form inputs with current values
         const titleInput = document.getElementById('linkEditTitle');
@@ -2921,7 +2904,7 @@
             titleInput.select();
         }
 
-        debugLog('Link edit modal opened', {
+        debugLog(isNew ? 'Link add modal opened' : 'Link edit modal opened', {
             linkId: link.id,
             title: link.title,
             url: link.url,
@@ -3000,10 +2983,22 @@
             return;
         }
 
-        const linkToUpdate = section.links.find(l => l.id === currentEditingLink.id);
-        if (!linkToUpdate) {
+        let linkToUpdate = section.links.find(l => l.id === currentEditingLink.id);
+        const isNewLink = !linkToUpdate && currentEditingIsNew;
+        if (!linkToUpdate && !currentEditingIsNew) {
             console.error('Link not found:', currentEditingLink.id);
             return;
+        }
+
+        if (isNewLink) {
+            linkToUpdate = {
+                id: currentEditingLink.id,
+                title: '',
+                url: '',
+                sectionId: currentEditingSectionId,
+                date: Date.now()
+            };
+            section.links.push(linkToUpdate);
         }
 
         // Store old values for logging
@@ -3017,7 +3012,7 @@
         // Save to localStorage
         saveState();
 
-        debugLog('Link updated', {
+        debugLog(isNewLink ? 'Link created' : 'Link updated', {
             linkId: linkToUpdate.id,
             oldTitle: oldTitle,
             newTitle: newTitle,
@@ -3056,6 +3051,7 @@
         // Clear references
         currentEditingLink = null;
         currentEditingSectionId = null;
+        currentEditingIsNew = false;
 
         debugLog('Link edit modal closed');
     }
