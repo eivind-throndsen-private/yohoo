@@ -1,0 +1,872 @@
+{
+  "version": "1.0.0",
+  "exportDate": "2026-01-31T00:00:00.000Z",
+  "exportedBy": "Yohoo Default Configuration - Norway Edition",
+  "data": {
+    "sections": [
+      {
+        "id": "norway-essentials",
+        "title": "Norway Essentials",
+        "icon": "\ud83c\uddf3\ud83c\uddf4",
+        "links": [
+          {
+            "id": "l1",
+            "title": "Yr (Weather)",
+            "url": "https://www.yr.no/en",
+            "sectionId": "norway-essentials",
+            "date": 1738368000000
+          },
+          {
+            "id": "l2",
+            "title": "Finn.no",
+            "url": "https://www.finn.no",
+            "sectionId": "norway-essentials",
+            "date": 1738368000000
+          },
+          {
+            "id": "l3",
+            "title": "1881",
+            "url": "https://www.1881.no",
+            "sectionId": "norway-essentials",
+            "date": 1738368000000
+          },
+          {
+            "id": "l4",
+            "title": "Gulesider",
+            "url": "https://www.gulesider.no",
+            "sectionId": "norway-essentials",
+            "date": 1738368000000
+          },
+          {
+            "id": "l5",
+            "title": "Posten",
+            "url": "https://www.posten.no",
+            "sectionId": "norway-essentials",
+            "date": 1738368000000
+          },
+          {
+            "id": "l6",
+            "title": "Vinmonopolet",
+            "url": "https://www.vinmonopolet.no",
+            "sectionId": "norway-essentials",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "transport",
+        "title": "Transport & Travel",
+        "icon": "\ud83d\ude87",
+        "links": [
+          {
+            "id": "l7",
+            "title": "Entur",
+            "url": "https://www.entur.no",
+            "sectionId": "transport",
+            "date": 1738368000000
+          },
+          {
+            "id": "l8",
+            "title": "Vy",
+            "url": "https://www.vy.no",
+            "sectionId": "transport",
+            "date": 1738368000000
+          },
+          {
+            "id": "l9",
+            "title": "Ruter",
+            "url": "https://ruter.no",
+            "sectionId": "transport",
+            "date": 1738368000000
+          },
+          {
+            "id": "l10",
+            "title": "Avinor",
+            "url": "https://avinor.no",
+            "sectionId": "transport",
+            "date": 1738368000000
+          },
+          {
+            "id": "l11",
+            "title": "Norwegian",
+            "url": "https://www.norwegian.com",
+            "sectionId": "transport",
+            "date": 1738368000000
+          },
+          {
+            "id": "l12",
+            "title": "SAS",
+            "url": "https://www.sas.no",
+            "sectionId": "transport",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "norwegian-news",
+        "title": "Norwegian News",
+        "icon": "\ud83d\udcf0",
+        "links": [
+          {
+            "id": "l13",
+            "title": "NRK",
+            "url": "https://www.nrk.no",
+            "sectionId": "norwegian-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l14",
+            "title": "VG",
+            "url": "https://www.vg.no",
+            "sectionId": "norwegian-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l15",
+            "title": "Aftenposten",
+            "url": "https://www.aftenposten.no",
+            "sectionId": "norwegian-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l16",
+            "title": "Dagbladet",
+            "url": "https://www.dagbladet.no",
+            "sectionId": "norwegian-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l17",
+            "title": "TV2",
+            "url": "https://www.tv2.no",
+            "sectionId": "norwegian-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l18",
+            "title": "E24",
+            "url": "https://e24.no",
+            "sectionId": "norwegian-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l19",
+            "title": "Digi.no",
+            "url": "https://www.digi.no",
+            "sectionId": "norwegian-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l20",
+            "title": "News in English",
+            "url": "https://www.newsinenglish.no",
+            "sectionId": "norwegian-news",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "international-news",
+        "title": "International News",
+        "icon": "\ud83c\udf0d",
+        "links": [
+          {
+            "id": "l21",
+            "title": "BBC News",
+            "url": "https://www.bbc.com/news",
+            "sectionId": "international-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l22",
+            "title": "The Guardian",
+            "url": "https://www.theguardian.com",
+            "sectionId": "international-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l23",
+            "title": "Reuters",
+            "url": "https://www.reuters.com",
+            "sectionId": "international-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l24",
+            "title": "AP News",
+            "url": "https://apnews.com",
+            "sectionId": "international-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l25",
+            "title": "The New York Times",
+            "url": "https://www.nytimes.com",
+            "sectionId": "international-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l26",
+            "title": "Ars Technica",
+            "url": "https://arstechnica.com",
+            "sectionId": "international-news",
+            "date": 1738368000000
+          },
+          {
+            "id": "l27",
+            "title": "The Economist",
+            "url": "https://www.economist.com",
+            "sectionId": "international-news",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "norwegian-streaming",
+        "title": "Norwegian Streaming",
+        "icon": "\ud83d\udcfa",
+        "links": [
+          {
+            "id": "l28",
+            "title": "NRK TV",
+            "url": "https://tv.nrk.no",
+            "sectionId": "norwegian-streaming",
+            "date": 1738368000000
+          },
+          {
+            "id": "l29",
+            "title": "TV2 Play",
+            "url": "https://play.tv2.no",
+            "sectionId": "norwegian-streaming",
+            "date": 1738368000000
+          },
+          {
+            "id": "l30",
+            "title": "Viaplay",
+            "url": "https://viaplay.no",
+            "sectionId": "norwegian-streaming",
+            "date": 1738368000000
+          },
+          {
+            "id": "l31",
+            "title": "Discovery+",
+            "url": "https://www.discoveryplus.com/no",
+            "sectionId": "norwegian-streaming",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "international-streaming",
+        "title": "International Streaming",
+        "icon": "\ud83c\udfac",
+        "links": [
+          {
+            "id": "l32",
+            "title": "Netflix",
+            "url": "https://www.netflix.com",
+            "sectionId": "international-streaming",
+            "date": 1738368000000
+          },
+          {
+            "id": "l33",
+            "title": "Disney+",
+            "url": "https://www.disneyplus.com",
+            "sectionId": "international-streaming",
+            "date": 1738368000000
+          },
+          {
+            "id": "l34",
+            "title": "HBO Max",
+            "url": "https://www.max.com",
+            "sectionId": "international-streaming",
+            "date": 1738368000000
+          },
+          {
+            "id": "l35",
+            "title": "YouTube",
+            "url": "https://www.youtube.com",
+            "sectionId": "international-streaming",
+            "date": 1738368000000
+          },
+          {
+            "id": "l36",
+            "title": "Spotify",
+            "url": "https://open.spotify.com",
+            "sectionId": "international-streaming",
+            "date": 1738368000000
+          },
+          {
+            "id": "l37",
+            "title": "Apple Music",
+            "url": "https://music.apple.com",
+            "sectionId": "international-streaming",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "events-culture",
+        "title": "Events & Culture",
+        "icon": "\ud83c\udfab",
+        "links": [
+          {
+            "id": "l38",
+            "title": "Ticketmaster Norway",
+            "url": "https://www.ticketmaster.no",
+            "sectionId": "events-culture",
+            "date": 1738368000000
+          },
+          {
+            "id": "l39",
+            "title": "Billettservice",
+            "url": "https://www.billettservice.no",
+            "sectionId": "events-culture",
+            "date": 1738368000000
+          },
+          {
+            "id": "l40",
+            "title": "VisitOslo Events",
+            "url": "https://www.visitoslo.com/en/whats-on/",
+            "sectionId": "events-culture",
+            "date": 1738368000000
+          },
+          {
+            "id": "l41",
+            "title": "Nasjonalmuseet",
+            "url": "https://www.nasjonalmuseet.no",
+            "sectionId": "events-culture",
+            "date": 1738368000000
+          },
+          {
+            "id": "l42",
+            "title": "Munchmuseet",
+            "url": "https://www.munchmuseet.no",
+            "sectionId": "events-culture",
+            "date": 1738368000000
+          },
+          {
+            "id": "l43",
+            "title": "Cinemateket",
+            "url": "https://www.cinemateket.no",
+            "sectionId": "events-culture",
+            "date": 1738368000000
+          },
+          {
+            "id": "l44",
+            "title": "Den Norske Opera",
+            "url": "https://operaen.no",
+            "sectionId": "events-culture",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "public-services",
+        "title": "Public Services",
+        "icon": "\ud83c\udfdb\ufe0f",
+        "links": [
+          {
+            "id": "l45",
+            "title": "Altinn",
+            "url": "https://www.altinn.no",
+            "sectionId": "public-services",
+            "date": 1738368000000
+          },
+          {
+            "id": "l46",
+            "title": "Skatteetaten",
+            "url": "https://www.skatteetaten.no",
+            "sectionId": "public-services",
+            "date": 1738368000000
+          },
+          {
+            "id": "l47",
+            "title": "NAV",
+            "url": "https://www.nav.no",
+            "sectionId": "public-services",
+            "date": 1738368000000
+          },
+          {
+            "id": "l48",
+            "title": "UDI",
+            "url": "https://www.udi.no",
+            "sectionId": "public-services",
+            "date": 1738368000000
+          },
+          {
+            "id": "l49",
+            "title": "Helsenorge",
+            "url": "https://www.helsenorge.no",
+            "sectionId": "public-services",
+            "date": 1738368000000
+          },
+          {
+            "id": "l50",
+            "title": "L\u00e5nekassen",
+            "url": "https://lanekassen.no",
+            "sectionId": "public-services",
+            "date": 1738368000000
+          },
+          {
+            "id": "l51",
+            "title": "Folkeregisteret",
+            "url": "https://www.skatteetaten.no/person/folkeregister/",
+            "sectionId": "public-services",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "banking",
+        "title": "Banking & Finance",
+        "icon": "\ud83c\udfe6",
+        "links": [
+          {
+            "id": "l52",
+            "title": "DNB",
+            "url": "https://www.dnb.no",
+            "sectionId": "banking",
+            "date": 1738368000000
+          },
+          {
+            "id": "l53",
+            "title": "Nordea",
+            "url": "https://www.nordea.no",
+            "sectionId": "banking",
+            "date": 1738368000000
+          },
+          {
+            "id": "l54",
+            "title": "Sbanken",
+            "url": "https://www.sbanken.no",
+            "sectionId": "banking",
+            "date": 1738368000000
+          },
+          {
+            "id": "l55",
+            "title": "Vipps",
+            "url": "https://www.vipps.no",
+            "sectionId": "banking",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "developer-tools",
+        "title": "Development & Docs",
+        "icon": "\ud83d\udcbb",
+        "links": [
+          {
+            "id": "l56",
+            "title": "GitHub",
+            "url": "https://github.com",
+            "sectionId": "developer-tools",
+            "date": 1738368000000
+          },
+          {
+            "id": "l57",
+            "title": "Stack Overflow",
+            "url": "https://stackoverflow.com",
+            "sectionId": "developer-tools",
+            "date": 1738368000000
+          },
+          {
+            "id": "l58",
+            "title": "MDN Web Docs",
+            "url": "https://developer.mozilla.org",
+            "sectionId": "developer-tools",
+            "date": 1738368000000
+          },
+          {
+            "id": "l59",
+            "title": "Can I Use",
+            "url": "https://caniuse.com",
+            "sectionId": "developer-tools",
+            "date": 1738368000000
+          },
+          {
+            "id": "l60",
+            "title": "DevDocs",
+            "url": "https://devdocs.io",
+            "sectionId": "developer-tools",
+            "date": 1738368000000
+          },
+          {
+            "id": "l61",
+            "title": "Hacker News",
+            "url": "https://news.ycombinator.com",
+            "sectionId": "developer-tools",
+            "date": 1738368000000
+          },
+          {
+            "id": "l62",
+            "title": "Dev.to",
+            "url": "https://dev.to",
+            "sectionId": "developer-tools",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "productivity",
+        "title": "Productivity & Tools",
+        "icon": "\ud83d\udee0\ufe0f",
+        "links": [
+          {
+            "id": "l63",
+            "title": "Notion",
+            "url": "https://www.notion.so",
+            "sectionId": "productivity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l64",
+            "title": "Figma",
+            "url": "https://www.figma.com",
+            "sectionId": "productivity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l65",
+            "title": "Miro",
+            "url": "https://miro.com",
+            "sectionId": "productivity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l66",
+            "title": "Canva",
+            "url": "https://www.canva.com",
+            "sectionId": "productivity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l67",
+            "title": "Excalidraw",
+            "url": "https://excalidraw.com",
+            "sectionId": "productivity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l68",
+            "title": "Carbon",
+            "url": "https://carbon.now.sh",
+            "sectionId": "productivity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l69",
+            "title": "Regex101",
+            "url": "https://regex101.com",
+            "sectionId": "productivity",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "ai-research",
+        "title": "AI & Research",
+        "icon": "\ud83e\udd16",
+        "links": [
+          {
+            "id": "l70",
+            "title": "Claude",
+            "url": "https://claude.ai",
+            "sectionId": "ai-research",
+            "date": 1738368000000
+          },
+          {
+            "id": "l71",
+            "title": "ChatGPT",
+            "url": "https://chat.openai.com",
+            "sectionId": "ai-research",
+            "date": 1738368000000
+          },
+          {
+            "id": "l72",
+            "title": "Perplexity",
+            "url": "https://www.perplexity.ai",
+            "sectionId": "ai-research",
+            "date": 1738368000000
+          },
+          {
+            "id": "l73",
+            "title": "Wolfram Alpha",
+            "url": "https://www.wolframalpha.com",
+            "sectionId": "ai-research",
+            "date": 1738368000000
+          },
+          {
+            "id": "l74",
+            "title": "Google Scholar",
+            "url": "https://scholar.google.com",
+            "sectionId": "ai-research",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "norwegian-language",
+        "title": "Norwegian Language",
+        "icon": "\ud83d\udcda",
+        "links": [
+          {
+            "id": "l75",
+            "title": "Duolingo Norwegian",
+            "url": "https://www.duolingo.com/course/no-BO/en",
+            "sectionId": "norwegian-language",
+            "date": 1738368000000
+          },
+          {
+            "id": "l76",
+            "title": "LearnNoW (NTNU)",
+            "url": "https://www.ntnu.edu/learnnow",
+            "sectionId": "norwegian-language",
+            "date": 1738368000000
+          },
+          {
+            "id": "l77",
+            "title": "NorwegianClass101",
+            "url": "https://www.norwegianclass101.com",
+            "sectionId": "norwegian-language",
+            "date": 1738368000000
+          },
+          {
+            "id": "l78",
+            "title": "Ordb\u00f8kene",
+            "url": "https://ordbokene.no",
+            "sectionId": "norwegian-language",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "online-learning",
+        "title": "Online Learning",
+        "icon": "\ud83c\udf93",
+        "links": [
+          {
+            "id": "l79",
+            "title": "Coursera",
+            "url": "https://www.coursera.org",
+            "sectionId": "online-learning",
+            "date": 1738368000000
+          },
+          {
+            "id": "l80",
+            "title": "edX",
+            "url": "https://www.edx.org",
+            "sectionId": "online-learning",
+            "date": 1738368000000
+          },
+          {
+            "id": "l81",
+            "title": "Khan Academy",
+            "url": "https://www.khanacademy.org",
+            "sectionId": "online-learning",
+            "date": 1738368000000
+          },
+          {
+            "id": "l82",
+            "title": "Udemy",
+            "url": "https://www.udemy.com",
+            "sectionId": "online-learning",
+            "date": 1738368000000
+          },
+          {
+            "id": "l83",
+            "title": "Brilliant",
+            "url": "https://brilliant.org",
+            "sectionId": "online-learning",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "outdoors",
+        "title": "Outdoors & Nature",
+        "icon": "\ud83c\udfd4\ufe0f",
+        "links": [
+          {
+            "id": "l84",
+            "title": "UT.no",
+            "url": "https://ut.no",
+            "sectionId": "outdoors",
+            "date": 1738368000000
+          },
+          {
+            "id": "l85",
+            "title": "Inatur",
+            "url": "https://www.inatur.no",
+            "sectionId": "outdoors",
+            "date": 1738368000000
+          },
+          {
+            "id": "l86",
+            "title": "DNT",
+            "url": "https://www.dnt.no",
+            "sectionId": "outdoors",
+            "date": 1738368000000
+          },
+          {
+            "id": "l87",
+            "title": "Skisporet",
+            "url": "https://skisporet.no",
+            "sectionId": "outdoors",
+            "date": 1738368000000
+          },
+          {
+            "id": "l88",
+            "title": "Surf Forecast",
+            "url": "https://www.surf-forecast.com",
+            "sectionId": "outdoors",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "food",
+        "title": "Food & Recipes",
+        "icon": "\ud83c\udf73",
+        "links": [
+          {
+            "id": "l89",
+            "title": "MatPrat",
+            "url": "https://www.matprat.no",
+            "sectionId": "food",
+            "date": 1738368000000
+          },
+          {
+            "id": "l90",
+            "title": "Tine Oppskrifter",
+            "url": "https://www.tine.no/oppskrifter",
+            "sectionId": "food",
+            "date": 1738368000000
+          },
+          {
+            "id": "l91",
+            "title": "Serious Eats",
+            "url": "https://www.seriouseats.com",
+            "sectionId": "food",
+            "date": 1738368000000
+          },
+          {
+            "id": "l92",
+            "title": "Colonyal",
+            "url": "https://colonyal.no",
+            "sectionId": "food",
+            "date": 1738368000000
+          },
+          {
+            "id": "l93",
+            "title": "Oda",
+            "url": "https://oda.com",
+            "sectionId": "food",
+            "date": 1738368000000
+          }
+        ]
+      },
+      {
+        "id": "curiosity",
+        "title": "Curiosity & Fun",
+        "icon": "\ud83c\udfb2",
+        "links": [
+          {
+            "id": "l94",
+            "title": "Wikipedia",
+            "url": "https://www.wikipedia.org",
+            "sectionId": "curiosity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l95",
+            "title": "Reddit",
+            "url": "https://www.reddit.com",
+            "sectionId": "curiosity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l96",
+            "title": "r/Norway",
+            "url": "https://www.reddit.com/r/norway",
+            "sectionId": "curiosity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l97",
+            "title": "Kvasir",
+            "url": "https://www.kvasir.no",
+            "sectionId": "curiosity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l98",
+            "title": "The Pudding",
+            "url": "https://pudding.cool",
+            "sectionId": "curiosity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l99",
+            "title": "Atlas Obscura",
+            "url": "https://www.atlasobscura.com",
+            "sectionId": "curiosity",
+            "date": 1738368000000
+          },
+          {
+            "id": "l100",
+            "title": "Wait But Why",
+            "url": "https://waitbutwhy.com",
+            "sectionId": "curiosity",
+            "date": 1738368000000
+          }
+        ]
+      }
+    ],
+    "trash": [],
+    "layout": {
+      "columns": [
+        {
+          "id": "col-1",
+          "sections": [
+            "norway-essentials",
+            "transport",
+            "norwegian-news",
+            "international-news",
+            "norwegian-streaming",
+            "international-streaming"
+          ]
+        },
+        {
+          "id": "col-2",
+          "sections": [
+            "events-culture",
+            "public-services",
+            "banking",
+            "developer-tools",
+            "productivity"
+          ]
+        },
+        {
+          "id": "col-3",
+          "sections": [
+            "ai-research",
+            "norwegian-language",
+            "online-learning",
+            "outdoors",
+            "food",
+            "curiosity"
+          ]
+        }
+      ]
+    },
+    "fontScale": 2.0
+  },
+  "metadata": {
+    "sectionCount": 17,
+    "linkCount": 100,
+    "trashCount": 0,
+    "columns": 3
+  }
+}
