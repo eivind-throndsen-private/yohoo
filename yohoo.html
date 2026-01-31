@@ -1043,7 +1043,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-31 14:34 - "Fix link drag start on Windows"
+            Last commit: 2026-01-31 14:53 - "Improve drag handling diagnostics"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -2691,7 +2691,7 @@
         // Event listeners set up in initSettingsModal()
 
         // Document-level drag handlers for external drops (bookmarks, files, etc.)
-        document.addEventListener('dragstart', (e) => {
+        window.addEventListener('dragstart', (e) => {
             debugLog('Document dragstart', {
                 targetClass: e.target.className,
                 targetId: e.target.id,
@@ -2700,17 +2700,42 @@
             });
         }, true);
 
-        document.addEventListener('dragenter', (e) => {
+        const allowDrop = (e, label) => {
             e.preventDefault();
             if (e.dataTransfer) {
                 e.dataTransfer.dropEffect = 'copy';
             }
-            debugLog('Document dragenter', {
+            debugLog(label, {
                 targetClass: e.target.className,
                 targetId: e.target.id,
                 targetNodeName: e.target.nodeName
             });
-        }, true);
+        };
+
+        window.addEventListener('dragenter', (e) => allowDrop(e, 'Window dragenter'), true);
+        document.documentElement.addEventListener('dragenter', (e) => allowDrop(e, 'HTML dragenter'), true);
+        document.addEventListener('dragenter', (e) => allowDrop(e, 'Document dragenter'), true);
+
+        window.addEventListener('dragover', (e) => {
+            // Must prevent default to allow drop
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            debugLog('Window dragover', {
+                targetClass: e.target.className,
+                targetId: e.target.id,
+                targetNodeName: e.target.nodeName
+            });
+        });
+
+        document.documentElement.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            debugLog('HTML dragover', {
+                targetClass: e.target.className,
+                targetId: e.target.id,
+                targetNodeName: e.target.nodeName
+            });
+        });
 
         document.addEventListener('dragover', (e) => {
             // Must prevent default to allow drop
