@@ -659,6 +659,12 @@
             pointer-events: none;
         }
 
+        .external-drop-target {
+            outline: 2px dashed var(--link-color);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .grid {
@@ -1074,7 +1080,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-31 15:35 - "Add external drag overlay dropzone"
+            Last commit: 2026-01-31 15:43 - "Resolve overlay drops to visible section"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -2606,6 +2612,7 @@
 
     let externalDragActive = false;
     let externalOverlayEl = null;
+    let externalDropTarget = null;
 
     function initExternalDropOverlay() {
         externalOverlayEl = document.getElementById('externalDropOverlay');
@@ -2623,6 +2630,7 @@
         externalOverlayEl.classList.remove('visible');
         document.body.classList.remove('external-drag-active');
         externalDragActive = false;
+        clearExternalDropTarget();
     }
 
     function getExternalDropEffect(e) {
@@ -2631,6 +2639,30 @@
             return 'link';
         }
         return 'copy';
+    }
+
+    function clearExternalDropTarget() {
+        if (externalDropTarget) {
+            externalDropTarget.classList.remove('external-drop-target');
+            externalDropTarget = null;
+        }
+    }
+
+    function getSectionFromPoint(x, y) {
+        const elements = document.elementsFromPoint(x, y);
+        const candidate = elements.find(el => el && el.id !== 'externalDropOverlay' && !el.closest('#externalDropOverlay'));
+        return candidate?.closest('.section') || null;
+    }
+
+    function updateExternalDropTarget(x, y) {
+        const section = getSectionFromPoint(x, y);
+        if (section !== externalDropTarget) {
+            clearExternalDropTarget();
+            if (section) {
+                section.classList.add('external-drop-target');
+                externalDropTarget = section;
+            }
+        }
     }
 
 
@@ -2890,10 +2922,7 @@
             let targetSectionId = 'misc';
             if (e.target && e.target.id === 'externalDropOverlay') {
                 // Overlay caught the drop; resolve section under cursor
-                externalOverlayEl.classList.remove('visible');
-                document.body.classList.remove('external-drag-active');
-                const underEl = document.elementFromPoint(e.clientX, e.clientY);
-                const targetSection = underEl?.closest('.section');
+                const targetSection = getSectionFromPoint(e.clientX, e.clientY);
                 targetSectionId = targetSection?.dataset.id || 'misc';
             } else {
                 const targetSection = e.target.closest('.section');
@@ -2907,6 +2936,7 @@
                 e.preventDefault();
                 e.stopPropagation();
                 e.dataTransfer.dropEffect = getExternalDropEffect(e);
+                updateExternalDropTarget(e.clientX, e.clientY);
                 debugLog('Overlay dragover', {
                     types: Array.from(e.dataTransfer?.types || [])
                 });
@@ -2919,15 +2949,11 @@
                 const overlayWasVisible = externalDragActive;
 
                 // Temporarily hide overlay to locate the underlying section
-                externalOverlayEl.classList.remove('visible');
-                document.body.classList.remove('external-drag-active');
-
-                const targetEl = document.elementFromPoint(e.clientX, e.clientY);
-                const targetSection = targetEl?.closest('.section');
+                const targetSection = getSectionFromPoint(e.clientX, e.clientY);
                 const targetSectionId = targetSection?.dataset.id || 'misc';
 
                 debugLog('Overlay drop', {
-                    targetNodeName: targetEl?.nodeName || 'none',
+                    targetNodeName: targetSection?.nodeName || 'none',
                     targetSectionId,
                     overlayWasVisible
                 });
