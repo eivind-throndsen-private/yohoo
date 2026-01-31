@@ -1043,7 +1043,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-31 14:53 - "Improve drag handling diagnostics"
+            Last commit: 2026-01-31 14:58 - "Add capture drag enter/over logging"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -1762,6 +1762,8 @@
 
             // Add pointer event for drag initiation
             headerEl.addEventListener('pointerdown', handleSectionPointerDown);
+            headerEl.addEventListener('dragover', handleSectionHeaderDragOver);
+            headerEl.addEventListener('drop', handleSectionHeaderDrop);
 
             sectionEl.appendChild(headerEl);
 
@@ -2380,7 +2382,24 @@
             this.classList.remove('drag-over');
         }
     }
-    
+
+    function handleSectionHeaderDragOver(e) {
+        // Allow external drops on section headers
+        if (draggedType === 'section') return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'copy';
+    }
+
+    function handleSectionHeaderDrop(e) {
+        // Only external drops should be handled here
+        if (draggedItem) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const sectionEl = this.closest('.section');
+        const sectionId = sectionEl?.dataset.id || 'misc';
+        handleExternalDrop(e, sectionId, 'section-header');
+    }
 
     function handleLinkDrop(e) {
         e.preventDefault();
@@ -2453,89 +2472,93 @@
         }
         // CASE 2: External URL Drop (from address bar or bookmarks)
         else if (!draggedItem) {
-            // Extract URLs from different types with prioritization
-            let urls = {
-                'text/plain': (e.dataTransfer.getData('text/plain') || '').trim(),
-                'text/uri-list': (e.dataTransfer.getData('text/uri-list') || '').trim(),
-                'text/html': (e.dataTransfer.getData('text/html') || '').trim()
-            };
+            handleExternalDrop(e, targetSectionId, 'link-list');
+        }
+    }
 
-            // Prioritize text/plain and avoid about:blank
-            let url = null;
-            if (urls['text/plain'] && urls['text/plain'] !== 'about:blank' && !urls['text/plain'].includes('about:blank#blocked')) {
-                url = urls['text/plain'];
-            } else if (urls['text/uri-list'] && urls['text/uri-list'] !== 'about:blank' && !urls['text/uri-list'].includes('about:blank#blocked')) {
-                url = urls['text/uri-list'];
-            }
+    function handleExternalDrop(e, targetSectionId, sourceLabel) {
+        // Extract URLs from different types with prioritization
+        let urls = {
+            'text/plain': (e.dataTransfer.getData('text/plain') || '').trim(),
+            'text/uri-list': (e.dataTransfer.getData('text/uri-list') || '').trim(),
+            'text/html': (e.dataTransfer.getData('text/html') || '').trim()
+        };
 
-            debugLog('External drop on link-list', { url, targetSectionId, allUrls: urls });
+        // Prioritize text/plain and avoid about:blank
+        let url = null;
+        if (urls['text/plain'] && urls['text/plain'] !== 'about:blank' && !urls['text/plain'].includes('about:blank#blocked')) {
+            url = urls['text/plain'];
+        } else if (urls['text/uri-list'] && urls['text/uri-list'] !== 'about:blank' && !urls['text/uri-list'].includes('about:blank#blocked')) {
+            url = urls['text/uri-list'];
+        }
 
-            if (url && isValidURL(url)) {
-                 // Try multiple methods to extract title from bookmark drag
-                 let title = url;
-                 
-                 // Method 1: Try text/html for bookmark bar drags
-                 const html = e.dataTransfer.getData('text/html');
-                 if (html) {
-                     const temp = document.createElement('div');
-                     temp.innerHTML = html;
-                     const anchor = temp.querySelector('a');
-                     if (anchor && anchor.textContent) {
-                         title = anchor.textContent.trim();
-                         debugLog('Extracted title from HTML', { title });
+        debugLog('External drop', { url, targetSectionId, source: sourceLabel, allUrls: urls });
+
+        if (url && isValidURL(url)) {
+             // Try multiple methods to extract title from bookmark drag
+             let title = url;
+             
+             // Method 1: Try text/html for bookmark bar drags
+             const html = e.dataTransfer.getData('text/html');
+             if (html) {
+                 const temp = document.createElement('div');
+                 temp.innerHTML = html;
+                 const anchor = temp.querySelector('a');
+                 if (anchor && anchor.textContent) {
+                     title = anchor.textContent.trim();
+                     debugLog('Extracted title from HTML', { title });
+                 }
+             }
+             
+             // Method 2: Try text/plain as fallback (might contain title)
+             if (title === url) {
+                 const plainText = e.dataTransfer.getData('text/plain');
+                 if (plainText && plainText !== url) {
+                     // Sometimes bookmark drags include title in plain text
+                     const lines = plainText.split('\n');
+                     if (lines.length > 1 && lines[0] !== url) {
+                         title = lines[0].trim();
+                         debugLog('Extracted title from plain text', { title });
                      }
                  }
+             }
+             
+             // Check if this URL already exists - if so, UPDATE the title instead of creating new
+             let existingLink = null;
+             let existingSection = null;
+             
+             for (const section of appState.sections) {
+                 const found = section.links.find(l => l.url === url);
+                 if (found) {
+                     existingLink = found;
+                     existingSection = section;
+                     break;
+                 }
+             }
+             
+             if (existingLink && title !== url) {
+                 // UPDATE: This is a bookmark drag to refresh the title!
+                 const oldTitle = existingLink.title;
+                 existingLink.title = title;
+                 saveState();
+                 render();
+                 debugLog(`Updated title: "${oldTitle}" → "${title}"`);
                  
-                 // Method 2: Try text/plain as fallback (might contain title)
-                 if (title === url) {
-                     const plainText = e.dataTransfer.getData('text/plain');
-                     if (plainText && plainText !== url) {
-                         // Sometimes bookmark drags include title in plain text
-                         const lines = plainText.split('\n');
-                         if (lines.length > 1 && lines[0] !== url) {
-                             title = lines[0].trim();
-                             debugLog('Extracted title from plain text', { title });
-                         }
+                 // Visual feedback - briefly highlight the updated link
+                 setTimeout(() => {
+                     const updatedEl = document.querySelector(`[data-url="${url}"]`);
+                     if (updatedEl) {
+                         updatedEl.style.backgroundColor = '#90EE90';
+                         setTimeout(() => {
+                             updatedEl.style.backgroundColor = '';
+                         }, 1000);
                      }
-                 }
-                 
-                 // Check if this URL already exists - if so, UPDATE the title instead of creating new
-                 let existingLink = null;
-                 let existingSection = null;
-                 
-                 for (const section of appState.sections) {
-                     const found = section.links.find(l => l.url === url);
-                     if (found) {
-                         existingLink = found;
-                         existingSection = section;
-                         break;
-                     }
-                 }
-                 
-                 if (existingLink && title !== url) {
-                     // UPDATE: This is a bookmark drag to refresh the title!
-                     const oldTitle = existingLink.title;
-                     existingLink.title = title;
-                     saveState();
-                     render();
-                     debugLog(`Updated title: "${oldTitle}" → "${title}"`);
-                     
-                     // Visual feedback - briefly highlight the updated link
-                     setTimeout(() => {
-                         const updatedEl = document.querySelector(`[data-url="${url}"]`);
-                         if (updatedEl) {
-                             updatedEl.style.backgroundColor = '#90EE90';
-                             setTimeout(() => {
-                                 updatedEl.style.backgroundColor = '';
-                             }, 1000);
-                         }
-                     }, 100);
-                 } else {
-                     // CREATE: New link
-                     createLink(title, url, targetSectionId);
-                     debugLog(`Created new link: ${title}`);
-                 }
-            }
+                 }, 100);
+             } else {
+                 // CREATE: New link
+                 createLink(title, url, targetSectionId);
+                 debugLog(`Created new link: ${title}`);
+             }
         }
     }
 
@@ -2781,127 +2804,9 @@
                 debugLog('Drop event on link-list, returning');
                 return;
             }
-
-            // Attempt to extract URL from different data types
-            const urlTypes = [
-                'text/plain',     // Try text/plain first to prioritize specific URLs
-                'text/uri-list',
-                'text/html',
-                'URL'
-            ];
-
-            let urls = {};
-            let preferredUrl = null;
-
-            // Collect URLs from different types
-            for (let type of urlTypes) {
-                const rawUrl = (e.dataTransfer.getData(type) || '').trim();
-                if (rawUrl) {
-                    urls[type] = rawUrl;
-                    debugLog(`URL extracted from ${type}`, { url: rawUrl });
-                }
-            }
-
-            // Prioritization logic
-            if (urls['text/plain'] && urls['text/plain'] !== 'about:blank') {
-                preferredUrl = urls['text/plain'];
-            } else if (urls['text/uri-list'] && urls['text/uri-list'] !== 'about:blank') {
-                preferredUrl = urls['text/uri-list'];
-            }
-
-            // Fallback
-            let url = preferredUrl || Object.values(urls).find(u => u !== 'about:blank');
-
-            debugLog('Url extraction results', {
-                allUrls: urls,
-                preferredUrl,
-                finalUrl: url
-            });
-
-            debugLog('Extracted URL for document-level drop', { url, valid: isValidURL(url) });
-
-            if (url && isValidURL(url)) {
-                // Try multiple methods to extract title from bookmark drag
-                let title = url;
-
-                // Method 1: Try text/html for bookmark bar drags
-                const html = e.dataTransfer.getData('text/html');
-                if (html) {
-                    const temp = document.createElement('div');
-                    temp.innerHTML = html;
-                    const anchor = temp.querySelector('a');
-                    if (anchor && anchor.textContent) {
-                        title = anchor.textContent.trim();
-                        debugLog('Extracted title from HTML', { title });
-                    }
-                }
-
-                // Method 2: Try text/plain as fallback (might contain title)
-                if (title === url) {
-                    const plainText = e.dataTransfer.getData('text/plain');
-                    if (plainText && plainText !== url) {
-                        // Sometimes bookmark drags include title in plain text
-                        const lines = plainText.split('\n');
-                        if (lines.length > 1 && lines[0] !== url) {
-                            title = lines[0].trim();
-                            debugLog('Extracted title from plain text', { title });
-                        }
-                    }
-                }
-
-                // If no meaningful title found, use descriptive text based on URL type
-                if (title === url) {
-                    if (url.startsWith('chrome://')) {
-                        title = `Chrome Settings: ${url.replace('chrome://', '')}`;
-                    } else if (url.startsWith('about:')) {
-                        title = `Browser Page: ${url.replace('about:', '')}`;
-                    }
-                }
-
-                // Check if this URL already exists
-                let existingLink = null;
-                let existingSection = null;
-
-                for (const section of appState.sections) {
-                    const found = section.links.find(l => l.url === url);
-                    if (found) {
-                        existingLink = found;
-                        existingSection = section;
-                        break;
-                    }
-                }
-
-                if (existingLink && title !== url) {
-                    // UPDATE: Refresh the title
-                    const oldTitle = existingLink.title;
-                    existingLink.title = title;
-                    saveState();
-                    render();
-                    debugLog(`Updated title: "${oldTitle}" → "${title}"`);
-
-                    // Visual feedback
-                    setTimeout(() => {
-                        const updatedEl = document.querySelector(`[data-url="${url}"]`);
-                        if (updatedEl) {
-                            updatedEl.style.backgroundColor = '#90EE90';
-                            setTimeout(() => {
-                                updatedEl.style.backgroundColor = '';
-                            }, 1000);
-                        }
-                    }, 100);
-                } else {
-                    // CREATE: Add to Misc section
-                    const miscSection = appState.sections.find(s => s.id === 'misc') || appState.sections[0];
-                    createLink(title, url, miscSection.id);
-                    debugLog(`Created new link in ${miscSection.title}: ${title}`);
-                }
-            } else {
-                debugLog('Invalid URL or no URL found in drop event', {
-                    urlValid: url ? isValidURL(url) : false,
-                    url,
-                    fullDataTransfer: debugInfo
-                });
-            }
+            const targetSection = e.target.closest('.section');
+            const targetSectionId = targetSection?.dataset.id || 'misc';
+            handleExternalDrop(e, targetSectionId, 'document');
         });
     }
 
