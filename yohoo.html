@@ -628,6 +628,37 @@
             z-index: 10000;
         }
 
+        /* External Drag Overlay */
+        .external-drop-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.02);
+            border: 2px dashed var(--link-color);
+            z-index: 9998;
+            pointer-events: none;
+        }
+
+        .external-drop-overlay.visible {
+            display: flex;
+            pointer-events: auto;
+        }
+
+        .external-drop-overlay-inner {
+            background: rgba(0, 0, 0, 0.85);
+            color: #e6f0ff;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.6rem;
+            letter-spacing: 0.02em;
+        }
+
+        .external-drag-active .link-content {
+            pointer-events: none;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .grid {
@@ -1043,7 +1074,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-31 14:58 - "Add capture drag enter/over logging"
+            Last commit: 2026-01-31 15:06 - "Handle external drops on section headers"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -1125,6 +1156,7 @@
         loadBackgroundColor(); // Load custom background color
         render();
         setupEventListeners();
+        initExternalDropOverlay();
         initSettingsModal(); // Initialize settings modal
         initLinkEditModal(); // Initialize link edit modal
     }
@@ -2562,6 +2594,37 @@
         }
     }
 
+    // --- External Drag Overlay ---
+
+    let externalDragActive = false;
+    let externalOverlayEl = null;
+
+    function initExternalDropOverlay() {
+        externalOverlayEl = document.getElementById('externalDropOverlay');
+    }
+
+    function showExternalOverlay() {
+        if (!externalOverlayEl) return;
+        externalOverlayEl.classList.add('visible');
+        document.body.classList.add('external-drag-active');
+        externalDragActive = true;
+    }
+
+    function hideExternalOverlay() {
+        if (!externalOverlayEl) return;
+        externalOverlayEl.classList.remove('visible');
+        document.body.classList.remove('external-drag-active');
+        externalDragActive = false;
+    }
+
+    function getExternalDropEffect(e) {
+        const types = Array.from(e.dataTransfer?.types || []);
+        if (types.includes('text/uri-list') || types.includes('text/plain')) {
+            return 'link';
+        }
+        return 'copy';
+    }
+
 
     // --- Search & Utilities ---
 
@@ -2726,7 +2789,7 @@
         const allowDrop = (e, label) => {
             e.preventDefault();
             if (e.dataTransfer) {
-                e.dataTransfer.dropEffect = 'copy';
+                e.dataTransfer.dropEffect = getExternalDropEffect(e);
             }
             debugLog(label, {
                 targetClass: e.target.className,
@@ -2735,14 +2798,25 @@
             });
         };
 
-        window.addEventListener('dragenter', (e) => allowDrop(e, 'Window dragenter'), true);
+        window.addEventListener('dragenter', (e) => {
+            if (!draggedItem && draggedType !== 'section') {
+                showExternalOverlay();
+            }
+            allowDrop(e, 'Window dragenter');
+        }, true);
         document.documentElement.addEventListener('dragenter', (e) => allowDrop(e, 'HTML dragenter'), true);
         document.addEventListener('dragenter', (e) => allowDrop(e, 'Document dragenter'), true);
+
+        window.addEventListener('dragleave', (e) => {
+            if (e.relatedTarget === null) {
+                hideExternalOverlay();
+            }
+        }, true);
 
         window.addEventListener('dragover', (e) => {
             // Must prevent default to allow drop
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
+            e.dataTransfer.dropEffect = getExternalDropEffect(e);
             debugLog('Window dragover', {
                 targetClass: e.target.className,
                 targetId: e.target.id,
@@ -2752,7 +2826,7 @@
 
         document.documentElement.addEventListener('dragover', (e) => {
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
+            e.dataTransfer.dropEffect = getExternalDropEffect(e);
             debugLog('HTML dragover', {
                 targetClass: e.target.className,
                 targetId: e.target.id,
@@ -2763,7 +2837,7 @@
         document.addEventListener('dragover', (e) => {
             // Must prevent default to allow drop
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
+            e.dataTransfer.dropEffect = getExternalDropEffect(e);
             debugLog('Document dragover', {
                 targetClass: e.target.className,
                 targetId: e.target.id,
@@ -2774,6 +2848,7 @@
         document.addEventListener('drop', (e) => {
             // Prevent default behavior (e.g., opening the file in browser)
             e.preventDefault();
+            hideExternalOverlay();
 
             // Extensive debug logging
             debugLog('Document-level drop event triggered', {
@@ -2808,6 +2883,40 @@
             const targetSectionId = targetSection?.dataset.id || 'misc';
             handleExternalDrop(e, targetSectionId, 'document');
         });
+
+        if (externalOverlayEl) {
+            externalOverlayEl.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.dataTransfer.dropEffect = getExternalDropEffect(e);
+                debugLog('Overlay dragover', {
+                    types: Array.from(e.dataTransfer?.types || [])
+                });
+            });
+
+            externalOverlayEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                hideExternalOverlay();
+                const overlayWasVisible = externalDragActive;
+
+                // Temporarily hide overlay to locate the underlying section
+                externalOverlayEl.classList.remove('visible');
+                document.body.classList.remove('external-drag-active');
+
+                const targetEl = document.elementFromPoint(e.clientX, e.clientY);
+                const targetSection = targetEl?.closest('.section');
+                const targetSectionId = targetSection?.dataset.id || 'misc';
+
+                debugLog('Overlay drop', {
+                    targetNodeName: targetEl?.nodeName || 'none',
+                    targetSectionId,
+                    overlayWasVisible
+                });
+
+                handleExternalDrop(e, targetSectionId, 'overlay');
+            });
+        }
     }
 
     // --- Edit Mode ---
@@ -3420,6 +3529,10 @@
     debugLog('Yohoo initialization started');
 
 </script>
+
+<div id="externalDropOverlay" class="external-drop-overlay" aria-hidden="true">
+    <div class="external-drop-overlay-inner">Drop link to add</div>
+</div>
 
 <!-- Settings Modal -->
 <div id="settingsModal" class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
