@@ -1074,7 +1074,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-31 15:06 - "Handle external drops on section headers"
+            Last commit: 2026-01-31 15:35 - "Add external drag overlay dropzone"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -2508,7 +2508,15 @@
         }
     }
 
+    function getRenderableSectionId(preferredId) {
+        if (!appState.layout || !appState.layout.columns) return preferredId;
+        const layoutIds = appState.layout.columns.flatMap(col => col.sections || []);
+        if (layoutIds.includes(preferredId)) return preferredId;
+        return layoutIds[0] || preferredId;
+    }
+
     function handleExternalDrop(e, targetSectionId, sourceLabel) {
+        targetSectionId = getRenderableSectionId(targetSectionId);
         // Extract URLs from different types with prioritization
         let urls = {
             'text/plain': (e.dataTransfer.getData('text/plain') || '').trim(),
@@ -2879,8 +2887,18 @@
                 debugLog('Drop event on link-list, returning');
                 return;
             }
-            const targetSection = e.target.closest('.section');
-            const targetSectionId = targetSection?.dataset.id || 'misc';
+            let targetSectionId = 'misc';
+            if (e.target && e.target.id === 'externalDropOverlay') {
+                // Overlay caught the drop; resolve section under cursor
+                externalOverlayEl.classList.remove('visible');
+                document.body.classList.remove('external-drag-active');
+                const underEl = document.elementFromPoint(e.clientX, e.clientY);
+                const targetSection = underEl?.closest('.section');
+                targetSectionId = targetSection?.dataset.id || 'misc';
+            } else {
+                const targetSection = e.target.closest('.section');
+                targetSectionId = targetSection?.dataset.id || 'misc';
+            }
             handleExternalDrop(e, targetSectionId, 'document');
         });
 
