@@ -1,0 +1,30 @@
+{
+    "manifest_version": 3,
+    "name": "Yohoo Title Helper",
+    "version": "0.1.0",
+    "description": "Improves dropped-link titles in Yohoo using Chrome tab titles and extension-side fetching.",
+    "permissions": [
+        "tabs"
+    ],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://eivind-throndsen-private.github.io/yohoo/*",
+                "http://localhost/*",
+                "http://127.0.0.1/*",
+                "file:///*"
+            ],
+            "js": [
+                "content-script.js"
+            ],
+            "run_at": "document_start"
+        }
+    ]
+}

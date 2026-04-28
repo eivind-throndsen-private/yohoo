@@ -1080,7 +1080,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-31 18:19 - "Highlight target section during external drag"
+            Last commit: 2026-04-28 14:37 - "Add silent local title helper"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -1307,6 +1307,7 @@
         'http://127.0.0.1:3001/fetch-title',
         'http://localhost:3001/fetch-title'
     ];
+    const TITLE_EXTENSION_TIMEOUT_MS = 1500;
 
     function normalizeTitleFetchUrl(url) {
         const trimmed = (url || '').trim();
@@ -1320,6 +1321,31 @@
             if (link) return link;
         }
         return null;
+    }
+
+    function isUsefulFetchedTitle(title, rawUrl) {
+        if (!title || typeof title !== 'string') return false;
+
+        const cleanTitle = title.trim();
+        const lowerTitle = cleanTitle.toLowerCase();
+        const blockedTitles = new Set([
+            'login',
+            'log in',
+            'sign in',
+            'sign in - google accounts',
+            'google accounts',
+            'access denied',
+            'unauthorized'
+        ]);
+        if (blockedTitles.has(lowerTitle)) return false;
+
+        try {
+            const url = new URL(normalizeTitleFetchUrl(rawUrl));
+            const normalizedUrl = url.href.replace(/\/$/, '').toLowerCase();
+            return lowerTitle !== normalizedUrl && lowerTitle !== url.hostname.toLowerCase();
+        } catch (error) {
+            return true;
+        }
     }
 
     async function fetchTitleFromLocalHelper(rawUrl) {
@@ -1336,7 +1362,7 @@
                 });
                 if (!response.ok) continue;
                 const payload = await response.json();
-                if (payload.title && typeof payload.title === 'string') {
+                if (isUsefulFetchedTitle(payload.title, url)) {
                     return payload.title.trim();
                 }
             } catch (error) {
@@ -1349,8 +1375,88 @@
         return null;
     }
 
+    function fetchTitleFromExtension(rawUrl) {
+        const url = normalizeTitleFetchUrl(rawUrl);
+        if (!url || !/^https?:\/\//.test(url)) return Promise.resolve(null);
+
+        return new Promise(resolve => {
+            const requestId = `yohoo-title-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            const timeoutId = setTimeout(() => {
+                window.removeEventListener('message', handleResponse);
+                resolve(null);
+            }, TITLE_EXTENSION_TIMEOUT_MS);
+
+            function handleResponse(event) {
+                if (event.source !== window) return;
+
+                const message = event.data;
+                if (
+                    !message ||
+                    message.source !== 'yohoo-title-extension' ||
+                    message.type !== 'YOHOO_TITLE_RESPONSE' ||
+                    message.requestId !== requestId
+                ) {
+                    return;
+                }
+
+                clearTimeout(timeoutId);
+                window.removeEventListener('message', handleResponse);
+
+                if (isUsefulFetchedTitle(message.title, url)) {
+                    debugLog('Title received from extension', {
+                        provider: message.provider,
+                        title: message.title
+                    });
+                    resolve(message.title.trim());
+                    return;
+                }
+
+                resolve(null);
+            }
+
+            window.addEventListener('message', handleResponse);
+            window.postMessage({
+                source: 'yohoo-page',
+                type: 'YOHOO_TITLE_REQUEST',
+                requestId,
+                url
+            }, window.location.protocol === 'file:' ? '*' : window.location.origin);
+        });
+    }
+
+    function firstResolvedTitle(promises) {
+        return new Promise(resolve => {
+            let settled = false;
+            let pending = promises.length;
+
+            promises.forEach(promise => {
+                Promise.resolve(promise)
+                    .then(title => {
+                        if (!settled && title) {
+                            settled = true;
+                            resolve(title);
+                        }
+                    })
+                    .catch(error => debugLog('Title provider failed', { error: error.message }))
+                    .finally(() => {
+                        pending -= 1;
+                        if (!settled && pending === 0) {
+                            resolve(null);
+                        }
+                    });
+            });
+        });
+    }
+
+    function fetchBestTitle(rawUrl) {
+        return firstResolvedTitle([
+            fetchTitleFromExtension(rawUrl),
+            fetchTitleFromLocalHelper(rawUrl)
+        ]);
+    }
+
     async function enrichLinkTitleSilently(linkId, rawUrl) {
-        const fetchedTitle = await fetchTitleFromLocalHelper(rawUrl);
+        const fetchedTitle = await fetchBestTitle(rawUrl);
         if (!fetchedTitle) return;
 
         const link = findLinkById(linkId);
@@ -1359,7 +1465,7 @@
         link.title = fetchedTitle;
         saveState();
         render();
-        debugLog('Title enriched from local helper', { linkId, title: fetchedTitle });
+        debugLog('Title enriched from optional provider', { linkId, title: fetchedTitle });
     }
 
     /**
