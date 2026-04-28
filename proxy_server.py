@@ -12,7 +12,8 @@ import logging
 import socket
 import sys
 import os
-from urllib.parse import urlparse, unquote
+import ipaddress
+from urllib.parse import urlparse, unquote, urljoin
 
 app = Flask(__name__)
 
@@ -23,7 +24,41 @@ TIMEOUT = 10
 MAX_REDIRECTS = 5
 ALLOWED_SCHEMES = ['http', 'https', 'file']
 MAX_URL_LENGTH = 2048
-USER_AGENT = 'YohooProxy/1.0'
+MAX_RESPONSE_BYTES = 512 * 1024
+USER_AGENT = 'YohooTitleHelper/1.1'
+ALLOWED_ORIGINS = {
+    'null',
+    'http://localhost',
+    'http://127.0.0.1',
+    'https://eivind-throndsen-private.github.io',
+}
+
+
+def add_cors_headers(response):
+    """Allow Yohoo pages to call the localhost helper from browser JavaScript."""
+    origin = request.headers.get('Origin')
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Vary'] = 'Origin'
+    elif not origin:
+        response.headers['Access-Control-Allow-Origin'] = '*'
+
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    # Required by Chrome Private Network Access when a public HTTPS page calls 127.0.0.1.
+    response.headers['Access-Control-Allow-Private-Network'] = 'true'
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
+@app.after_request
+def after_request(response):
+    return add_cors_headers(response)
+
+
+def origin_allowed() -> bool:
+    origin = request.headers.get('Origin')
+    return not origin or origin in ALLOWED_ORIGINS
 
 
 def check_port_available(port: int) -> bool:
@@ -62,11 +97,41 @@ def validate_url(url: str) -> tuple:
     # Validate http/https URLs
     if parsed.scheme in ['http', 'https'] and not parsed.netloc:
         return False, "Invalid URL format"
+
+    if parsed.scheme in ['http', 'https']:
+        is_safe, error = validate_public_http_target(parsed.hostname)
+        if not is_safe:
+            return False, error
     
     # Validate file:// URLs
     if parsed.scheme == 'file' and not parsed.path:
         return False, "Invalid file path"
     
+    return True, None
+
+
+def validate_public_http_target(hostname: str) -> tuple:
+    """Reject private network targets to keep the helper from becoming a local SSRF bridge."""
+    if not hostname:
+        return False, "Invalid URL host"
+
+    try:
+        addresses = socket.getaddrinfo(hostname, None, type=socket.SOCK_STREAM)
+    except socket.gaierror:
+        return False, "Could not resolve URL host"
+
+    for address in addresses:
+        ip = ipaddress.ip_address(address[4][0])
+        if (
+            ip.is_private or
+            ip.is_loopback or
+            ip.is_link_local or
+            ip.is_multicast or
+            ip.is_reserved or
+            ip.is_unspecified
+        ):
+            return False, "Private or local network targets are not allowed"
+
     return True, None
 
 
@@ -131,16 +196,53 @@ def fetch_http_title(url: str) -> tuple:
     Returns: (title, error)
     """
     try:
-        response = requests.get(
-            url,
-            timeout=TIMEOUT,
-            allow_redirects=True,
-            headers={'User-Agent': USER_AGENT}
-        )
+        session = requests.Session()
+        current_url = url
+        response = None
+
+        for _redirect_count in range(MAX_REDIRECTS + 1):
+            is_valid, validation_error = validate_url(current_url)
+            if not is_valid:
+                return None, validation_error
+
+            response = session.get(
+                current_url,
+                timeout=TIMEOUT,
+                allow_redirects=False,
+                headers={'User-Agent': USER_AGENT},
+                stream=True
+            )
+
+            if response.is_redirect:
+                location = response.headers.get('Location')
+                if not location:
+                    return None, "Redirect without Location header"
+                current_url = urljoin(current_url, location)
+                response.close()
+                continue
+
+            break
+        else:
+            return None, "Too many redirects"
+
+        if response is None:
+            return None, "Request failed"
+
         response.raise_for_status()
-        
+
+        chunks = []
+        total_bytes = 0
+        for chunk in response.iter_content(chunk_size=16384, decode_unicode=False):
+            if not chunk:
+                continue
+            chunks.append(chunk)
+            total_bytes += len(chunk)
+            if total_bytes >= MAX_RESPONSE_BYTES:
+                break
+
         # Extract title
-        title = extract_title(response.text)
+        encoding = response.encoding or response.apparent_encoding or 'utf-8'
+        title = extract_title(b''.join(chunks).decode(encoding, errors='replace'))
         if not title:
             return None, "No title found in page"
         
@@ -171,22 +273,32 @@ def fetch_page_title(url: str) -> tuple:
         return fetch_http_title(url)
 
 
-@app.route('/fetch-title', methods=['GET'])
+@app.route('/fetch-title', methods=['GET', 'OPTIONS'])
 def fetch_title_endpoint():
     """Fetch title from provided URL"""
+    if request.method == 'OPTIONS':
+        return ('', 204)
+
+    if not origin_allowed():
+        origin = request.headers.get('Origin')
+        logging.warning(f"Rejected request from disallowed origin: {origin}")
+        return jsonify({
+            'title': None,
+            'url': None,
+            'error': 'Origin not allowed'
+        }), 403
+
     url = request.args.get('url')
     
     # Validate URL
     is_valid, error = validate_url(url)
     if not is_valid:
         logging.warning(f"Invalid URL: {url} - {error}")
-        response = jsonify({
+        return jsonify({
             'title': None,
             'url': url,
             'error': error
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 400
+        }), 400
     
     # Fetch title
     logging.info(f"Fetching title for: {url}")
@@ -194,34 +306,31 @@ def fetch_title_endpoint():
     
     if error:
         logging.warning(f"Failed to fetch title for {url}: {error}")
-        response = jsonify({
+        return jsonify({
             'title': None,
             'url': url,
             'error': error
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
+        }), 500
     
     logging.info(f"Successfully fetched title for {url} → \"{title}\"")
-    response = jsonify({
+    return jsonify({
         'title': title,
         'url': url,
         'error': None
-    })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response, 200
+    }), 200
 
 
-@app.route('/health', methods=['GET'])
+@app.route('/health', methods=['GET', 'OPTIONS'])
 def health_check():
     """Health check endpoint"""
-    response = jsonify({
+    if request.method == 'OPTIONS':
+        return ('', 204)
+
+    return jsonify({
         'status': 'ok',
         'service': 'yohoo-proxy',
-        'version': '1.0'
-    })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response, 200
+        'version': '1.1'
+    }), 200
 
 
 if __name__ == '__main__':

@@ -1080,7 +1080,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-01-31 15:43 - "Resolve overlay drops to visible section"
+            Last commit: 2026-01-31 18:19 - "Highlight target section during external drag"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -1301,6 +1301,65 @@
 
     function saveState() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    const TITLE_HELPER_ENDPOINTS = [
+        'http://127.0.0.1:3001/fetch-title',
+        'http://localhost:3001/fetch-title'
+    ];
+
+    function normalizeTitleFetchUrl(url) {
+        const trimmed = (url || '').trim();
+        if (trimmed.startsWith('www.')) return `https://${trimmed}`;
+        return trimmed;
+    }
+
+    function findLinkById(linkId) {
+        for (const section of appState.sections) {
+            const link = section.links.find(item => item.id === linkId);
+            if (link) return link;
+        }
+        return null;
+    }
+
+    async function fetchTitleFromLocalHelper(rawUrl) {
+        const url = normalizeTitleFetchUrl(rawUrl);
+        if (!url || !/^(https?|file):\/\//.test(url)) return null;
+
+        for (const endpoint of TITLE_HELPER_ENDPOINTS) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            try {
+                const response = await fetch(`${endpoint}?url=${encodeURIComponent(url)}`, {
+                    signal: controller.signal,
+                    cache: 'no-store'
+                });
+                if (!response.ok) continue;
+                const payload = await response.json();
+                if (payload.title && typeof payload.title === 'string') {
+                    return payload.title.trim();
+                }
+            } catch (error) {
+                debugLog('Title helper unavailable', { endpoint, error: error.message });
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        return null;
+    }
+
+    async function enrichLinkTitleSilently(linkId, rawUrl) {
+        const fetchedTitle = await fetchTitleFromLocalHelper(rawUrl);
+        if (!fetchedTitle) return;
+
+        const link = findLinkById(linkId);
+        if (!link || link.title === fetchedTitle) return;
+
+        link.title = fetchedTitle;
+        saveState();
+        render();
+        debugLog('Title enriched from local helper', { linkId, title: fetchedTitle });
     }
 
     /**
@@ -1964,6 +2023,8 @@
             saveState();
             render();
         }
+
+        return newLink;
     }
 
     function addSection(title) {
@@ -2588,6 +2649,7 @@
                  existingLink.title = title;
                  saveState();
                  render();
+                 enrichLinkTitleSilently(existingLink.id, url);
                  debugLog(`Updated title: "${oldTitle}" → "${title}"`);
                  
                  // Visual feedback - briefly highlight the updated link
@@ -2602,7 +2664,8 @@
                  }, 100);
              } else {
                  // CREATE: New link
-                 createLink(title, url, targetSectionId);
+                 const newLink = createLink(title, url, targetSectionId);
+                 if (newLink) enrichLinkTitleSilently(newLink.id, url);
                  debugLog(`Created new link: ${title}`);
              }
         }
