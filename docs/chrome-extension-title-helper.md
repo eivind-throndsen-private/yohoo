@@ -1,10 +1,10 @@
-# Yohoo Chrome Extension Title Helper
+# Yohoo Chrome Extension Helper
 
 Primary environment: Google Chrome on macOS.
 
 ## What It Does
 
-The extension improves titles for links dropped onto Yohoo.
+The extension improves titles for links dropped onto Yohoo and can open trusted local `file://` links from Yohoo.
 
 When Yohoo asks for a title, the extension tries:
 
@@ -14,7 +14,7 @@ When Yohoo asks for a title, the extension tries:
 
 The open-tab path is the most important one for private pages such as Google Docs or Vend Wiki. If the page is already open and Chrome knows its tab title, the extension can return that title without asking Python to use browser cookies.
 
-If the extension is not installed, disabled, or cannot resolve a title, Yohoo silently keeps the existing fallback title.
+If the extension is not installed, disabled, or cannot resolve a title, Yohoo silently keeps the existing fallback title. If local file opening is unavailable, Yohoo copies the file URL and asks you to paste it into the browser address bar.
 
 ## Install In Chrome
 
@@ -28,14 +28,14 @@ If the extension is not installed, disabled, or cannot resolve a title, Yohoo si
 /Users/eivind.throndsen@m10s.io/1-Projects/yohoo/extension
 ```
 
-6. Confirm that `Yohoo Title Helper` is enabled.
+6. Confirm that `Yohoo Helper` is enabled.
 7. Refresh Yohoo:
 
 ```text
 https://eivind-throndsen-private.github.io/yohoo/yohoo.html
 ```
 
-For normal GitHub Pages use, no `file://` access is needed. If you later use Yohoo from a local `file://` path, open the extension details page and enable `Allow access to file URLs`.
+For local file links, open the extension details page and enable `Allow access to file URLs`. Chrome requires this manual toggle before extensions can interact with `file://` URLs.
 
 ## Use
 
@@ -46,12 +46,15 @@ For normal GitHub Pages use, no `file://` access is needed. If you later use Yoh
 
 For private Google Docs or Vend Wiki pages, keep the source page open in Chrome when you drag it. The extension can then match the dropped URL to the open tab and use Chrome's tab title.
 
+For local files, click a `file://` Yohoo link. If Chrome has granted the extension file URL access, the helper opens the file in a new tab. If not, Yohoo copies the file URL as a fallback.
+
 ## Permissions
 
 The extension requests:
 
 - `tabs`: needed to read open tab URLs and titles so private/authenticated pages can be matched without scraping cookies.
 - `http://*/*` and `https://*/*`: needed for extension-side title fetching when no matching open tab is found.
+- `file:///*`: needed for opening local file links from Yohoo, and only works after Chrome's manual `Allow access to file URLs` toggle is enabled.
 
 This is intentionally broad because Yohoo can accept links from any site. The extension does not send data to any third-party service. It only responds to title requests from Yohoo pages matched in `extension/manifest.json`.
 
@@ -77,7 +80,8 @@ scripts/install_title_helper.sh
 ## Troubleshooting
 
 - Refresh Yohoo after installing or updating the extension.
-- In `chrome://extensions`, click `Details` for `Yohoo Title Helper` and verify it is enabled.
+- In `chrome://extensions`, click `Details` for `Yohoo Helper` and verify it is enabled.
+- If local files copy instead of opening, verify `Allow access to file URLs` is enabled and refresh Yohoo.
 - To inspect extension logs, click the extension's `service worker` link on `chrome://extensions`.
 - If Google Docs or Vend Wiki titles do not improve, make sure the source page is open in Chrome before dragging.
 - If only public sites work, the private page may not have an open tab match and may block extension-side fetches.
@@ -87,6 +91,5 @@ scripts/install_title_helper.sh
 Chrome does not automatically reload unpacked extension code.
 
 1. Go to `chrome://extensions`.
-2. Click the reload icon on `Yohoo Title Helper`.
+2. Click the reload icon on `Yohoo Helper`.
 3. Refresh Yohoo.
-

@@ -1080,7 +1080,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-04-28 14:37 - "Add silent local title helper"
+            Last commit: 2026-04-28 14:56 - "Add Chrome title helper extension"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -1422,6 +1422,64 @@
                 url
             }, window.location.protocol === 'file:' ? '*' : window.location.origin);
         });
+    }
+
+    function openLocalFileFromExtension(rawUrl) {
+        const url = (rawUrl || '').trim();
+        if (!url.startsWith('file://')) return Promise.resolve(false);
+
+        return new Promise(resolve => {
+            const requestId = `yohoo-open-file-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            const timeoutId = setTimeout(() => {
+                window.removeEventListener('message', handleResponse);
+                resolve(false);
+            }, TITLE_EXTENSION_TIMEOUT_MS);
+
+            function handleResponse(event) {
+                if (event.source !== window) return;
+
+                const message = event.data;
+                if (
+                    !message ||
+                    message.source !== 'yohoo-title-extension' ||
+                    message.type !== 'YOHOO_OPEN_LOCAL_FILE_RESPONSE' ||
+                    message.requestId !== requestId
+                ) {
+                    return;
+                }
+
+                clearTimeout(timeoutId);
+                window.removeEventListener('message', handleResponse);
+                if (!message.success && message.error) {
+                    debugLog('Local file helper failed', { error: message.error });
+                }
+                resolve(Boolean(message.success));
+            }
+
+            window.addEventListener('message', handleResponse);
+            window.postMessage({
+                source: 'yohoo-page',
+                type: 'YOHOO_OPEN_LOCAL_FILE_REQUEST',
+                requestId,
+                url
+            }, window.location.protocol === 'file:' ? '*' : window.location.origin);
+        });
+    }
+
+    async function copyUrlToClipboard(url) {
+        try {
+            await navigator.clipboard.writeText(url);
+            return true;
+        } catch (error) {
+            debugLog('Clipboard write failed', { error: error.message });
+            return false;
+        }
+    }
+
+    async function copySpecialUrlFallback(url, label = 'URL') {
+        const copied = await copyUrlToClipboard(url);
+        const copyStatus = copied ? `${label} copied to clipboard:` : `Copy this ${label.toLowerCase()}:`;
+        alert(`${copyStatus} ${url}\n\nPaste it in your browser address bar.`);
     }
 
     function firstResolvedTitle(promises) {
@@ -1987,19 +2045,17 @@
                 // Truncate display title to 50 characters
                 const displayTitle = link.title.length > 40 ? link.title.substring(0, 70) + '...' : link.title;
                 
-                // Check if this is a browser internal URL
+                // Check if this is a browser internal or local file URL
                 const isInternalUrl = link.url.startsWith('chrome://') ||
                                      link.url.startsWith('edge://') ||
                                      link.url.startsWith('about:') ||
                                      link.url.startsWith('brave://');
+                const isLocalFileUrl = link.url.startsWith('file://');
 
-                // For internal URLs, add onclick handler to copy URL
-                const linkAttr = isInternalUrl
-                    ? `href="#" onclick="event.preventDefault(); navigator.clipboard.writeText('${link.url}'); alert('URL copied to clipboard: ${link.url}\\n\\nPaste it in your browser address bar.'); return false;"`
-                    : `href="${link.url}" target="_blank"`;
+                const linkHref = (isInternalUrl || isLocalFileUrl) ? '#' : link.url;
 
                 li.innerHTML = `
-                    <a ${linkAttr} class="link-content" draggable="true">
+                    <a href="${linkHref}" class="link-content" draggable="true" ${linkHref === '#' ? '' : 'target="_blank"'}>
                         <img src="${getFaviconUrl(link.url)}" class="favicon" alt="" onerror="this.style.display='none'">
                         <span class="link-title" title="${link.title}">${displayTitle}</span>
                     </a>
@@ -2030,6 +2086,20 @@
                 // Windows Chrome: dragging the inner <a> won't trigger the <li> handler
                 const linkContent = li.querySelector('.link-content');
                 if (linkContent) {
+                    if (isInternalUrl) {
+                        linkContent.addEventListener('click', async (e) => {
+                            e.preventDefault();
+                            await copySpecialUrlFallback(link.url);
+                        });
+                    } else if (isLocalFileUrl) {
+                        linkContent.addEventListener('click', async (e) => {
+                            e.preventDefault();
+                            const opened = await openLocalFileFromExtension(link.url);
+                            if (!opened) {
+                                await copySpecialUrlFallback(link.url, 'File URL');
+                            }
+                        });
+                    }
                     linkContent.addEventListener('dragstart', (e) => {
                         handleLinkDragStart.call(li, e);
                     });

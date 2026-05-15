@@ -6,7 +6,22 @@ const LOCAL_HELPER_ENDPOINTS = [
     'http://localhost:3001/fetch-title'
 ];
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type === 'YOHOO_OPEN_LOCAL_FILE') {
+        openLocalFile(message.url, sender)
+            .then(result => sendResponse({
+                requestId: message.requestId,
+                ...result
+            }))
+            .catch(error => sendResponse({
+                requestId: message.requestId,
+                success: false,
+                error: error.message
+            }));
+
+        return true;
+    }
+
     if (message?.type !== 'YOHOO_FETCH_TITLE') return false;
 
     resolveTitle(message.url)
@@ -23,6 +38,54 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
     return true;
 });
+
+async function openLocalFile(rawUrl, sender) {
+    if (!isTrustedSender(sender)) {
+        return { success: false, error: 'Untrusted sender' };
+    }
+
+    const fileUrl = normalizeFileUrl(rawUrl);
+    if (!fileUrl) {
+        return { success: false, error: 'Unsupported URL' };
+    }
+
+    await chrome.tabs.create({ url: fileUrl });
+    return { success: true, error: null };
+}
+
+function normalizeFileUrl(rawUrl) {
+    const trimmed = (rawUrl || '').trim();
+    if (!trimmed) return null;
+
+    try {
+        const url = new URL(trimmed);
+        if (url.protocol !== 'file:') return null;
+        if (!url.pathname || url.pathname === '/') return null;
+        return url.href;
+    } catch (_error) {
+        return null;
+    }
+}
+
+function isTrustedSender(sender) {
+    const senderUrl = sender?.url || sender?.tab?.url || '';
+    if (!senderUrl) return false;
+
+    try {
+        const url = new URL(senderUrl);
+        if (url.protocol === 'file:') {
+            return url.pathname.endsWith('/yohoo.html');
+        }
+
+        return (
+            url.hostname === 'eivind-throndsen-private.github.io' ||
+            url.hostname === 'localhost' ||
+            url.hostname === '127.0.0.1'
+        );
+    } catch (_error) {
+        return false;
+    }
+}
 
 async function resolveTitle(rawUrl) {
     const url = normalizeUrl(rawUrl);

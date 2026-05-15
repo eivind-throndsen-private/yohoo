@@ -1,14 +1,15 @@
 {
     "manifest_version": 3,
-    "name": "Yohoo Title Helper",
-    "version": "0.1.0",
-    "description": "Improves dropped-link titles in Yohoo using Chrome tab titles and extension-side fetching.",
+    "name": "Yohoo Helper",
+    "version": "0.2.0",
+    "description": "Improves dropped-link titles in Yohoo and opens trusted local file links.",
     "permissions": [
         "tabs"
     ],
     "host_permissions": [
         "http://*/*",
-        "https://*/*"
+        "https://*/*",
+        "file:///*"
     ],
     "background": {
         "service_worker": "background.js"
