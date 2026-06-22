@@ -305,6 +305,27 @@
             color: var(--delete-icon);
         }
 
+        /* Section add link button */
+        .section-add-btn {
+            background: none;
+            color: var(--text-muted);
+            padding: 2px 4px;
+            opacity: 0;
+            pointer-events: none;
+            font-size: calc(0.6rem * var(--font-scale));
+            border: none;
+            cursor: pointer;
+        }
+
+        .section:hover .section-add-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .section-add-btn:hover {
+            color: var(--link-color);
+        }
+
         /* Section edit button */
         .section-edit-btn {
             background: none;
@@ -1080,7 +1101,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-04-28 14:56 - "Add Chrome title helper extension"
+            Last commit: 2026-05-15 10:10 - "Add local file opening to Yohoo helper"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -1996,6 +2017,7 @@
             headerEl.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.25rem;">
                     <span class="section-title">${section.icon} ${section.title}</span>
+                    <button class="section-add-btn" title="Add link to this section">➕</button>
                     <button class="section-edit-btn" title="Edit section name">✏️</button>
                 </div>
                 ${deleteBtn}
@@ -2008,6 +2030,23 @@
                     e.preventDefault();
                     e.stopPropagation();
                     deleteSection(section.id);
+                });
+            }
+
+            // Add link to section handler
+            const addBtn = headerEl.querySelector('.section-add-btn');
+            if (addBtn) {
+                addBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const draftLink = {
+                        id: 'link_' + Date.now() + Math.random().toString(36).substr(2, 9),
+                        title: '',
+                        url: '',
+                        sectionId: section.id,
+                        date: Date.now()
+                    };
+                    openLinkEditModal(draftLink, section.id, true);
                 });
             }
 
@@ -3299,7 +3338,13 @@
 
         const modalTitle = document.getElementById('linkEditModalTitle');
         if (modalTitle) {
-            modalTitle.textContent = isNew ? '➕ Add Link' : '✏️ Edit Link';
+            if (isNew) {
+                const targetSection = appState.sections.find(s => s.id === sectionId);
+                const sectionName = targetSection ? targetSection.title : 'Misc';
+                modalTitle.textContent = `➕ Add link to ${sectionName}`;
+            } else {
+                modalTitle.textContent = '✏️ Edit Link';
+            }
         }
 
         // Populate form inputs with current values
