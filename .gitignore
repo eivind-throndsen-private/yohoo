@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 .venv/
 logs/*.log
+
+# AI session artifacts
+archive/*-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md
