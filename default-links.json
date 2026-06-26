@@ -1,9 +1,15 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "exportDate": "2026-06-26T00:00:00.000Z",
   "exportedBy": "Yohoo curated default configuration",
   "data": {
     "sections": [
+      {
+        "id": "private-stuff",
+        "title": "Private",
+        "icon": "📂",
+        "links": []
+      },
       {
         "id": "todo",
         "title": "To do",
@@ -12,7 +18,7 @@
       },
       {
         "id": "read",
-        "title": "Read",
+        "title": "Read later",
         "icon": "📖",
         "links": []
       },
@@ -27,48 +33,34 @@
             "url": "https://vibe.vend.com/home/",
             "sectionId": "vend-info",
             "date": 1782432000000
-          }
-        ]
-      },
-      {
-        "id": "bob",
-        "title": "Bob the Builder",
-        "icon": "🤖",
-        "links": [
+          },
           {
-            "id": "bob-jira",
-            "title": "Jira",
-            "url": "https://jira.atlassian.com",
-            "sectionId": "bob",
-            "date": 1782432000000
+            "id": "link_1782484351367h5bhlo7f3",
+            "title": "Home - Vend IT Info Hub - Vibe",
+            "url": "https://vibe.vend.com/home/ls/space/5874616533241187/vend-it-info-hub/home",
+            "sectionId": "vend-info",
+            "date": 1782484351367
           }
         ]
       },
       {
         "id": "dai",
-        "title": "Department of AI",
+        "title": "AI tools",
         "icon": "🧠",
         "links": [
           {
-            "id": "dai-chatgpt",
-            "title": "ChatGPT",
-            "url": "https://chat.openai.com",
+            "id": "link_1782484209116u6cdh32st",
+            "title": "NotebookLM",
+            "url": "https://notebooklm.google.com/",
             "sectionId": "dai",
-            "date": 1782432000000
+            "date": 1782484209116
           },
           {
-            "id": "dai-claude",
-            "title": "Claude",
-            "url": "https://claude.ai",
+            "id": "link_1782484197747yyoeruama",
+            "title": "Google Gemini",
+            "url": "https://gemini.google.com/app",
             "sectionId": "dai",
-            "date": 1782432000000
-          },
-          {
-            "id": "dai-perplexity",
-            "title": "Perplexity",
-            "url": "https://www.perplexity.ai",
-            "sectionId": "dai",
-            "date": 1782432000000
+            "date": 1782484197747
           }
         ]
       },
@@ -82,51 +74,26 @@
         "id": "learning-labs",
         "title": "Learning Labs",
         "icon": "🎓",
-        "links": []
-      },
-      {
-        "id": "ai-productivity",
-        "title": "Everyday AI",
-        "icon": "⚡",
-        "links": []
-      },
-      {
-        "id": "pm-days",
-        "title": "PM Days",
-        "icon": "📊",
-        "links": []
-      },
-      {
-        "id": "development",
-        "title": "Development",
-        "icon": "⚡",
         "links": [
           {
-            "id": "dev-github",
-            "title": "GitHub",
-            "url": "https://github.com",
-            "sectionId": "development",
-            "date": 1782432000000
+            "id": "link_1782484105186fri2okx30",
+            "title": "Home | Learning Lab",
+            "url": "https://learninglab.sana.ai/",
+            "sectionId": "learning-labs",
+            "date": 1782484105186
           },
           {
-            "id": "dev-stack-overflow",
-            "title": "Stack Overflow",
-            "url": "https://stackoverflow.com",
-            "sectionId": "development",
-            "date": 1782432000000
-          },
-          {
-            "id": "dev-mdn",
-            "title": "MDN Web Docs",
-            "url": "https://developer.mozilla.org",
-            "sectionId": "development",
-            "date": 1782432000000
+            "id": "link_1782484116897zsjfb0gfd",
+            "title": "Everyday AI Academy | Learning Lab",
+            "url": "https://learninglab.sana.ai/t/jCQTawdJTpo1",
+            "sectionId": "learning-labs",
+            "date": 1782484116897
           }
         ]
       },
       {
         "id": "communication",
-        "title": "Communication",
+        "title": "Google tools",
         "icon": "💬",
         "links": [
           {
@@ -149,6 +116,20 @@
             "url": "https://meet.google.com",
             "sectionId": "communication",
             "date": 1782432000000
+          },
+          {
+            "id": "link_1782484076753f940x8lnb",
+            "title": "Google Sheets",
+            "url": "https://docs.google.com/spreadsheets/u/0/?tgif=c",
+            "sectionId": "communication",
+            "date": 1782484076753
+          },
+          {
+            "id": "link_17824840900863hbv8abi2",
+            "title": "Google Docs",
+            "url": "https://docs.google.com/document/u/0/?tgif=d",
+            "sectionId": "communication",
+            "date": 1782484090086
           }
         ]
       },
@@ -158,18 +139,11 @@
         "icon": "🔧",
         "links": [
           {
-            "id": "tools-notion",
-            "title": "Notion",
-            "url": "https://www.notion.so",
+            "id": "link_17824842641119oc47xsew",
+            "title": "Okta: My Apps Dashboard | m10s",
+            "url": "https://m10s.okta.com/app/UserHome?session_hint=AUTHENTICATED",
             "sectionId": "tools",
-            "date": 1782432000000
-          },
-          {
-            "id": "tools-figma",
-            "title": "Figma",
-            "url": "https://www.figma.com",
-            "sectionId": "tools",
-            "date": 1782432000000
+            "date": 1782484264111
           },
           {
             "id": "tools-miro",
@@ -192,39 +166,23 @@
       "columns": [
         {
           "id": "col-1",
-          "sections": [
-            "todo",
-            "read",
-            "vend-info",
-            "bob",
-            "dai"
-          ]
+          "sections": ["todo", "vend-info", "tools"]
         },
         {
           "id": "col-2",
-          "sections": [
-            "one-on-one",
-            "learning-labs",
-            "ai-productivity",
-            "pm-days"
-          ]
+          "sections": ["one-on-one", "learning-labs", "dai"]
         },
         {
           "id": "col-3",
-          "sections": [
-            "development",
-            "communication",
-            "tools",
-            "misc"
-          ]
+          "sections": ["read", "communication", "private-stuff", "misc"]
         }
       ]
     },
-    "fontScale": 2.0
+    "fontScale": 2
   },
   "metadata": {
-    "sectionCount": 13,
-    "linkCount": 14,
+    "sectionCount": 10,
+    "linkCount": 13,
     "trashCount": 0,
     "columns": 3
   }
