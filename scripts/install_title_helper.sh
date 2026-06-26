@@ -18,7 +18,7 @@ if [[ ! -x "$PYTHON_BIN" ]]; then
     python3 -m venv "$PROJECT_DIR/.venv"
     PYTHON_BIN="$PROJECT_DIR/.venv/bin/python"
     "$PYTHON_BIN" -m pip install --upgrade pip
-    "$PYTHON_BIN" -m pip install -r "$PROJECT_DIR/archive/requirements.txt"
+    "$PYTHON_BIN" -m pip install -r "$PROJECT_DIR/requirements-title-helper.txt"
 fi
 
 mkdir -p "$PLIST_DIR" "$LOG_DIR"

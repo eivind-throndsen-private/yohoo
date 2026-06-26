@@ -65,6 +65,8 @@ The extension works without the local helper, but they complement each other:
 - Extension: better for private/authenticated browser pages, especially if the page is open in Chrome.
 - Local helper: better for public server-side fetches, local automation, and future API-based providers.
 
+Full local helper installation, API, security, and troubleshooting details are in `docs/local-title-helper.md`.
+
 Check local helper health:
 
 ```zsh

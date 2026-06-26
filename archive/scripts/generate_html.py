@@ -51,6 +51,8 @@ def generate_section_html(section, is_user_section=False):
                 <div class="section-header">
                     <span class="section-icon">{emoji}</span>
                     <h2 class="section-title">{name}</h2>
+                    <button class="section-action-btn section-add-btn" title="Add link to this section">+</button>
+                    <button class="section-action-btn section-edit-btn" title="Edit section name">✎</button>
                     <span class="section-toggle">−</span>
                 </div>
                 <div class="links-list">
@@ -70,6 +72,10 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
     data = load_default_links(default_links_file)
     sections = data.get('sections', [])
     user_sections = data.get('userSections', [])
+
+    # Create JSON string for embedding in HTML (will be used for reset functionality)
+    import json
+    default_data_json = json.dumps(data, indent=8)
 
     # Generate sections HTML
     sections_html = []
@@ -278,13 +284,35 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
         }}
 
         .section-title {{
-            flex: 1;
             font-size: 0.95rem;
             font-weight: 700;
             color: var(--header-color);
         }}
 
+        .section-action-btn {{
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.15rem;
+            padding: 0.1rem 0.3rem;
+            user-select: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            background: none;
+            border: none;
+            line-height: 1;
+        }}
+
+        .section-header:hover .section-action-btn {{
+            opacity: 0.5;
+        }}
+
+        .section-action-btn:hover {{
+            opacity: 1 !important;
+            color: var(--header-color);
+        }}
+
         .section-toggle {{
+            margin-left: auto;
             color: var(--text-muted);
             cursor: pointer;
             font-weight: bold;
@@ -381,6 +409,15 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
 
         .delete-icon:hover {{
             opacity: 1 !important;
+        }}
+
+        /* Fix drag and drop on Chrome/Windows - child elements should not capture pointer events */
+        .link-item > * {{
+            pointer-events: none;
+        }}
+
+        .delete-icon {{
+            pointer-events: auto;  /* Re-enable for delete icon specifically */
         }}
 
         /* Trash Section */
@@ -586,6 +623,7 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
                         <input type="text" id="searchBox" placeholder="Search links..." autocomplete="off">
                         <span class="shortcut-hint">/</span>
                     </div>
+                    <button class="btn" id="addLinkBtn">+ Link</button>
                     <button class="btn" id="addSectionBtn">+ Section</button>
                     <button class="btn btn-settings" id="settingsBtn" title="Settings">⚙</button>
                 </div>
@@ -628,6 +666,20 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
         </div>
     </div>
 
+    <!-- Add Link Modal -->
+    <div class="modal" id="addLinkModal">
+        <div class="modal-content">
+            <div class="modal-title" id="addLinkModalTitle">Add Link to Misc</div>
+            <input type="text" class="modal-input" id="linkUrlInput" placeholder="URL (e.g. https://example.com)">
+            <input type="text" class="modal-input" id="linkTitleInput" placeholder="Title">
+            <input type="hidden" id="linkTargetSection" value="misc">
+            <div class="modal-buttons">
+                <button class="btn" id="linkCancelBtn">Cancel</button>
+                <button class="btn" id="linkAddBtn" style="background: var(--header-color); color: white;">Add</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
@@ -652,6 +704,9 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
     <script>
         // Storage key
         const STORAGE_KEY = 'yohoo-data-v2';
+
+        // Default data embedded for reset functionality
+        const DEFAULT_DATA = {default_data_json};
 
         // State
         let draggedElement = null;
@@ -880,6 +935,8 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
                 <div class="section-header">
                     <span class="section-icon">${{emoji}}</span>
                     <h2 class="section-title">${{name}}</h2>
+                    <button class="section-action-btn section-add-btn" title="Add link to this section">+</button>
+                    <button class="section-action-btn section-edit-btn" title="Edit section name">✎</button>
                     <span class="section-toggle">−</span>
                 </div>
                 <div class="links-list">
@@ -889,6 +946,18 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
 
             container.appendChild(section);
             setupSectionDragAndDrop(section);
+
+            // Setup add button
+            section.querySelector('.section-add-btn').addEventListener('click', (e) => {{
+                e.stopPropagation();
+                openAddLinkModal(id, name);
+            }});
+
+            // Setup edit button
+            section.querySelector('.section-edit-btn').addEventListener('click', (e) => {{
+                e.stopPropagation();
+                editSectionName(section);
+            }});
 
             // Setup toggle
             section.querySelector('.section-toggle').addEventListener('click', (e) => {{
@@ -944,6 +1013,44 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
                 }}
             }});
 
+            // Add Link Modal (header button - adds to Misc)
+            document.getElementById('addLinkBtn').addEventListener('click', () => {{
+                openAddLinkModal('misc', 'Misc');
+            }});
+
+            // Add Link Modal - per-section "+" buttons
+            document.querySelectorAll('.section-add-btn').forEach(btn => {{
+                btn.addEventListener('click', (e) => {{
+                    e.stopPropagation();
+                    const section = btn.closest('.section');
+                    const sectionId = section.dataset.section;
+                    const sectionName = section.querySelector('.section-title').textContent;
+                    openAddLinkModal(sectionId, sectionName);
+                }});
+            }});
+
+            // Edit section name - per-section pencil buttons
+            document.querySelectorAll('.section-edit-btn').forEach(btn => {{
+                btn.addEventListener('click', (e) => {{
+                    e.stopPropagation();
+                    const section = btn.closest('.section');
+                    editSectionName(section);
+                }});
+            }});
+
+            document.getElementById('linkCancelBtn').addEventListener('click', () => {{
+                document.getElementById('addLinkModal').classList.remove('show');
+            }});
+
+            document.getElementById('linkAddBtn').addEventListener('click', addLinkFromModal);
+
+            document.getElementById('linkUrlInput').addEventListener('keydown', (e) => {{
+                if (e.key === 'Enter') document.getElementById('linkTitleInput').focus();
+            }});
+            document.getElementById('linkTitleInput').addEventListener('keydown', (e) => {{
+                if (e.key === 'Enter') addLinkFromModal();
+            }});
+
             // Settings Modal
             document.getElementById('settingsBtn').addEventListener('click', () => {{
                 document.getElementById('settingsModal').classList.add('show');
@@ -962,8 +1069,7 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
 
             document.getElementById('resetBtn').addEventListener('click', () => {{
                 if (confirm('Reset all customizations? This will restore the default layout.')) {{
-                    localStorage.removeItem(STORAGE_KEY);
-                    location.reload();
+                    resetToDefaults();
                 }}
             }});
 
@@ -1015,33 +1121,80 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
             }});
         }}
 
-        // Drag and Drop Setup
+        // Drag and Drop Setup - uses event delegation to avoid duplicate listeners
+        let dragListenersInitialized = false;
+
         function setupDragAndDrop() {{
-            // Links
-            document.querySelectorAll('.link-item').forEach(link => {{
-                link.addEventListener('dragstart', handleLinkDragStart);
-                link.addEventListener('dragend', handleLinkDragEnd);
+            if (dragListenersInitialized) {{
+                return; // Already set up, don't add duplicate listeners
+            }}
+
+            const container = document.getElementById('sectionsContainer');
+
+            // Use event delegation on container to handle all drag events
+            // This prevents duplicate event listeners when reset is called
+
+            container.addEventListener('dragstart', function(e) {{
+                const link = e.target.closest('.link-item');
+                const section = e.target.closest('.section');
+
+                if (link && e.target === link) {{
+                    handleLinkDragStart.call(link, e);
+                }} else if (section && e.target === section) {{
+                    handleSectionDragStart.call(section, e);
+                }}
             }});
 
-            // Link containers
-            document.querySelectorAll('.links-list').forEach(list => {{
-                list.addEventListener('dragover', handleLinkDragOver);
-                list.addEventListener('dragleave', handleLinkDragLeave);
-                list.addEventListener('drop', handleLinkDrop);
+            container.addEventListener('dragend', function(e) {{
+                const link = e.target.closest('.link-item');
+                const section = e.target.closest('.section');
+
+                if (link && e.target === link) {{
+                    handleLinkDragEnd.call(link, e);
+                }} else if (section && e.target === section) {{
+                    handleSectionDragEnd.call(section, e);
+                }}
             }});
 
-            // Sections
-            document.querySelectorAll('.section').forEach(section => {{
-                setupSectionDragAndDrop(section);
+            container.addEventListener('dragover', function(e) {{
+                const linksList = e.target.closest('.links-list');
+                const section = e.target.closest('.section');
+
+                if (linksList) {{
+                    handleLinkDragOver.call(linksList, e);
+                }} else if (section) {{
+                    handleSectionDragOver.call(section, e);
+                }}
             }});
+
+            container.addEventListener('dragleave', function(e) {{
+                const linksList = e.target.closest('.links-list');
+                const section = e.target.closest('.section');
+
+                if (linksList && e.target.classList.contains('links-list')) {{
+                    handleLinkDragLeave.call(linksList, e);
+                }} else if (section && e.target.classList.contains('section')) {{
+                    handleSectionDragLeave.call(section, e);
+                }}
+            }});
+
+            container.addEventListener('drop', function(e) {{
+                const linksList = e.target.closest('.links-list');
+                const section = e.target.closest('.section');
+
+                if (linksList) {{
+                    handleLinkDrop.call(linksList, e);
+                }} else if (section) {{
+                    handleSectionDrop.call(section, e);
+                }}
+            }});
+
+            dragListenersInitialized = true;
         }}
 
         function setupSectionDragAndDrop(section) {{
-            section.addEventListener('dragstart', handleSectionDragStart);
-            section.addEventListener('dragend', handleSectionDragEnd);
-            section.addEventListener('dragover', handleSectionDragOver);
-            section.addEventListener('dragleave', handleSectionDragLeave);
-            section.addEventListener('drop', handleSectionDrop);
+            // No longer needed - event delegation handles this
+            // Kept for compatibility but does nothing
         }}
 
         // Link drag handlers
@@ -1208,6 +1361,163 @@ def generate_html(output_file='yohoo.html', default_links_file=None):
                     </div>
                 `).join('');
             }}
+        }}
+
+        // Reset to defaults
+        function resetToDefaults() {{
+            // Clear localStorage
+            localStorage.removeItem(STORAGE_KEY);
+
+            // Reset state variables
+            deletedLinks = [];
+            sectionOrder = [];
+            collapsedSections = [];
+            fontScale = 1.0;
+
+            // Clear sections container
+            const container = document.getElementById('sectionsContainer');
+            container.innerHTML = '';
+
+            // Clear trash
+            document.getElementById('trashLinks').innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem;">No deleted links</div>';
+            document.getElementById('trashCount').textContent = '(0)';
+
+            // Rebuild sections from DEFAULT_DATA
+            const allSections = [...DEFAULT_DATA.sections, ...(DEFAULT_DATA.userSections || [])];
+            allSections.forEach(sectionData => {{
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.dataset.section = sectionData.id;
+                section.draggable = true;
+
+                const linksHtml = (sectionData.links || []).map(link => {{
+                    return `<a href="${{link.url}}" class="link-item" draggable="true" data-url="${{link.url}}" data-title="${{link.title}}" data-domain="${{link.domain || ''}}">
+                        <span class="link-text">${{link.title}}</span>
+                        <span class="delete-icon" onclick="event.preventDefault(); event.stopPropagation(); deleteLink(this.parentElement);">×</span>
+                    </a>`;
+                }}).join('\\n');
+
+                const isUserSection = DEFAULT_DATA.userSections?.some(s => s.id === sectionData.id);
+                const placeholderHtml = (isUserSection && sectionData.placeholder && (!sectionData.links || sectionData.links.length === 0))
+                    ? `<div class="placeholder-text">${{sectionData.placeholder}}</div>`
+                    : '';
+
+                section.innerHTML = `
+                    <div class="section-header">
+                        <span class="section-icon">${{sectionData.emoji}}</span>
+                        <h2 class="section-title">${{sectionData.name}}</h2>
+                        <span class="section-toggle">−</span>
+                    </div>
+                    <div class="links-list">
+                        ${{placeholderHtml}}
+                        ${{linksHtml}}
+                    </div>
+                `;
+
+                container.appendChild(section);
+            }});
+
+            // Reset font scale
+            document.documentElement.style.setProperty('--font-scale', 1.0);
+            document.getElementById('fontSizeSlider').value = 1.0;
+            document.getElementById('fontSizeValue').textContent = '100%';
+
+            // Re-initialize drag and drop
+            setupDragAndDrop();
+
+            // Re-attach section toggles
+            document.querySelectorAll('.section-toggle').forEach(toggle => {{
+                toggle.addEventListener('click', (e) => {{
+                    e.stopPropagation();
+                    const section = toggle.closest('.section');
+                    section.classList.toggle('collapsed');
+                    saveState();
+                }});
+            }});
+
+            // Close settings modal
+            closeAllModals();
+        }}
+
+        // Edit section name inline
+        function editSectionName(section) {{
+            const titleEl = section.querySelector('.section-title');
+            const currentName = titleEl.textContent;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentName;
+            input.className = 'modal-input';
+            input.style.cssText = 'margin: 0; padding: 0.2rem 0.4rem; font-size: 0.95rem; font-weight: 700; width: auto; min-width: 80px;';
+
+            titleEl.replaceWith(input);
+            input.focus();
+            input.select();
+
+            function finish() {{
+                const newName = input.value.trim() || currentName;
+                const newTitle = document.createElement('h2');
+                newTitle.className = 'section-title';
+                newTitle.textContent = newName;
+                input.replaceWith(newTitle);
+                saveState();
+            }}
+
+            input.addEventListener('blur', finish);
+            input.addEventListener('keydown', (e) => {{
+                if (e.key === 'Enter') input.blur();
+                if (e.key === 'Escape') {{ input.value = currentName; input.blur(); }}
+            }});
+        }}
+
+        // Add Link helpers
+        function openAddLinkModal(sectionId, sectionName) {{
+            document.getElementById('linkTargetSection').value = sectionId;
+            document.getElementById('addLinkModalTitle').textContent = 'Add link to ' + sectionName;
+            document.getElementById('linkUrlInput').value = '';
+            document.getElementById('linkTitleInput').value = '';
+            document.getElementById('addLinkModal').classList.add('show');
+            document.getElementById('linkUrlInput').focus();
+        }}
+
+        function ensureMiscSection() {{
+            let section = document.querySelector('[data-section="misc"]');
+            if (!section) {{
+                section = createSection('Misc', '📌', 'misc');
+            }}
+            return section;
+        }}
+
+        function addLinkFromModal() {{
+            let url = document.getElementById('linkUrlInput').value.trim();
+            const title = document.getElementById('linkTitleInput').value.trim();
+            const targetId = document.getElementById('linkTargetSection').value;
+
+            if (!url) return;
+
+            if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+            const displayTitle = title || url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
+            let domain = '';
+            try {{ domain = new URL(url).hostname.replace(/^www\./, ''); }} catch(e) {{}}
+
+            let section;
+            if (targetId === 'misc') {{
+                section = ensureMiscSection();
+            }} else {{
+                section = document.querySelector(`[data-section="${{targetId}}"]`);
+            }}
+
+            if (!section) return;
+
+            const linksList = section.querySelector('.links-list');
+            const placeholder = linksList.querySelector('.placeholder-text');
+            if (placeholder) placeholder.remove();
+
+            const linkEl = createLinkElement(url, displayTitle, domain, true);
+            linksList.appendChild(linkEl);
+
+            document.getElementById('addLinkModal').classList.remove('show');
+            saveState();
         }}
 
         // Close all modals
