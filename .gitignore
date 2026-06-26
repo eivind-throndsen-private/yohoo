@@ -4,5 +4,4 @@ __pycache__/
 .venv/
 logs/*.log
 
-# AI session artifacts
-archive/*-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md
+archive/
