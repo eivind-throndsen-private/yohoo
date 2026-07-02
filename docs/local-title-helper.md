@@ -102,7 +102,7 @@ Allowed browser origins are configured in `proxy_server.py`. The current allowli
 - `null`, for local `file://` use.
 - `http://localhost`.
 - `http://127.0.0.1`.
-- `https://eivind-throndsen-private.github.io`.
+- `https://static.m10s.io`.
 
 The Chrome extension documented in `docs/chrome-extension-title-helper.md` can also use this helper as a fallback after checking open Chrome tabs and extension-side fetches.
 
