@@ -32,7 +32,7 @@ If the extension is not installed, disabled, or cannot resolve a title, Yohoo si
 7. Refresh Yohoo:
 
 ```text
-https://eivind-throndsen-private.github.io/yohoo/yohoo.html
+https://static.m10s.io/eivind-throndsen/yohoo/yohoo.html
 ```
 
 For local file links, open the extension details page and enable `Allow access to file URLs`. Chrome requires this manual toggle before extensions can interact with `file://` URLs.
