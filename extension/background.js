@@ -78,7 +78,7 @@ function isTrustedSender(sender) {
         }
 
         return (
-            url.hostname === 'eivind-throndsen-private.github.io' ||
+            url.hostname === 'static.m10s.io' ||
             url.hostname === 'localhost' ||
             url.hostname === '127.0.0.1'
         );
@@ -157,7 +157,7 @@ function urlsReferToSamePage(target, candidate) {
 }
 
 function documentIdentity(url) {
-    const googleDocMatch = url.pathname.match(/^\/(?:document|spreadsheets|presentation)\/d\/([^/]+)/);
+    const googleDocMatch = url.pathname.match(/^\/(?:document|spreadsheets|presentation)\/(?:u\/\d+\/)?d\/([^/]+)/);
     if (url.hostname === 'docs.google.com' && googleDocMatch) {
         return `google:${googleDocMatch[1]}`;
     }

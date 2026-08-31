@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Yohoo Helper",
-    "version": "0.2.0",
+    "version": "0.2.2",
     "description": "Improves dropped-link titles in Yohoo and opens trusted local file links.",
     "permissions": [
         "tabs"
@@ -17,7 +17,7 @@
     "content_scripts": [
         {
             "matches": [
-                "https://eivind-throndsen-private.github.io/yohoo/*",
+                "https://static.m10s.io/eivind-throndsen/yohoo/*",
                 "http://localhost/*",
                 "http://127.0.0.1/*",
                 "file:///*"
