@@ -1124,6 +1124,8 @@
     // --- Data Models & State ---
     
     const STORAGE_KEY = 'yohoo_v1_data';
+    const AUTOSAVE_ENABLED_KEY = 'yohoo_autosave_enabled';
+    const AUTOSAVE_LAST_DATE_KEY = 'yohoo_autosave_last_date';
 
     // Default configuration
     const defaultSections = [
@@ -1186,6 +1188,7 @@
         initExternalDropOverlay();
         initSettingsModal(); // Initialize settings modal
         initLinkEditModal(); // Initialize link edit modal
+        checkAutoSaveOnLoad(); // Daily auto-save backup, if enabled
     }
 
     function loadBackgroundColor() {
@@ -1552,6 +1555,47 @@
      * Includes sections, links, layout, trash, and font scale.
      * Filename format: yohoo-backup-YYYY-MM-DD-HHMMSS.json
      */
+    /**
+     * Returns today's date as a local YYYY-MM-DD string (not UTC),
+     * so the "once per day" check lines up with the user's local calendar day.
+     */
+    function getLocalDateString() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function isAutoSaveEnabled() {
+        return localStorage.getItem(AUTOSAVE_ENABLED_KEY) !== 'false';
+    }
+
+    /**
+     * If auto-save is enabled and this is the first page load of the local
+     * calendar day, downloads a backup and records today's date so it won't
+     * fire again until tomorrow.
+     */
+    function checkAutoSaveOnLoad() {
+        if (!isAutoSaveEnabled()) {
+            return;
+        }
+        const today = getLocalDateString();
+        if (localStorage.getItem(AUTOSAVE_LAST_DATE_KEY) === today) {
+            return;
+        }
+        // Record today's date before exporting (not after) to shrink the
+        // window where multiple tabs opened at once could both trigger a save.
+        localStorage.setItem(AUTOSAVE_LAST_DATE_KEY, today);
+        try {
+            exportYohooData();
+            debugLog('Auto-save backup created', { date: today });
+        } catch (err) {
+            debugLog('Auto-save backup failed', { error: err.message });
+            alert('Yohoo auto-save backup failed: ' + err.message);
+        }
+    }
+
     function exportYohooData() {
         debugLog('Starting export...');
 
@@ -3830,6 +3874,16 @@
             });
         }
 
+        // Initialize auto-save toggle checkbox
+        const autoSaveCheckbox = document.getElementById('autoSaveToggleCheckbox');
+        if (autoSaveCheckbox) {
+            autoSaveCheckbox.checked = isAutoSaveEnabled();
+            autoSaveCheckbox.addEventListener('change', (e) => {
+                localStorage.setItem(AUTOSAVE_ENABLED_KEY, e.target.checked ? 'true' : 'false');
+                debugLog(e.target.checked ? 'Auto-save enabled from settings' : 'Auto-save disabled from settings');
+            });
+        }
+
         // Initialize debug toggle checkbox
         const debugCheckbox = document.getElementById('debugToggleCheckbox');
         const debugConsole = document.getElementById('debugConsole');
@@ -3913,6 +3967,16 @@
             <!-- Section 2: Data Management -->
             <div class="settings-section">
                 <div class="settings-section-title">💾 Data Management</div>
+
+                <div class="settings-control">
+                    <label class="settings-control-label">
+                        <input type="checkbox" id="autoSaveToggleCheckbox" style="margin-right: 0.5rem;">
+                        Auto-save links every day
+                    </label>
+                    <div class="settings-control-description">
+                        Automatically download a backup file the first time you open Yohoo each day.
+                    </div>
+                </div>
 
                 <div class="settings-control">
                     <label class="settings-control-label">
