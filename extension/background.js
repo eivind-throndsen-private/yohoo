@@ -78,7 +78,7 @@ function isTrustedSender(sender) {
         }
 
         return (
-            url.hostname === 'static.m10s.io' ||
+            url.hostname === 'eivind-throndsen.static.m10s.io' ||
             url.hostname === 'localhost' ||
             url.hostname === '127.0.0.1'
         );

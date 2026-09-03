@@ -30,7 +30,7 @@ ALLOWED_ORIGINS = {
     'null',
     'http://localhost',
     'http://127.0.0.1',
-    'https://static.m10s.io',
+    'https://eivind-throndsen.static.m10s.io',
 }
 
 
