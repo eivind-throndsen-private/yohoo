@@ -19,6 +19,12 @@
 - `make -C archive format`: run `black` + `isort` on Python code.
 - `make -C archive proxy`: start the local title-fetch proxy.
 
+## Internal Deployment
+- The live internal page is `https://eivind-throndsen.static.m10s.io/yohoo/`.
+- Read `docs/internal-deployment.md` before publishing and use the installed `static-prototype-publish` plugin helper.
+- The managed destination is `gs://vend-prototypes/eivind-throndsen/yohoo/index.html`.
+- Do not use the sibling `static-prototype-site/publish.sh`, the `yohoo-prototypes` bucket, or the `smp-pc-ai-unit-ai-productivity` project; those belong to a separate legacy deployment.
+
 ## Coding Style & Naming Conventions
 - JavaScript/HTML: 4-space indentation; prefer `const`/`let`; camelCase for variables and functions.
 - Python: follow Black formatting and isort ordering; snake_case for functions/vars, CapWords for classes.
