@@ -1043,6 +1043,12 @@
             font-size: calc(0.5rem * var(--font-scale));
             margin-top: 0.25rem;
         }
+
+        .form-status {
+            color: var(--text-muted);
+            font-size: calc(0.5rem * var(--font-scale));
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -1101,7 +1107,7 @@
         <div>© 2025 Yohoo - Personal Start Page</div>
         <div style="margin-top: 0.25rem; font-size: 0.4rem; opacity: 0.7;">
             <!-- BUILD_COMMIT_INFO -->
-            Last commit: 2026-06-26 16:49 - "fix: clear background color and reapply it on reset to defaults"
+            Last commit: 2026-08-31 12:18 - "feat: auto-save a daily backup on first page load (#2)"
             <!-- /BUILD_COMMIT_INFO -->
         </div>
     </footer>
@@ -1187,6 +1193,7 @@
         setupEventListeners();
         initExternalDropOverlay();
         initSettingsModal(); // Initialize settings modal
+        initUrlCaptureModal(); // Initialize first step of the add-link flow
         initLinkEditModal(); // Initialize link edit modal
         checkAutoSaveOnLoad(); // Daily auto-save backup, if enabled
     }
@@ -2085,14 +2092,7 @@
                 addBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const draftLink = {
-                        id: 'link_' + Date.now() + Math.random().toString(36).substr(2, 9),
-                        title: '',
-                        url: '',
-                        sectionId: section.id,
-                        date: Date.now()
-                    };
-                    openLinkEditModal(draftLink, section.id, true);
+                    startAddLinkFlow(section.id);
                 });
             }
 
@@ -3094,16 +3094,7 @@
 
         const handleAddUrl = () => {
             const targetSection = appState.sections.find(s => s.id === 'misc') || appState.sections[0];
-            const draftLink = {
-                id: 'link_' + Date.now() + Math.random().toString(36).substr(2, 9),
-                title: '',
-                url: '',
-                sectionId: targetSection.id,
-                date: Date.now()
-            };
-
-            // Browsers block cross-origin HTML access without a server proxy, so we ask for titles manually.
-            openLinkEditModal(draftLink, targetSection.id, true);
+            startAddLinkFlow(targetSection.id);
         };
 
         const handleAddSection = () => {
@@ -3369,6 +3360,155 @@
     let currentEditingLink = null;  // Store reference to link being edited
     let currentEditingSectionId = null;
     let currentEditingIsNew = false;
+    let currentUrlCaptureDraft = null;
+    let urlCaptureSequence = 0;
+
+    function recognizableClipboardUrl(text) {
+        const candidate = (text || '').trim();
+        if (!candidate || /\s/.test(candidate)) return null;
+
+        // Accept the commonly mistyped "httpe://" and repair it before use.
+        const normalized = candidate.replace(/^httpe:/i, 'https:');
+        if (!/^(https?|file):\/\//i.test(normalized)) return null;
+
+        try {
+            const parsed = new URL(normalized);
+            return ['http:', 'https:', 'file:'].includes(parsed.protocol) ? normalized : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async function startAddLinkFlow(sectionId) {
+        const targetSection = appState.sections.find(section => section.id === sectionId);
+        if (!targetSection) return;
+
+        currentUrlCaptureDraft = {
+            id: 'link_' + Date.now() + Math.random().toString(36).substr(2, 9),
+            title: '',
+            url: '',
+            sectionId,
+            date: Date.now()
+        };
+
+        const sequence = ++urlCaptureSequence;
+        const modal = document.getElementById('urlCaptureModal');
+        const modalTitle = document.getElementById('urlCaptureModalTitle');
+        const urlInput = document.getElementById('urlCaptureUrl');
+        const urlError = document.getElementById('urlCaptureError');
+        const status = document.getElementById('urlCaptureStatus');
+        const continueBtn = document.getElementById('urlCaptureContinue');
+
+        if (!modal || !urlInput) return;
+        if (modalTitle) modalTitle.textContent = `➕ Add link to ${targetSection.title}`;
+        urlInput.value = '';
+        if (urlError) urlError.style.display = 'none';
+        if (status) status.textContent = '';
+        if (continueBtn) {
+            continueBtn.disabled = false;
+            continueBtn.textContent = 'OK';
+        }
+        modal.classList.add('visible');
+        urlInput.focus();
+
+        try {
+            const clipboardText = await navigator.clipboard.readText();
+            const clipboardUrl = recognizableClipboardUrl(clipboardText);
+            if (sequence !== urlCaptureSequence || !clipboardUrl || urlInput.value.trim()) return;
+
+            urlInput.value = clipboardUrl;
+            await continueAddLinkFlow();
+        } catch (error) {
+            // Clipboard access is optional and can be blocked by browser permissions.
+            debugLog('Clipboard URL unavailable', { error: error.message });
+        }
+    }
+
+    async function continueAddLinkFlow() {
+        const urlInput = document.getElementById('urlCaptureUrl');
+        const urlError = document.getElementById('urlCaptureError');
+        const status = document.getElementById('urlCaptureStatus');
+        const continueBtn = document.getElementById('urlCaptureContinue');
+        const draft = currentUrlCaptureDraft;
+        if (!urlInput || !draft) return;
+
+        if (urlError) urlError.style.display = 'none';
+        const urlValidation = validateUrl(urlInput.value.trim());
+        if (!urlValidation.valid) {
+            if (urlError) {
+                urlError.textContent = urlValidation.error;
+                urlError.style.display = 'block';
+            }
+            urlInput.focus();
+            return;
+        }
+
+        const sequence = urlCaptureSequence;
+        draft.url = urlValidation.url;
+        if (continueBtn) {
+            continueBtn.disabled = true;
+            continueBtn.textContent = 'Looking up title…';
+        }
+        urlInput.disabled = true;
+        if (status) status.textContent = 'Looking up the page title…';
+
+        const fetchedTitle = await fetchBestTitle(draft.url);
+        if (sequence !== urlCaptureSequence || currentUrlCaptureDraft !== draft) return;
+        draft.title = fetchedTitle || '';
+
+        const modal = document.getElementById('urlCaptureModal');
+        if (modal) modal.classList.remove('visible');
+        urlInput.disabled = false;
+        currentUrlCaptureDraft = null;
+        openLinkEditModal(draft, draft.sectionId, true);
+    }
+
+    function closeUrlCaptureModal() {
+        urlCaptureSequence += 1;
+        currentUrlCaptureDraft = null;
+        const modal = document.getElementById('urlCaptureModal');
+        const urlInput = document.getElementById('urlCaptureUrl');
+        const urlError = document.getElementById('urlCaptureError');
+        const status = document.getElementById('urlCaptureStatus');
+        const continueBtn = document.getElementById('urlCaptureContinue');
+        if (modal) modal.classList.remove('visible');
+        if (urlInput) {
+            urlInput.value = '';
+            urlInput.disabled = false;
+        }
+        if (urlError) urlError.style.display = 'none';
+        if (status) status.textContent = '';
+        if (continueBtn) {
+            continueBtn.disabled = false;
+            continueBtn.textContent = 'OK';
+        }
+    }
+
+    function initUrlCaptureModal() {
+        const modal = document.getElementById('urlCaptureModal');
+        const closeBtn = document.getElementById('urlCaptureCloseBtn');
+        const cancelBtn = document.getElementById('urlCaptureCancel');
+        const continueBtn = document.getElementById('urlCaptureContinue');
+        const urlInput = document.getElementById('urlCaptureUrl');
+        if (!modal) return;
+
+        if (closeBtn) closeBtn.addEventListener('click', closeUrlCaptureModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeUrlCaptureModal);
+        if (continueBtn) continueBtn.addEventListener('click', continueAddLinkFlow);
+        modal.addEventListener('click', event => {
+            if (event.target === modal) closeUrlCaptureModal();
+        });
+        if (urlInput) {
+            urlInput.addEventListener('keydown', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    continueAddLinkFlow();
+                } else if (event.key === 'Escape') {
+                    closeUrlCaptureModal();
+                }
+            });
+        }
+    }
 
     function openLinkEditModal(link, sectionId, isNew = false) {
         const modal = document.getElementById('linkEditModal');
@@ -3432,7 +3572,11 @@
         }
 
         // Valid URL protocols
-        const validProtocols = ['http://', 'https://', 'chrome://', 'edge://', 'about:', 'brave://'];
+        if (url.toLowerCase().startsWith('httpe://')) {
+            return { valid: true, url: url.replace(/^httpe:/i, 'https:'), autoFixed: true };
+        }
+
+        const validProtocols = ['http://', 'https://', 'file://', 'chrome://', 'edge://', 'about:', 'brave://'];
         const hasValidProtocol = validProtocols.some(protocol => url.toLowerCase().startsWith(protocol));
 
         if (!hasValidProtocol) {
@@ -3440,7 +3584,7 @@
             if (!url.includes('://') && !url.startsWith('about:')) {
                 return { valid: true, url: 'https://' + url, autoFixed: true };
             }
-            return { valid: false, error: 'URL must start with http://, https://, or a valid browser protocol' };
+            return { valid: false, error: 'URL must start with http://, https://, file://, or a valid browser protocol' };
         }
 
         return { valid: true, url: url };
@@ -4047,6 +4191,28 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+</div>
+
+<!-- URL Capture Modal -->
+<div id="urlCaptureModal" class="link-edit-modal" role="dialog" aria-modal="true" aria-labelledby="urlCaptureModalTitle">
+    <div class="link-edit-modal-content">
+        <div class="link-edit-header">
+            <h3 id="urlCaptureModalTitle">➕ Add link</h3>
+            <button class="link-edit-close-btn" id="urlCaptureCloseBtn" aria-label="Close">✕</button>
+        </div>
+        <div class="link-edit-body">
+            <div class="form-group">
+                <label for="urlCaptureUrl">URL</label>
+                <input type="url" id="urlCaptureUrl" placeholder="https://example.com" aria-required="true">
+                <div id="urlCaptureError" class="form-error" style="display: none;"></div>
+                <div id="urlCaptureStatus" class="form-status" aria-live="polite"></div>
+            </div>
+        </div>
+        <div class="link-edit-footer">
+            <button class="secondary-btn" id="urlCaptureCancel">Cancel</button>
+            <button class="primary-btn" id="urlCaptureContinue">OK</button>
         </div>
     </div>
 </div>
