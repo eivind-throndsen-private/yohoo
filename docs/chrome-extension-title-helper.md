@@ -1,6 +1,6 @@
 # Yohoo Chrome Extension Helper
 
-Primary environment: Google Chrome on macOS.
+Primary environment: Google Chrome on macOS. A Safari port is described in `docs/safari-extension-title-helper.md`.
 
 ## What It Does
 
