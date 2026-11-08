@@ -10,13 +10,29 @@ Safari port of the [Chrome extension](chrome-extension-title-helper.md). It impr
 
 ## Build
 
-Requires full Xcode (Command Line Tools are not enough), then:
+Requires full Xcode (Command Line Tools are not enough). One-time setup after installing Xcode:
+
+```zsh
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+sudo xcodebuild -license accept
+sudo xcodebuild -runFirstLaunch
+```
+
+You also need an Apple ID added in Xcode > Settings > Accounts (a free personal team works), so an Apple Development signing certificate exists.
 
 ```zsh
 scripts/build_safari_app.sh
 ```
 
-This writes the Safari resources to `dist/safari/Resources` and runs `safari-web-extension-converter` to create `dist/safari/Yohoo Helper/Yohoo Helper.xcodeproj`. Open it, choose your team under Signing & Capabilities, and Run.
+First run: writes the Safari resources to `dist/safari/Resources`, runs `safari-web-extension-converter`, forces the app bundle ID to `io.m10s.yohoo.helper` (the converter picks a name that breaks Apple's prefix rule) and fills in your team ID from your signing certificate. Then open `dist/safari/Yohoo Helper/Yohoo Helper.xcodeproj` and press Run, or build from the command line:
+
+```zsh
+cd "dist/safari/Yohoo Helper"
+xcodebuild -project "Yohoo Helper.xcodeproj" -scheme "Yohoo Helper" -derivedDataPath build -allowProvisioningUpdates build
+open "build/Build/Products/Debug/Yohoo Helper.app"
+```
+
+Later runs only refresh the resources and keep the project and signing. Pass `--force` to regenerate the project. A build signed with a personal team only runs on the Mac that built it.
 
 To get only the resources (no Xcode needed):
 
@@ -43,4 +59,4 @@ Change code in `extension/`, then rebuild. Host allowlists live in `extension/ma
 
 ## Status
 
-The Safari resources bundle and converter script are tested only for output shape (`tests/test_build_safari_extension.py`). The Xcode app wrapper has not been built or run in Safari yet, because the machine that authored it has no Xcode.
+Verified: the resources bundle (`tests/test_build_safari_extension.py`), project generation, and a signed Debug build with Xcode 27.2 on macOS. Not yet verified: title fetching inside Safari.
