@@ -14,4 +14,10 @@ python3 -I scripts/build_safari_extension.py dist/safari/Resources
 xcrun safari-web-extension-converter dist/safari/Resources \
     --project-location dist/safari --app-name "Yohoo Helper" \
     --bundle-identifier io.m10s.yohoo.helper --macos-only --no-open --force
+# The converter names the app io.m10s.yohoo.Yohoo-Helper, which breaks the
+# "extension ID must be prefixed by the app ID" rule. Force the intended ID.
+PROJ="dist/safari/Yohoo Helper/Yohoo Helper.xcodeproj"
+for f in "$PROJ"/project.pbxproj "$PROJ"/project.xcproj; do
+    [ -f "$f" ] && sed -i.bak 's/io\.m10s\.yohoo\.Yohoo-Helper/io.m10s.yohoo.helper/g' "$f" && rm -f "$f.bak"
+done
 echo "Open dist/safari/Yohoo\ Helper/Yohoo\ Helper.xcodeproj, pick your team under Signing, and Run."
