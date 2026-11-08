@@ -24,15 +24,13 @@ You also need an Apple ID added in Xcode > Settings > Accounts (a free personal 
 scripts/build_safari_app.sh
 ```
 
-First run: writes the Safari resources to `dist/safari/Resources`, runs `safari-web-extension-converter`, forces the app bundle ID to `io.m10s.yohoo.helper` (the converter picks a name that breaks Apple's prefix rule) and fills in your team ID from your signing certificate. Then open `dist/safari/Yohoo Helper/Yohoo Helper.xcodeproj` and press Run, or build from the command line:
+First run: writes the Safari resources to `dist/safari/Resources`, runs `safari-web-extension-converter`, forces the app bundle ID to `io.m10s.yohoo.helper` (the converter picks a name that breaks Apple's prefix rule) and fills in your team ID from your signing certificate. Every run then builds, installs the single canonical app to `~/Applications/Yohoo Helper.app`, deletes the build products and Xcode's DerivedData copy, and launches the app.
 
-```zsh
-cd "dist/safari/Yohoo Helper"
-xcodebuild -project "Yohoo Helper.xcodeproj" -scheme "Yohoo Helper" -derivedDataPath build -allowProvisioningUpdates build
-open "build/Build/Products/Debug/Yohoo Helper.app"
-```
+Do not press Run in Xcode afterwards: that creates a second copy under DerivedData, and Safari then lists the extension twice (for example 0.2.3 and 0.2.4). If it happens, rerun the script; it cleans up.
 
-Later runs only refresh the resources and keep the project and signing. Pass `--force` to regenerate the project. A build signed with a personal team only runs on the Mac that built it.
+Later runs keep the project and signing. Pass `--force` to regenerate the project. A build signed with a personal team only runs on the Mac that built it.
+
+To uninstall completely, delete `~/Applications/Yohoo Helper.app`. Safari only lets you remove the extension by removing its app.
 
 To get only the resources (no Xcode needed):
 

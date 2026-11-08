@@ -3,8 +3,9 @@
 # Requires full Xcode (not just Command Line Tools) on macOS.
 #
 # The Xcode project references dist/safari/Resources in place, so it only needs
-# generating once. Re-running refreshes the resources and keeps your project and
-# signing settings. Pass --force to regenerate the project from scratch.
+# generating once. Re-running refreshes the resources, rebuilds, and reinstalls
+# the app to ~/Applications, keeping your project and signing settings. Pass
+# --force to regenerate the project from scratch.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,8 +19,29 @@ fi
 
 python3 -I scripts/build_safari_extension.py dist/safari/Resources
 
+APP_NAME="Yohoo Helper.app"
+INSTALL_DIR="$HOME/Applications"
+
+# Build, install the single canonical copy into ~/Applications, and remove every
+# other copy. Safari lists one extension per registered app copy, so leftovers
+# (build products, Xcode's DerivedData) show up as duplicate, stale versions.
+build_and_install() {
+    local build_dir="dist/safari/Yohoo Helper/build"
+    xcodebuild -project "$PROJ" -scheme "Yohoo Helper" -configuration Debug \
+        -derivedDataPath "$build_dir" -allowProvisioningUpdates build -quiet
+    pkill -x "Yohoo Helper" 2>/dev/null || true
+    mkdir -p "$INSTALL_DIR"
+    rm -rf "$INSTALL_DIR/$APP_NAME"
+    ditto "$build_dir/Build/Products/Debug/$APP_NAME" "$INSTALL_DIR/$APP_NAME"
+    rm -rf "$build_dir"
+    rm -rf "$HOME"/Library/Developer/Xcode/DerivedData/Yohoo_Helper-*
+    open "$INSTALL_DIR/$APP_NAME"
+    echo "Installed $INSTALL_DIR/$APP_NAME"
+    echo "In Safari: Settings > Extensions, tick Yohoo Helper, and allow the Yohoo hosts."
+}
+
 if [ -d "$PROJ" ] && [ "${1:-}" != "--force" ]; then
-    echo "Project exists, resources refreshed. Rebuild in Xcode (Cmd+R). Use --force to regenerate."
+    build_and_install
     exit 0
 fi
 
@@ -56,5 +78,4 @@ for name in ("project.pbxproj", "project.xcproj"):
     f.write_text(text)
 print(f"Team: {team or 'not found, set it in Xcode'}")
 EOF
-echo "Open the project, check Signing, and Run:"
-echo "  open \"$PROJ\""
+build_and_install
