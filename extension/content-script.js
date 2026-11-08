@@ -3,6 +3,7 @@
     const EXTENSION_SOURCE = 'yohoo-title-extension';
     const TRUSTED_HTTP_HOSTS = new Set([
         'eivind-throndsen.static.m10s.io',
+        'eivind-throndsen-private.github.io',
         'localhost',
         '127.0.0.1'
     ]);

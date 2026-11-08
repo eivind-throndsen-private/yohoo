@@ -35,6 +35,8 @@ If the extension is not installed, disabled, or cannot resolve a title, Yohoo si
 https://eivind-throndsen.static.m10s.io/yohoo/
 ```
 
+The extension also works on the GitHub Pages copy, `https://eivind-throndsen-private.github.io/yohoo/yohoo.html`. Trusted hosts are listed in `manifest.json`, `content-script.js`, `background.js` and `proxy_server.py`; keep all four in sync.
+
 For local file links, open the extension details page and enable `Allow access to file URLs`. Chrome requires this manual toggle before extensions can interact with `file://` URLs.
 
 ## Use
